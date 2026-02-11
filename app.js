@@ -3,8 +3,7 @@ const DB={pickup:{smooth:{mild:["Do you have a map? Because I just got lost in y
 const toolCfg={pickup:{title:"Pickup Line Generator",ctxLabel:"Describe the situation or your crush",ctxPlace:"e.g., She loves coffee and has the most beautiful smile...",reply:false},reply:{title:"Rizz Reply Generator",ctxLabel:"Paste their message you want to reply to",ctxPlace:"e.g., How are you? / You're not that tall are you? / What makes you different?",reply:true},bio:{title:"Dating Bio Generator",ctxLabel:"Describe yourself and what you're looking for",ctxPlace:"e.g., 24-year-old software engineer who loves hiking and bad puns...",reply:false},starter:{title:"Conversation Starter Generator",ctxLabel:"Describe the person or situation",ctxPlace:"e.g., She's into photography and travel, matched on Bumble...",reply:false},compliment:{title:"Compliment Generator",ctxLabel:"Describe the person you want to compliment",ctxPlace:"e.g., She's kind, funny, and has the most amazing laugh...",reply:false}};
 
 let curTool='pickup',curStyle='smooth',genLines=[];
-const geminiKey=atob('QUl6YVN5QmdvT1JBZHFWUEpwcFl2TE9xQzByaE93M3FQLV82ODZn');
-let geminiConnected=true;
+const AI_CONNECTED=true;
 
 document.addEventListener('DOMContentLoaded',()=>{
 const nav=document.getElementById('navbar');
@@ -51,10 +50,10 @@ const cnt=multi?5:1;
 const target=document.getElementById('targetSelect').value;
 const lang=document.getElementById('langSelect').value;
 
-if(geminiKey&&geminiConnected){
-document.getElementById('loadingText').textContent='Gemini AI is generating...';
+if(AI_CONNECTED){
+document.getElementById('loadingText').textContent='AI is generating...';
 try{
-const lines=await callGemini({tool:curTool,style:curStyle,intensity:int,count:cnt,context:ctx,replyTo:replyCtx,target,lang,emoji});
+const lines=await callAI({tool:curTool,style:curStyle,intensity:int,count:cnt,context:ctx,replyTo:replyCtx,target,lang,emoji});
 if(lines.length===0) throw new Error('Empty response');
 genLines=lines;
 renderOut(genLines,true);
@@ -62,7 +61,7 @@ btn.classList.remove('loading');
 return;
 }catch(err){
 console.error('Gemini error:',err);
-showToast('Gemini failed, using built-in lines');
+showToast('AI unavailable, using built-in lines');
 }
 }
 
@@ -154,8 +153,8 @@ document.querySelectorAll('.stat-number').forEach(el=>obs.observe(el));
 
 function dupTest(){const t=document.querySelector('.testimonials-track');if(t)t.innerHTML+=t.innerHTML}
 
-// === GEMINI AI ===
-const GEMINI_URL='https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+// === POLLINATIONS AI (Free, No API Key, No Quota) ===
+const AI_URL='https://text.pollinations.ai/openai/chat/completions';
 
 function buildPrompt(opts){
 const intensityDesc={mild:'mild, subtle, and light',bold:'confident, bold, and charming',extreme:'extremely bold, intense, and unforgettable'};
@@ -254,28 +253,32 @@ ${opts.context?'- Each compliment MUST reference specific traits/qualities from 
 return prompt;
 }
 
-async function callGemini(opts){
+async function callAI(opts){
 const prompt=buildPrompt(opts);
-const res=await fetch(`${GEMINI_URL}?key=${geminiKey}`,{
+const res=await fetch(AI_URL,{
 method:'POST',
 headers:{'Content-Type':'application/json'},
 body:JSON.stringify({
-contents:[{parts:[{text:prompt}]}],
-generationConfig:{temperature:1.0,maxOutputTokens:1024,topP:0.95,topK:40}
+model:'openai-fast',
+messages:[
+{role:'system',content:'You are RizzGPT, the world\'s best AI rizz and flirting assistant. You ONLY output numbered lines. No explanations, no intros, no outros.'},
+{role:'user',content:prompt}
+],
+temperature:1.0,
+max_tokens:1024
 })
 });
 if(!res.ok){
-const err=await res.json().catch(()=>({}));
-throw new Error(err?.error?.message||`API error ${res.status}`);
+throw new Error(`API error ${res.status}`);
 }
 const data=await res.json();
-const text=data?.candidates?.[0]?.content?.parts?.[0]?.text||'';
-return parseGeminiResponse(text,opts.count);
+const text=data?.choices?.[0]?.message?.content||'';
+return parseAIResponse(text,opts.count);
 }
 
-function parseGeminiResponse(text,count){
+function parseAIResponse(text,count){
 const lines=text.split('\n')
-.map(l=>l.replace(/^\d+[.)\-:\s]+/,'').trim())
-.filter(l=>l.length>5&&!l.startsWith('#')&&!l.toLowerCase().startsWith('here'));
+.map(l=>l.replace(/^\d+[.)\-:\s]+/,'').replace(/^"/,'').replace(/"$/,'').trim())
+.filter(l=>l.length>5&&!l.startsWith('#')&&!l.startsWith('*')&&!l.toLowerCase().startsWith('here')&&!l.toLowerCase().startsWith('sure'));
 return lines.slice(0,count);
 }
