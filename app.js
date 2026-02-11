@@ -159,7 +159,7 @@ const AI_URL='https://text.pollinations.ai/openai/chat/completions';
 function buildPrompt(opts){
 const intensityDesc={mild:'mild, subtle, and light',bold:'confident, bold, and charming',extreme:'extremely bold, intense, and unforgettable'};
 const intDesc=intensityDesc[opts.intensity]||'bold';
-const langNote=opts.lang&&opts.lang!=='english'?`\nIMPORTANT: Generate ALL lines in ${opts.lang} language.`:'';
+const langNote=opts.lang==='hinglish'?'\nIMPORTANT: Generate ALL lines in Hinglish — a casual mix of Hindi and English written in Roman/Latin script (not Devanagari). Example: "Tera smile dekh ke toh mera dil garden garden ho gaya." Use natural Hinglish that young Indians speak in everyday texting and DMs.':opts.lang&&opts.lang!=='english'?`\nIMPORTANT: Generate ALL lines in ${opts.lang} language.`:'';
 const emojiNote=opts.emoji?'Include 1-2 relevant emojis per line.':'Do NOT include any emojis.';
 const targetNote=opts.target&&opts.target!=='anyone'?` These are meant for: ${opts.target}.`:'';
 let prompt='';
