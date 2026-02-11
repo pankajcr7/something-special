@@ -3,7 +3,7 @@ const DB={pickup:{smooth:{mild:["Do you have a map? Because I just got lost in y
 const toolCfg={pickup:{title:"Pickup Line Generator",ctxLabel:"Describe the situation or your crush",ctxPlace:"e.g., She loves coffee and has the most beautiful smile...",reply:false},reply:{title:"Rizz Reply Generator",ctxLabel:"Paste their message you want to reply to",ctxPlace:"e.g., How are you? / You're not that tall are you? / What makes you different?",reply:true},bio:{title:"Dating Bio Generator",ctxLabel:"Describe yourself and what you're looking for",ctxPlace:"e.g., 24-year-old software engineer who loves hiking and bad puns...",reply:false},starter:{title:"Conversation Starter Generator",ctxLabel:"Describe the person or situation",ctxPlace:"e.g., She's into photography and travel, matched on Bumble...",reply:false},compliment:{title:"Compliment Generator",ctxLabel:"Describe the person you want to compliment",ctxPlace:"e.g., She's kind, funny, and has the most amazing laugh...",reply:false}};
 
 let curTool='pickup',curStyle='smooth',genLines=[];
-const geminiKey=atob('QUl6YVN5REMxb1duRlhfOWhrQThfQm9TN0I2bDNsUDVFeG5MLURz');
+const geminiKey=atob('AIzaSyBgoORAdqVPJppYvLOqC0rhOw3qP-_686g');
 let geminiConnected=true;
 
 document.addEventListener('DOMContentLoaded',()=>{
