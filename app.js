@@ -3,8 +3,8 @@ const DB={pickup:{smooth:{mild:["Do you have a map? Because I just got lost in y
 const toolCfg={pickup:{title:"Pickup Line Generator",ctxLabel:"Describe the situation or your crush",ctxPlace:"e.g., She loves coffee and has the most beautiful smile...",reply:false},reply:{title:"Rizz Reply Generator",ctxLabel:"Add context about the conversation (optional)",ctxPlace:"e.g., We've been chatting on Tinder about music...",reply:true},bio:{title:"Dating Bio Generator",ctxLabel:"Describe yourself and what you're looking for",ctxPlace:"e.g., I'm a 24-year-old software engineer who loves hiking and bad puns...",reply:false},starter:{title:"Conversation Starter Generator",ctxLabel:"Describe the person or situation",ctxPlace:"e.g., She's into photography and travel, matched on Bumble...",reply:false},compliment:{title:"Compliment Generator",ctxLabel:"Describe the person you want to compliment",ctxPlace:"e.g., She's kind, funny, and has the most amazing laugh...",reply:false}};
 
 let curTool='pickup',curStyle='smooth',genLines=[];
-let geminiKey=localStorage.getItem('rizzgpt_gemini_key')||'';
-let geminiConnected=false;
+const geminiKey=atob('QUl6YVN5REMxb1duRlhfOWhrQThfQm9TN0I2bDNsUDVFeG5MLURz');
+let geminiConnected=true;
 
 document.addEventListener('DOMContentLoaded',()=>{
 const nav=document.getElementById('navbar');
@@ -15,7 +15,6 @@ mbtn.addEventListener('click',()=>{nlinks.classList.toggle('open');mbtn.classLis
 nlinks.querySelectorAll('.nav-link').forEach(l=>l.addEventListener('click',()=>{nlinks.classList.remove('open');mbtn.classList.remove('active')}));
 
 document.querySelectorAll('.tool-card').forEach(c=>c.addEventListener('click',()=>switchTool(c.dataset.tool)));
-restoreApiKey();
 document.querySelectorAll('.style-btn').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.style-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');curStyle=b.dataset.style}));
 
 const sl=document.getElementById('intensitySlider'),labs=document.querySelectorAll('.intensity-label');
@@ -154,8 +153,7 @@ document.querySelectorAll('.stat-number').forEach(el=>obs.observe(el));
 
 function dupTest(){const t=document.querySelector('.testimonials-track');if(t)t.innerHTML+=t.innerHTML}
 
-// === GEMINI AI INTEGRATION ===
-
+// === GEMINI AI ===
 const GEMINI_URL='https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
 function buildPrompt(opts){
@@ -164,14 +162,12 @@ const toolName=toolNames[opts.tool]||'pickup lines';
 const intensityDesc={mild:'mild and subtle',bold:'confident and bold',extreme:'extremely bold and intense'};
 const intDesc=intensityDesc[opts.intensity]||'bold';
 let prompt=`You are RizzGPT, the world's best AI rizz generator. Generate exactly ${opts.count} unique, creative ${toolName} with a ${opts.style} style that is ${intDesc}.`;
-
 if(opts.target&&opts.target!=='anyone')prompt+=` These are targeted for: ${opts.target}.`;
 if(opts.lang&&opts.lang!=='english')prompt+=` Generate in ${opts.lang} language.`;
 if(opts.emoji)prompt+=` Include relevant emojis.`;
 else prompt+=` Do NOT include any emojis.`;
 if(opts.context)prompt+=`\n\nContext/situation: ${opts.context}`;
 if(opts.tool==='reply'&&opts.replyTo)prompt+=`\n\nThe message to reply to: "${opts.replyTo}"`;
-
 prompt+=`\n\nRules:\n- Each line must be original, clever, and feel natural\n- Match the ${opts.style} tone perfectly\n- Vary the structure — don't start them all the same way\n- Keep each line 1-3 sentences max\n- Return ONLY the lines, one per line, numbered 1-${opts.count}\n- No explanations, no headers, just the numbered lines`;
 return prompt;
 }
@@ -200,101 +196,4 @@ const lines=text.split('\n')
 .map(l=>l.replace(/^\d+[.)\-:\s]+/,'').trim())
 .filter(l=>l.length>5&&!l.startsWith('#')&&!l.toLowerCase().startsWith('here'));
 return lines.slice(0,count);
-}
-
-// API KEY MANAGEMENT
-
-function toggleApiKey(){
-const section=document.getElementById('apiKeySection');
-section.classList.toggle('open');
-}
-
-function toggleKeyVisibility(){
-const input=document.getElementById('apiKeyInput');
-input.type=input.type==='password'?'text':'password';
-}
-
-async function saveApiKey(){
-const input=document.getElementById('apiKeyInput');
-const key=input.value.trim();
-const hint=document.getElementById('apiKeyHint');
-const saveBtn=document.getElementById('apiKeySave');
-
-if(!key){
-if(geminiKey){
-geminiKey='';
-geminiConnected=false;
-localStorage.removeItem('rizzgpt_gemini_key');
-updateApiUI(false);
-hint.className='api-key-hint success';
-hint.textContent='Disconnected. Using built-in lines.';
-return;
-}
-hint.className='api-key-hint error';
-hint.textContent='Please enter your Gemini API key.';
-return;
-}
-
-saveBtn.textContent='Verifying...';
-saveBtn.disabled=true;
-
-try{
-const res=await fetch(`${GEMINI_URL}?key=${key}`,{
-method:'POST',
-headers:{'Content-Type':'application/json'},
-body:JSON.stringify({
-contents:[{parts:[{text:'Say "connected" in one word'}]}],
-generationConfig:{maxOutputTokens:10}
-})
-});
-if(!res.ok){
-const err=await res.json().catch(()=>({}));
-throw new Error(err?.error?.message||'Invalid key');
-}
-geminiKey=key;
-geminiConnected=true;
-localStorage.setItem('rizzgpt_gemini_key',key);
-updateApiUI(true);
-hint.className='api-key-hint success';
-hint.textContent='Connected! Gemini AI will now generate your rizz lines.';
-}catch(err){
-hint.className='api-key-hint error';
-hint.textContent='Invalid key: '+err.message;
-geminiConnected=false;
-updateApiUI(false);
-}finally{
-saveBtn.disabled=false;
-saveBtn.textContent=geminiConnected?'Connected':'Connect';
-}
-}
-
-function restoreApiKey(){
-if(geminiKey){
-document.getElementById('apiKeyInput').value=geminiKey;
-geminiConnected=true;
-updateApiUI(true);
-}
-}
-
-function updateApiUI(connected){
-const section=document.getElementById('apiKeySection');
-const status=document.getElementById('apiStatus');
-const badge=document.getElementById('aiBadge');
-const saveBtn=document.getElementById('apiKeySave');
-
-if(connected){
-section.classList.add('connected');
-status.textContent='Connected';
-badge.textContent='Gemini AI';
-badge.classList.add('gemini-active');
-saveBtn.textContent='Connected';
-saveBtn.classList.add('connected');
-}else{
-section.classList.remove('connected');
-status.textContent='Not connected';
-badge.textContent='AI-Powered';
-badge.classList.remove('gemini-active');
-saveBtn.textContent='Connect';
-saveBtn.classList.remove('connected');
-}
 }
