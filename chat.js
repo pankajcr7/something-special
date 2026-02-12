@@ -215,14 +215,14 @@ aiBtn.classList.add('loading');
 
 showTyping();
 
-const conversation=buildConversation(insertAt);
+const convo=buildConversation(insertAt);
 
 try{
-const text=await callProviders(conversation);
+const text=await callProviders(convo.messages);
 const replies=parseReplies(text);
 if(replies.length===0) throw new Error('Empty');
 hideTyping();
-showReplies(replies,insertAt);
+showReplies(replies,insertAt,convo.nextSender);
 }catch(err){
 console.error('AI error:',err);
 hideTyping();
@@ -245,6 +245,17 @@ let chatLog=slice.map(m=>`${m.sender==='me'?'Me':theirName}: ${m.text}`).join('\
 
 const lastSender=slice.length>0?slice[slice.length-1].sender:'them';
 
+const nextSender=lastSender==='me'?'them':'me';
+
+const styleDesc={
+smooth:'smooth and charming',funny:'funny and witty',romantic:'romantic and heartfelt',bold:'bold and confident',
+savage:'savage and brutally honest',sweet:'sweet and wholesome',spicy:'flirty and suggestive with sexual tension',
+toxic:'toxic and possessive but attractive',drunk:'like drunk texting — messy, unhinged, chaotic',
+villain:'dark, mysterious villain energy',desi:'desi/Bollywood style with Hindi-English mix',
+flirtyaf:'extremely flirty and aggressive',nerdy:'nerdy with clever references',poetic:'poetic and lyrical'
+};
+const styleNote=styleDesc[style]||style;
+
 const sysPrompt=`You generate text message replies that read EXACTLY like a real human typed them in a chat app.
 
 RULES — non-negotiable:
@@ -260,22 +271,25 @@ RULES — non-negotiable:
 4. READ THE FULL CONVERSATION and reply in context. Reference what was said. Don't be random.
 5. Output ONLY numbered lines (1. 2. 3. etc). Nothing else.`;
 
+const whoReplies=nextSender==='me'?'I ("Me")':theirName+' ("them")';
+const whoSpokeLast=lastSender==='me'?'I':'they';
+
 const userPrompt=`Here's the chat conversation so far:
 ---
 ${chatLog}
 ---
 
-Generate 5 replies I ("Me") can send next. Read the FULL conversation above and reply naturally to what ${lastSender==='me'?'I':'they'} just said.
+Generate 5 replies that ${whoReplies} would send next. Read the FULL conversation and reply naturally to what ${whoSpokeLast} just said.
 
-Vibe: ${style} (${intDesc}).${window._scenarioContext?'\nScenario context: '+window._scenarioContext:''}
+Vibe: ${style} — ${styleNote} (${intDesc}).${window._scenarioContext?'\nScenario context: '+window._scenarioContext:''}
 ${langNote}
 
-These must sound like real texts from a real person chatting. Short, casual, natural. React to what they actually said — use their words, tease them, be specific to THIS conversation. ONLY numbered replies (1. 2. 3. 4. 5.)`;
+These must sound like real texts from a real person chatting. Short, casual, natural. React to what was actually said — use their words, tease, be specific to THIS conversation. ONLY numbered replies (1. 2. 3. 4. 5.)`;
 
-return [
-{role:'system',content:sysPrompt},
-{role:'user',content:userPrompt}
-];
+return {
+messages:[{role:'system',content:sysPrompt},{role:'user',content:userPrompt}],
+nextSender
+};
 }
 
 async function callProviders(msgs){
@@ -305,10 +319,14 @@ return text.split('\n')
 .filter(l=>l.length>3&&!l.startsWith('#')&&!l.startsWith('*')&&!l.toLowerCase().startsWith('here')&&!l.toLowerCase().startsWith('sure'));
 }
 
-function showReplies(replies,insertAt){
+function showReplies(replies,insertAt,sender){
+const replySender=sender||'me';
 const panel=document.getElementById('aiReplies');
 const list=document.getElementById('aiRepliesList');
 list.innerHTML='';
+
+const headerTitle=panel.querySelector('.ai-replies-title');
+if(headerTitle) headerTitle.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> Pick a reply ${replySender==='them'?'(as them)':'(as you)'}`;
 
 replies.forEach((r,i)=>{
 const btn=document.createElement('button');
@@ -316,10 +334,10 @@ btn.className='ai-reply-option';
 btn.innerHTML=`<span class="reply-num">${i+1}</span><span class="reply-text">${escapeHtml(r)}</span>`;
 btn.addEventListener('click',()=>{
 if(insertAt!=null){
-const msg={id:Date.now(),sender:'me',text:r,time:new Date()};
+const msg={id:Date.now(),sender:replySender,text:r,time:new Date()};
 messages.splice(insertAt,0,msg);
 }else{
-messages.push({id:Date.now(),sender:'me',text:r,time:new Date()});
+messages.push({id:Date.now(),sender:replySender,text:r,time:new Date()});
 }
 renderMessages();
 saveChat();

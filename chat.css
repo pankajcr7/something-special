@@ -244,3 +244,8 @@ html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--t
 .scenario-trigger-btn:active{background:rgba(99,102,241,.15);border-style:solid}
 .scenario-trigger-btn svg{margin-bottom:2px}
 .scenario-trigger-btn .upload-ss-sub{font-size:.72rem;color:var(--text3);font-weight:400}
+
+/* ===== STYLE CHIPS SCROLLABLE ===== */
+.style-chips{display:flex;flex-wrap:wrap;gap:6px;max-height:140px;overflow-y:auto;padding-right:4px;-webkit-overflow-scrolling:touch}
+.style-chips::-webkit-scrollbar{width:3px}
+.style-chips::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
