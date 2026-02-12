@@ -92,7 +92,8 @@ displayResults(lines);addToHistory(lines,category,style);playSound('generate');l
 function displayResults(lines){
 const c=document.getElementById('results');c.innerHTML='';
 lines.forEach((line,i)=>{const isFav=favorites.includes(line);const d=document.createElement('div');d.className='result-item';d.style.animationDelay=`${i*.08}s`;
-d.innerHTML=`<p class="result-text">${escHtml(line)}</p><div class="result-actions"><button class="result-action-btn copy-btn" onclick="copyLine(this,'${escAttr(line)}')">📋 Copy</button><button class="result-action-btn fav-toggle ${isFav?'fav-active':''}" onclick="toggleFav(this,'${escAttr(line)}')">❤️ Save</button><button class="result-action-btn share-btn" onclick="openShareCard('${escAttr(line)}')">📤 Share</button></div>`;c.appendChild(d);});
+d.innerHTML=`<p class="result-text">${escHtml(line)}</p><div class="result-actions"><button class="result-action-btn copy-btn" onclick="copyLine(this,'${escAttr(line)}')">📋 Copy</button><button class="result-action-btn fav-toggle ${isFav?'fav-active':''}" onclick="toggleFav(this,'${escAttr(line)}')">❤️ Save</button><button class="result-action-btn share-btn" onclick="openShareCard('${escAttr(line)}')">📤 Share</button><button class="voice-btn" onclick="speakText('${escAttr(line)}')">🔊</button></div>`;c.appendChild(d);});
+trackStat('generations',lines.length);
 }
 
 // ===== COPY / FAV =====
@@ -111,7 +112,7 @@ l.innerHTML=favorites.map((f,i)=>`<div class="fav-item"><p class="fav-item-text"
 function removeFav(i){favorites.splice(i,1);localStorage.setItem('rizzFavs',JSON.stringify(favorites));renderFavList();updateFavCount();}
 
 // ===== HISTORY =====
-function addToHistory(lines,cat,sty){historyArr.unshift({id:Date.now(),timestamp:new Date().toISOString(),category:cat,style:sty,lines:[...lines]});if(historyArr.length>100)historyArr=historyArr.slice(0,100);localStorage.setItem('rizzHistory',JSON.stringify(historyArr));}
+function addToHistory(lines,cat,sty){historyArr.unshift({id:Date.now(),timestamp:new Date().toISOString(),category:cat,style:sty,lines:[...lines]});if(historyArr.length>100)historyArr=historyArr.slice(0,100);localStorage.setItem('rizzHistory',JSON.stringify(historyArr));trackStat('styleUsage',sty);}
 function openHistoryDrawer(){document.getElementById('historyDrawer').classList.add('open');renderHistoryList();}
 function closeHistoryDrawer(){document.getElementById('historyDrawer').classList.remove('open');}
 function renderHistoryList(filter=''){
@@ -150,7 +151,7 @@ const input=document.getElementById('rizzScoreInput').value.trim();if(!input){sh
 const btn=document.getElementById('analyzeRizzBtn');btn.classList.add('loading');
 try{
 const msgs=[{role:'system',content:'You are a Rizz Score Analyzer. Rate the message on rizz. Return ONLY valid JSON: {"score":75,"confidence":80,"creativity":70,"charm":75,"humor":60,"label":"Smooth Operator","verdict":"Brief analysis."} Score 0-100. Labels: 0-20="Needs CPR", 21-40="Rookie Rizzer", 41-60="Decent Game", 61-80="Smooth Operator", 81-95="Certified Rizz Lord", 96-100="Rizz God".'},{role:'user',content:`Rate this: "${input}"`}];
-const text=await callAIRaw(msgs);const json=JSON.parse(text.match(/\{[\s\S]*\}/)?.[0]||'{}');displayRizzScore(json);playSound('generate');
+const text=await callAIRaw(msgs);const json=JSON.parse(text.match(/\{[\s\S]*\}/)?.[0]||'{}');displayRizzScore(json);playSound('generate');trackStat('rizzScore',json.score||50);
 }catch(e){displayRizzScore({score:Math.floor(Math.random()*40)+40,confidence:Math.floor(Math.random()*30)+50,creativity:Math.floor(Math.random()*30)+40,charm:Math.floor(Math.random()*30)+45,humor:Math.floor(Math.random()*30)+35,label:'Decent Game',verdict:'Shows some personality but could use more originality.'});}
 btn.classList.remove('loading');
 }
@@ -323,4 +324,469 @@ document.getElementById('clearHistoryBtn')?.addEventListener('click',()=>{histor
 document.getElementById('historySearch')?.addEventListener('input',e=>renderHistoryList(e.target.value));
 document.getElementById('battleCount').textContent=`${battleStats.total||0} battles`;
 newBattle();
+initRoulette();
+renderStatsDashboard();
+updateStreak();
+initMainScreenshot();
+checkScheduledCompliments();
 });
+
+// ===== VOICE RIZZ (Web Speech API) =====
+function speakText(text){
+if(!('speechSynthesis' in window)){showToast('Speech not supported');return;}
+window.speechSynthesis.cancel();
+const u=new SpeechSynthesisUtterance(text);
+u.rate=0.95;u.pitch=1.05;u.volume=1;
+const voices=window.speechSynthesis.getVoices();
+const pref=voices.find(v=>v.lang.startsWith('en')&&v.name.includes('Female'))||voices.find(v=>v.lang.startsWith('en'))||voices[0];
+if(pref)u.voice=pref;
+window.speechSynthesis.speak(u);
+showToast('🔊 Speaking...');
+}
+
+// ===== RIZZ ROULETTE =====
+const ROULETTE_SEGMENTS=[
+{label:'💘 Pickup',color:'#a855f7',cat:'pickup'},
+{label:'💬 Reply',color:'#6366f1',cat:'reply'},
+{label:'✍️ Bio',color:'#ec4899',cat:'bio'},
+{label:'👋 Opener',color:'#f59e0b',cat:'opener'},
+{label:'💐 Compliment',color:'#22c55e',cat:'compliment'},
+{label:'🔥 Roast',color:'#ef4444',cat:'roast'},
+{label:'🌙 Goodnight',color:'#3b82f6',cat:'goodnight'},
+{label:'☀️ Morning',color:'#f97316',cat:'goodmorning'}
+];
+let rouletteSpinning=false;
+function initRoulette(){
+const canvas=document.getElementById('rouletteWheel');
+if(!canvas)return;
+const ctx=canvas.getContext('2d');
+const segs=ROULETTE_SEGMENTS;
+const arc=2*Math.PI/segs.length;
+const cx=150,cy=150,r=140;
+segs.forEach((s,i)=>{
+const a0=i*arc-Math.PI/2,a1=a0+arc;
+ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a0,a1);ctx.closePath();
+ctx.fillStyle=s.color;ctx.fill();
+ctx.strokeStyle='rgba(0,0,0,0.3)';ctx.lineWidth=2;ctx.stroke();
+const mid=a0+arc/2;
+ctx.save();ctx.translate(cx+Math.cos(mid)*(r*0.65),cy+Math.sin(mid)*(r*0.65));
+ctx.rotate(mid+Math.PI/2);ctx.fillStyle='#fff';ctx.font='bold 11px Inter,sans-serif';
+ctx.textAlign='center';ctx.fillText(s.label,0,0);ctx.restore();
+});
+ctx.beginPath();ctx.moveTo(cx,cy-r-10);ctx.lineTo(cx-8,cy-r+8);ctx.lineTo(cx+8,cy-r+8);ctx.closePath();
+ctx.fillStyle='#fff';ctx.fill();
+document.getElementById('spinBtn')?.addEventListener('click',spinRoulette);
+}
+function spinRoulette(){
+if(rouletteSpinning)return;
+rouletteSpinning=true;
+const btn=document.getElementById('spinBtn');
+btn.disabled=true;
+const canvas=document.getElementById('rouletteWheel');
+const totalDeg=1800+Math.random()*1800;
+canvas.style.transition='transform 4s cubic-bezier(0.17,0.67,0.12,0.99)';
+canvas.style.transform=`rotate(${totalDeg}deg)`;
+playSound('generate');
+setTimeout(()=>{
+const finalDeg=totalDeg%360;
+const segIdx=Math.floor(((360-finalDeg+90)%360)/(360/ROULETTE_SEGMENTS.length))%ROULETTE_SEGMENTS.length;
+const seg=ROULETTE_SEGMENTS[segIdx];
+const styles=['smooth','funny','romantic','bold','savage','sweet','spicy','nerdy','poetic','flirtyaf'];
+const rndStyle=styles[Math.floor(Math.random()*styles.length)];
+const db=DB[seg.cat];
+let line='Spin again for a fresh line!';
+if(db){
+const s=db[rndStyle]||db.smooth||Object.values(db)[0];
+const pool=s?.bold||s?.mild||Object.values(s)[0]||[];
+if(pool.length)line=pool[Math.floor(Math.random()*pool.length)];
+}
+const res=document.getElementById('rouletteResult');
+res.style.display='block';
+document.getElementById('rouletteResCat').textContent=`${seg.label} • ${cap(rndStyle)}`;
+document.getElementById('rouletteResText').textContent=line;
+launchConfetti();
+rouletteSpinning=false;btn.disabled=false;
+trackStat('rouletteSpins');
+},4200);
+}
+
+// ===== STATS TRACKING =====
+function getStats(){return JSON.parse(localStorage.getItem('rizzStats')||'{"generations":0,"rouletteSpins":0,"toolUses":0,"scores":[],"styleUsage":{}}');}
+function saveStats(s){localStorage.setItem('rizzStats',JSON.stringify(s));}
+function trackStat(key,val){
+const s=getStats();
+if(key==='generations')s.generations=(s.generations||0)+(val||1);
+else if(key==='rouletteSpins')s.rouletteSpins=(s.rouletteSpins||0)+1;
+else if(key==='toolUses')s.toolUses=(s.toolUses||0)+1;
+else if(key==='rizzScore'){if(!s.scores)s.scores=[];s.scores.push(val);if(s.scores.length>50)s.scores=s.scores.slice(-50);}
+else if(key==='styleUsage'){if(!s.styleUsage)s.styleUsage={};s.styleUsage[val]=(s.styleUsage[val]||0)+1;}
+saveStats(s);
+}
+function updateStreak(){
+const s=getStats();
+const today=new Date().toDateString();
+if(!s.lastVisit){s.lastVisit=today;s.streak=1;}
+else if(s.lastVisit!==today){
+const last=new Date(s.lastVisit);
+const diff=Math.floor((new Date()-last)/(86400000));
+s.streak=diff<=1?(s.streak||0)+1:1;
+s.lastVisit=today;
+}
+saveStats(s);
+}
+function renderStatsDashboard(){
+const s=getStats();
+document.getElementById('statGenerations').textContent=s.generations||0;
+document.getElementById('statFavorites').textContent=favorites.length;
+document.getElementById('statBattles').textContent=battleStats.total||0;
+const avg=s.scores?.length?Math.round(s.scores.reduce((a,b)=>a+b,0)/s.scores.length):0;
+document.getElementById('statAvgScore').textContent=avg||'—';
+const su=s.styleUsage||{};
+const topStyle=Object.entries(su).sort((a,b)=>b[1]-a[1])[0];
+document.getElementById('statTopStyle').textContent=topStyle?cap(topStyle[0]):'—';
+document.getElementById('statStreak').textContent=s.streak||0;
+const bars=document.getElementById('statsBars');
+if(bars){
+const max=Math.max(...Object.values(su),1);
+bars.innerHTML=Object.entries(su).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([k,v])=>`<div class="stat-bar-row"><span class="stat-bar-label">${cap(k)}</span><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${(v/max*100).toFixed(0)}%"></div><span class="stat-bar-val">${v}</span></div></div>`).join('')||'<p style="color:var(--text3);font-size:.82rem">Generate some lines to see stats!</p>';
+}
+}
+
+// ===== TOOL MODAL =====
+function openTool(name){
+const overlay=document.getElementById('toolOverlay');
+const title=document.getElementById('toolModalTitle');
+const body=document.getElementById('toolModalBody');
+trackStat('toolUses');
+playSound('click');
+
+switch(name){
+case 'profileRoast':
+title.textContent='🔥 Profile Roast & Review';
+body.innerHTML=`<label class="tool-label">Paste your dating profile bio</label><textarea class="tool-textarea" id="toolInput" placeholder="e.g., Just a chill guy who loves pizza and Netflix..." rows="4"></textarea><button class="tool-gen-btn" id="toolGenBtn">🔥 Roast My Profile</button><div id="toolResult"></div>`;
+document.getElementById('toolGenBtn').onclick=runProfileRoast;
+break;
+case 'responsePred':
+title.textContent='🔮 Response Predictor';
+body.innerHTML=`<label class="tool-label">What did you send?</label><textarea class="tool-textarea" id="toolInput" placeholder="e.g., hey, you looked really cute today" rows="3"></textarea><label class="tool-label">Their personality (optional)</label><input class="tool-input" id="toolInput2" placeholder="e.g., shy, sarcastic, flirty"><button class="tool-gen-btn" id="toolGenBtn">🔮 Predict Response</button><div id="toolResult"></div>`;
+document.getElementById('toolGenBtn').onclick=runResponsePredictor;
+break;
+case 'remixer':
+title.textContent='🎵 Pickup Line Remixer';
+body.innerHTML=`<label class="tool-label">Original line</label><textarea class="tool-textarea" id="toolInput" placeholder="e.g., Are you a magician? Because whenever I look at you, everyone else disappears." rows="3"></textarea><label class="tool-label">Remix styles</label><div class="tool-chips" id="remixChips">${['smooth','funny','romantic','bold','savage','sweet','spicy','nerdy','poetic','toxic','villain','desi','flirtyaf'].map((s,i)=>`<span class="tool-chip${i<3?' active':''}" data-style="${s}">${cap(s)}</span>`).join('')}</div><button class="tool-gen-btn" id="toolGenBtn">🎵 Remix It</button><div id="toolResult"></div>`;
+document.querySelectorAll('#remixChips .tool-chip').forEach(c=>c.onclick=()=>c.classList.toggle('active'));
+document.getElementById('toolGenBtn').onclick=runRemixer;
+break;
+case 'situational':
+title.textContent='📍 Situational Rizz';
+body.innerHTML=`<label class="tool-label">Pick a situation</label><div class="tool-situation-grid" id="sitGrid">${[
+{e:'☕',n:'Coffee Shop'},{e:'💪',n:'Gym'},{e:'📚',n:'Library'},{e:'🎉',n:'Party'},
+{e:'📱',n:'DMs/Online'},{e:'🏢',n:'Office'},{e:'🏖️',n:'Beach'},{e:'🎵',n:'Concert'},
+{e:'🛒',n:'Grocery Store'},{e:'🐕',n:'Dog Park'},{e:'✈️',n:'Airport'},{e:'🍷',n:'Bar/Club'}
+].map(s=>`<div class="tool-sit-card" data-sit="${s.n}"><span class="sit-emoji">${s.e}</span>${s.n}</div>`).join('')}</div><div id="toolResult"></div>`;
+document.querySelectorAll('#sitGrid .tool-sit-card').forEach(c=>c.onclick=()=>runSituational(c.dataset.sit));
+break;
+case 'screenshotReply':
+title.textContent='📸 Screenshot Reply';
+body.innerHTML=`<label class="tool-label">Upload a chat screenshot</label><div class="tool-upload-area" id="toolUploadArea"><span class="upload-icon">📸</span><p>Tap to upload screenshot</p><p style="font-size:.72rem;color:var(--text3);margin-top:4px">AI will read it and suggest replies</p></div><img class="tool-img-preview" id="toolImgPreview" style="display:none"><div id="toolResult"></div>`;
+document.getElementById('toolUploadArea').onclick=()=>document.getElementById('mainSSUpload').click();
+document.getElementById('mainSSUpload').onchange=handleMainScreenshot;
+break;
+case 'flowBuilder':
+title.textContent='🌊 Conversation Flow Builder';
+body.innerHTML=`<label class="tool-label">Their opening message</label><input class="tool-input" id="toolInput" placeholder="e.g., heyy whats up"><label class="tool-label">Your goal</label><div class="tool-chips" id="goalChips">${['Get a date','Keep it fun','Be mysterious','Rizz hard','Friend zone escape'].map((g,i)=>`<span class="tool-chip${i===0?' active':''}" data-goal="${g}">${g}</span>`).join('')}</div><button class="tool-gen-btn" id="toolGenBtn">🌊 Build Flow</button><div id="toolResult"></div>`;
+document.querySelectorAll('#goalChips .tool-chip').forEach(c=>c.onclick=()=>{document.querySelectorAll('#goalChips .tool-chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');});
+document.getElementById('toolGenBtn').onclick=runFlowBuilder;
+break;
+case 'compatibility':
+title.textContent='💕 Compatibility Analyzer';
+body.innerHTML=`<label class="tool-label">Your zodiac / MBTI</label><input class="tool-input" id="toolInput" placeholder="e.g., Leo, INFJ, Scorpio..."><label class="tool-label">Their zodiac / MBTI</label><input class="tool-input" id="toolInput2" placeholder="e.g., Libra, ENFP, Aquarius..."><button class="tool-gen-btn" id="toolGenBtn">💕 Analyze Compatibility</button><div id="toolResult"></div>`;
+document.getElementById('toolGenBtn').onclick=runCompatibility;
+break;
+case 'emojiDecoder':
+title.textContent='🧩 Emoji Decoder';
+body.innerHTML=`<label class="tool-label">Paste emojis or emoji-heavy message</label><textarea class="tool-textarea" id="toolInput" placeholder="e.g., 😏🔥💀 or 👉👈🥺" rows="3"></textarea><button class="tool-gen-btn" id="toolGenBtn">🧩 Decode</button><div id="toolResult"></div>`;
+document.getElementById('toolGenBtn').onclick=runEmojiDecoder;
+break;
+case 'dateIdea':
+title.textContent='💡 Date Idea Generator';
+body.innerHTML=`<label class="tool-label">Budget</label><div class="tool-chips" id="budgetChips">${['Free','Cheap ($)','Moderate ($$)','Fancy ($$$)'].map((b,i)=>`<span class="tool-chip${i===1?' active':''}" data-val="${b}">${b}</span>`).join('')}</div><label class="tool-label">Vibe</label><div class="tool-chips" id="vibeChips">${['Chill','Adventurous','Romantic','Fun & Quirky'].map((v,i)=>`<span class="tool-chip${i===0?' active':''}" data-val="${v}">${v}</span>`).join('')}</div><label class="tool-label">Interests (optional)</label><input class="tool-input" id="toolInput" placeholder="e.g., art, food, nature, gaming"><button class="tool-gen-btn" id="toolGenBtn">💡 Generate Date Ideas</button><div id="toolResult"></div>`;
+document.querySelectorAll('#budgetChips .tool-chip').forEach(c=>c.onclick=()=>{document.querySelectorAll('#budgetChips .tool-chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');});
+document.querySelectorAll('#vibeChips .tool-chip').forEach(c=>c.onclick=()=>{document.querySelectorAll('#vibeChips .tool-chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');});
+document.getElementById('toolGenBtn').onclick=runDateIdea;
+break;
+case 'complimentSched':
+title.textContent='⏰ Compliment Scheduler';
+const scheds=JSON.parse(localStorage.getItem('rizzSchedules')||'[]');
+body.innerHTML=`<label class="tool-label">Person's name</label><input class="tool-input" id="toolInput" placeholder="e.g., Sarah"><label class="tool-label">Style</label><div class="tool-chips" id="schedStyleChips">${['sweet','romantic','funny','smooth','bold','spicy'].map((s,i)=>`<span class="tool-chip${i===0?' active':''}" data-style="${s}">${cap(s)}</span>`).join('')}</div><label class="tool-label">Remind me at</label><input class="tool-input" id="toolTimeInput" type="time" value="09:00"><button class="tool-gen-btn" id="toolGenBtn">⏰ Schedule Compliment</button><div class="tool-sched-list" id="schedList">${scheds.map((s,i)=>`<div class="tool-sched-item"><span class="sched-time">${s.time}</span><span class="sched-text">${s.name} • ${cap(s.style)}</span><button class="tool-sched-del" onclick="deleteSchedule(${i})">✕</button></div>`).join('')}</div><div id="toolResult"></div>`;
+document.querySelectorAll('#schedStyleChips .tool-chip').forEach(c=>c.onclick=()=>{document.querySelectorAll('#schedStyleChips .tool-chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');});
+document.getElementById('toolGenBtn').onclick=runComplimentSchedule;
+break;
+case 'redFlag':
+title.textContent='🚩 Red Flag Detector';
+body.innerHTML=`<label class="tool-label">Paste their message or profile text</label><textarea class="tool-textarea" id="toolInput" placeholder="Paste a message, bio, or conversation snippet..." rows="5"></textarea><button class="tool-gen-btn" id="toolGenBtn">🚩 Analyze Flags</button><div id="toolResult"></div>`;
+document.getElementById('toolGenBtn').onclick=runRedFlagDetector;
+break;
+}
+overlay.style.display='flex';
+}
+function closeTool(){document.getElementById('toolOverlay').style.display='none';}
+
+// ===== TOOL: PROFILE ROAST =====
+async function runProfileRoast(){
+const bio=document.getElementById('toolInput').value.trim();
+if(!bio){showToast('Paste your bio first!');return;}
+const btn=document.getElementById('toolGenBtn');btn.disabled=true;btn.textContent='Roasting...';
+try{
+const msgs=[{role:'system',content:'You are a brutally honest but helpful dating profile reviewer. First ROAST the bio (be savage and funny, 2-3 lines). Then give a SCORE out of 10. Then provide an IMPROVED VERSION of their bio. Then give 3 SPECIFIC TIPS. Format with clear sections using ** headers.'},{role:'user',content:`Roast and review this dating profile bio:\n"${bio}"`}];
+const res=await callAIRaw(msgs);
+document.getElementById('toolResult').innerHTML=`<div class="tool-result">${formatToolResult(res)}</div>`;
+playSound('generate');
+}catch(e){document.getElementById('toolResult').innerHTML=`<div class="tool-result">Couldn't roast right now. Try again!</div>`;}
+btn.disabled=false;btn.textContent='🔥 Roast My Profile';
+}
+
+// ===== TOOL: RESPONSE PREDICTOR =====
+async function runResponsePredictor(){
+const msg=document.getElementById('toolInput').value.trim();
+if(!msg){showToast('Enter what you sent!');return;}
+const personality=document.getElementById('toolInput2')?.value||'';
+const btn=document.getElementById('toolGenBtn');btn.disabled=true;btn.textContent='Predicting...';
+try{
+const msgs=[{role:'system',content:`You predict how someone will reply to a text message. ${personality?'Their personality: '+personality+'.':''} Give 5 possible responses ranging from best case to worst case. For each, give a probability %, the predicted reply, and what to reply back. Format clearly with numbered predictions.`},{role:'user',content:`Predict responses to: "${msg}"`}];
+const res=await callAIRaw(msgs);
+document.getElementById('toolResult').innerHTML=`<div class="tool-result">${formatToolResult(res)}</div>`;
+playSound('generate');
+}catch(e){document.getElementById('toolResult').innerHTML=`<div class="tool-result">Prediction failed. Try again!</div>`;}
+btn.disabled=false;btn.textContent='🔮 Predict Response';
+}
+
+// ===== TOOL: LINE REMIXER =====
+async function runRemixer(){
+const line=document.getElementById('toolInput').value.trim();
+if(!line){showToast('Enter a line to remix!');return;}
+const activeStyles=[...document.querySelectorAll('#remixChips .tool-chip.active')].map(c=>c.dataset.style);
+if(!activeStyles.length){showToast('Select at least one style!');return;}
+const btn=document.getElementById('toolGenBtn');btn.disabled=true;btn.textContent='Remixing...';
+try{
+const msgs=[{role:'system',content:`You remix pickup lines into different styles. Take the given line and rewrite it in each of these styles: ${activeStyles.join(', ')}. Keep the core idea but transform the delivery. Label each with the style name.`},{role:'user',content:`Remix this line: "${line}"`}];
+const res=await callAIRaw(msgs);
+document.getElementById('toolResult').innerHTML=`<div class="tool-result">${formatToolResult(res)}</div>`;
+playSound('generate');
+}catch(e){document.getElementById('toolResult').innerHTML=`<div class="tool-result">Remix failed. Try again!</div>`;}
+btn.disabled=false;btn.textContent='🎵 Remix It';
+}
+
+// ===== TOOL: SITUATIONAL RIZZ =====
+async function runSituational(situation){
+document.querySelectorAll('#sitGrid .tool-sit-card').forEach(c=>c.style.opacity=c.dataset.sit===situation?'1':'0.5');
+const res=document.getElementById('toolResult');
+res.innerHTML='<div class="tool-result" style="text-align:center">Generating lines for '+situation+'...</div>';
+try{
+const msgs=[{role:'system',content:`Generate 5 creative, natural pickup lines or conversation starters specifically for meeting someone at a ${situation}. Make them contextual — reference things you'd actually find at that location. Mix smooth, funny, and bold. Number them 1-5.`},{role:'user',content:`Give me rizz lines for: ${situation}`}];
+const text=await callAIRaw(msgs);
+res.innerHTML=`<div class="tool-result">${formatToolResult(text)}</div>`;
+playSound('generate');
+}catch(e){res.innerHTML=`<div class="tool-result">Failed. Tap another situation!</div>`;}
+}
+
+// ===== TOOL: SCREENSHOT REPLY (MAIN PAGE) =====
+function initMainScreenshot(){}
+async function handleMainScreenshot(e){
+const file=e.target.files?.[0];
+if(!file)return;
+const preview=document.getElementById('toolImgPreview');
+preview.src=URL.createObjectURL(file);preview.style.display='block';
+const res=document.getElementById('toolResult');
+res.innerHTML='<div class="tool-result" style="text-align:center">🔍 Reading screenshot with OCR...</div>';
+try{
+const script=document.createElement('script');
+if(!window.Tesseract){
+script.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+document.head.appendChild(script);
+await new Promise(r=>script.onload=r);
+}
+const{data}=await Tesseract.recognize(file,'eng');
+const text=data.text.trim();
+if(!text){res.innerHTML='<div class="tool-result">Could not read text from image. Try a clearer screenshot.</div>';return;}
+const msgs=[{role:'system',content:'You are a texting expert. The user uploaded a chat screenshot. The OCR text is below. Analyze the conversation and suggest 5 great reply options in different styles (smooth, funny, bold, flirty, savage). Number them 1-5.'},{role:'user',content:`Chat text from screenshot:\n${text}`}];
+const aiRes=await callAIRaw(msgs);
+res.innerHTML=`<div class="tool-result"><h4>📸 Detected Text:</h4><p style="color:var(--text3);margin-bottom:12px;font-size:.82rem">${escHtml(text).substring(0,300)}...</p><h4>💬 Suggested Replies:</h4>${formatToolResult(aiRes)}</div>`;
+playSound('generate');
+}catch(err){res.innerHTML=`<div class="tool-result">Error reading screenshot. Try again!</div>`;}
+e.target.value='';
+}
+
+// ===== TOOL: CONVERSATION FLOW BUILDER =====
+async function runFlowBuilder(){
+const opener=document.getElementById('toolInput').value.trim();
+if(!opener){showToast('Enter their message!');return;}
+const goal=document.querySelector('#goalChips .tool-chip.active')?.dataset.goal||'Get a date';
+const btn=document.getElementById('toolGenBtn');btn.disabled=true;btn.textContent='Building flow...';
+try{
+const msgs=[{role:'system',content:`You are a conversation strategist. Build a conversation flow tree. Start with their message, then show 3 possible replies from "me". For each reply, predict their next response and give a follow-up. Format as a structured tree:
+THEM: [message]
+→ OPTION A: [reply]
+  THEM: [predicted response]
+  → FOLLOW UP: [your next move]
+→ OPTION B: [reply]
+  THEM: [predicted response]
+  → FOLLOW UP: [your next move]
+→ OPTION C: [reply]
+  THEM: [predicted response]
+  → FOLLOW UP: [your next move]
+Goal: ${goal}. Make it practical and realistic.`},{role:'user',content:`Build a conversation flow starting with: "${opener}"`}];
+const res=await callAIRaw(msgs);
+const html=res.split('\n').map(line=>{
+const trimmed=line.trim();
+if(trimmed.startsWith('THEM:'))return`<div class="flow-node them">💬 ${escHtml(trimmed)}</div>`;
+if(trimmed.startsWith('→ OPTION')||trimmed.startsWith('→ FOLLOW'))return`<div class="flow-node me">⚡ ${escHtml(trimmed.replace('→','').trim())}</div>`;
+if(trimmed.startsWith('THEM:'))return`<div class="flow-node them">${escHtml(trimmed)}</div>`;
+if(trimmed.length>2)return`<div class="flow-node">${escHtml(trimmed)}</div>`;
+return'';
+}).join('');
+document.getElementById('toolResult').innerHTML=`<div class="tool-flow-tree">${html}</div>`;
+playSound('generate');
+}catch(e){document.getElementById('toolResult').innerHTML=`<div class="tool-result">Flow building failed. Try again!</div>`;}
+btn.disabled=false;btn.textContent='🌊 Build Flow';
+}
+
+// ===== TOOL: COMPATIBILITY ANALYZER =====
+async function runCompatibility(){
+const you=document.getElementById('toolInput').value.trim();
+const them=document.getElementById('toolInput2').value.trim();
+if(!you||!them){showToast('Enter both signs/types!');return;}
+const btn=document.getElementById('toolGenBtn');btn.disabled=true;btn.textContent='Analyzing...';
+try{
+const msgs=[{role:'system',content:'You are a fun compatibility analyzer. Analyze the zodiac/MBTI compatibility. Return ONLY valid JSON: {"score":78,"chemistry":"Electric","strengths":["Great communication","Shared humor"],"challenges":["Stubbornness"],"firstDate":"A fun description","pickupLine":"A custom pickup line using both signs","verdict":"Overall verdict in 2 sentences"}'},{role:'user',content:`Compatibility: ${you} + ${them}`}];
+const text=await callAIRaw(msgs);
+const json=JSON.parse(text.match(/\{[\s\S]*\}/)?.[0]||'{}');
+const score=json.score||Math.floor(Math.random()*40)+50;
+document.getElementById('toolResult').innerHTML=`<div class="tool-result">
+<h4>💕 ${you} × ${them}</h4>
+<div style="font-size:2.5rem;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;margin:10px 0">${score}%</div>
+<div class="tool-compat-bar"><div class="tool-compat-fill" style="width:${score}%"></div></div>
+<p><strong>Chemistry:</strong> ${json.chemistry||'Interesting'}</p>
+<p style="margin-top:8px"><strong>Strengths:</strong> ${(json.strengths||[]).join(', ')}</p>
+<p style="margin-top:8px"><strong>Challenges:</strong> ${(json.challenges||[]).join(', ')}</p>
+<p style="margin-top:8px"><strong>Perfect First Date:</strong> ${json.firstDate||'Something fun'}</p>
+<p style="margin-top:8px"><strong>Custom Pickup Line:</strong> <em>${json.pickupLine||''}</em></p>
+<p style="margin-top:8px"><strong>Verdict:</strong> ${json.verdict||''}</p>
+</div>`;
+playSound('generate');
+}catch(e){document.getElementById('toolResult').innerHTML=`<div class="tool-result">Analysis failed. Try again!</div>`;}
+btn.disabled=false;btn.textContent='💕 Analyze Compatibility';
+}
+
+// ===== TOOL: EMOJI DECODER =====
+async function runEmojiDecoder(){
+const emojis=document.getElementById('toolInput').value.trim();
+if(!emojis){showToast('Enter some emojis!');return;}
+const btn=document.getElementById('toolGenBtn');btn.disabled=true;btn.textContent='Decoding...';
+try{
+const msgs=[{role:'system',content:'You are an emoji decoder expert for dating/texting. Decode the hidden meaning behind emoji combinations. Give: 1) The literal decode, 2) The REAL hidden meaning in dating context, 3) Flirt level (1-10), 4) What they actually want, 5) Best emoji reply combo to send back, 6) A text reply suggestion. Be fun and insightful.'},{role:'user',content:`Decode these emojis in dating context: ${emojis}`}];
+const res=await callAIRaw(msgs);
+document.getElementById('toolResult').innerHTML=`<div class="tool-result">${formatToolResult(res)}</div>`;
+playSound('generate');
+}catch(e){document.getElementById('toolResult').innerHTML=`<div class="tool-result">Decode failed. Try again!</div>`;}
+btn.disabled=false;btn.textContent='🧩 Decode';
+}
+
+// ===== TOOL: DATE IDEA GENERATOR =====
+async function runDateIdea(){
+const budget=document.querySelector('#budgetChips .tool-chip.active')?.dataset.val||'Cheap';
+const vibe=document.querySelector('#vibeChips .tool-chip.active')?.dataset.val||'Chill';
+const interests=document.getElementById('toolInput')?.value||'';
+const btn=document.getElementById('toolGenBtn');btn.disabled=true;btn.textContent='Planning...';
+try{
+const msgs=[{role:'system',content:`Generate 5 creative date ideas. Budget: ${budget}. Vibe: ${vibe}. ${interests?'Interests: '+interests+'.' :''} For each date idea give: Name (creative/fun name), Description (2-3 sentences), Why it works (1 sentence), Pro tip (1 sentence). Number them 1-5. Be creative and unique — avoid generic answers.`},{role:'user',content:'Generate 5 unique date ideas'}];
+const res=await callAIRaw(msgs);
+document.getElementById('toolResult').innerHTML=`<div class="tool-result">${formatToolResult(res)}</div>`;
+playSound('generate');
+}catch(e){document.getElementById('toolResult').innerHTML=`<div class="tool-result">Planning failed. Try again!</div>`;}
+btn.disabled=false;btn.textContent='💡 Generate Date Ideas';
+}
+
+// ===== TOOL: COMPLIMENT SCHEDULER =====
+function runComplimentSchedule(){
+const name=document.getElementById('toolInput').value.trim();
+if(!name){showToast('Enter their name!');return;}
+const style=document.querySelector('#schedStyleChips .tool-chip.active')?.dataset.style||'sweet';
+const time=document.getElementById('toolTimeInput')?.value||'09:00';
+const scheds=JSON.parse(localStorage.getItem('rizzSchedules')||'[]');
+scheds.push({name,style,time,created:Date.now()});
+localStorage.setItem('rizzSchedules',JSON.stringify(scheds));
+const list=document.getElementById('schedList');
+list.innerHTML=scheds.map((s,i)=>`<div class="tool-sched-item"><span class="sched-time">${s.time}</span><span class="sched-text">${s.name} • ${cap(s.style)}</span><button class="tool-sched-del" onclick="deleteSchedule(${i})">✕</button></div>`).join('');
+showToast(`⏰ Scheduled for ${name} at ${time}`);
+playSound('generate');
+genAndShowCompliment(name,style);
+}
+async function genAndShowCompliment(name,sty){
+const res=document.getElementById('toolResult');
+res.innerHTML='<div class="tool-result">Generating compliment preview...</div>';
+try{
+const msgs=[{role:'system',content:`Generate 3 ${sty} compliments for someone named ${name}. Make them feel special. One per line.`},{role:'user',content:`Generate ${sty} compliments for ${name}`}];
+const text=await callAIRaw(msgs);
+res.innerHTML=`<div class="tool-result"><h4>Preview compliments for ${name}:</h4>${formatToolResult(text)}</div>`;
+}catch(e){res.innerHTML='';}
+}
+function deleteSchedule(idx){
+const scheds=JSON.parse(localStorage.getItem('rizzSchedules')||'[]');
+scheds.splice(idx,1);
+localStorage.setItem('rizzSchedules',JSON.stringify(scheds));
+const list=document.getElementById('schedList');
+if(list)list.innerHTML=scheds.map((s,i)=>`<div class="tool-sched-item"><span class="sched-time">${s.time}</span><span class="sched-text">${s.name} • ${cap(s.style)}</span><button class="tool-sched-del" onclick="deleteSchedule(${i})">✕</button></div>`).join('');
+showToast('Schedule removed');
+}
+function checkScheduledCompliments(){
+const scheds=JSON.parse(localStorage.getItem('rizzSchedules')||'[]');
+if(!scheds.length)return;
+const now=new Date();
+const hhmm=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+scheds.forEach(s=>{
+if(s.time===hhmm){
+if('Notification' in window && Notification.permission==='granted'){
+new Notification(`💜 Compliment time for ${s.name}!`,{body:`Send a ${s.style} compliment to ${s.name}`,icon:'icon-192.svg'});
+}else showToast(`💜 Time to compliment ${s.name}!`);
+}
+});
+if('Notification' in window && Notification.permission==='default')Notification.requestPermission();
+setInterval(checkScheduledCompliments,60000);
+}
+
+// ===== TOOL: RED FLAG DETECTOR =====
+async function runRedFlagDetector(){
+const text=document.getElementById('toolInput').value.trim();
+if(!text){showToast('Paste their message/profile!');return;}
+const btn=document.getElementById('toolGenBtn');btn.disabled=true;btn.textContent='Analyzing...';
+try{
+const msgs=[{role:'system',content:'You are a dating red flag / green flag detector. Analyze the text and identify red flags 🚩, yellow flags ⚠️, and green flags ✅. Return ONLY valid JSON: {"redFlags":[{"flag":"description","severity":"high/medium"}],"yellowFlags":[{"flag":"description"}],"greenFlags":[{"flag":"description"}],"overallScore":7,"verdict":"Overall assessment in 2-3 sentences","advice":"What to do next"}'},{role:'user',content:`Analyze for flags:\n"${text}"`}];
+const res=await callAIRaw(msgs);
+const json=JSON.parse(res.match(/\{[\s\S]*\}/)?.[0]||'{}');
+let html='<div class="tool-result">';
+html+=`<div style="text-align:center;font-size:2rem;font-weight:800;margin-bottom:10px">${json.overallScore||5}/10</div>`;
+if(json.redFlags?.length){html+='<h4 style="color:#ef4444">🚩 Red Flags</h4>';json.redFlags.forEach(f=>{html+=`<div class="tool-flag red">${f.flag} ${f.severity==='high'?'⚠️':''}</div>`;});}
+if(json.yellowFlags?.length){html+='<h4 style="color:#f59e0b;margin-top:12px">⚠️ Yellow Flags</h4>';json.yellowFlags.forEach(f=>{html+=`<div class="tool-flag yellow">${f.flag}</div>`;});}
+if(json.greenFlags?.length){html+='<h4 style="color:#22c55e;margin-top:12px">✅ Green Flags</h4>';json.greenFlags.forEach(f=>{html+=`<div class="tool-flag green">${f.flag}</div>`;});}
+html+=`<p style="margin-top:14px"><strong>Verdict:</strong> ${json.verdict||''}</p>`;
+html+=`<p style="margin-top:8px"><strong>Advice:</strong> ${json.advice||''}</p></div>`;
+document.getElementById('toolResult').innerHTML=html;
+playSound('generate');
+}catch(e){document.getElementById('toolResult').innerHTML=`<div class="tool-result">Analysis failed. Try again!</div>`;}
+btn.disabled=false;btn.textContent='🚩 Analyze Flags';
+}
+
+// ===== FORMAT TOOL RESULT =====
+function formatToolResult(text){
+return text.split('\n').map(line=>{
+let l=line.trim();
+if(!l)return'<br>';
+l=l.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+l=l.replace(/^(\d+[.)])\s/,'<strong>$1</strong> ');
+return`<p style="margin-bottom:4px">${l}</p>`;
+}).join('');
+}
+
+function copyText(t){navigator.clipboard.writeText(t).then(()=>{showToast('Copied!');playSound('copy');});}
+

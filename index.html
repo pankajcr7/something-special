@@ -178,6 +178,15 @@
                             <div class="select-option" data-value="hindi">🇮🇳 Hindi</div>
                             <div class="select-option" data-value="spanish">🇪🇸 Spanish</div>
                             <div class="select-option" data-value="french">🇫🇷 French</div>
+                            <div class="select-option" data-value="german">🇩🇪 German</div>
+                            <div class="select-option" data-value="italian">🇮🇹 Italian</div>
+                            <div class="select-option" data-value="portuguese">🇧🇷 Portuguese</div>
+                            <div class="select-option" data-value="japanese">🇯🇵 Japanese</div>
+                            <div class="select-option" data-value="korean">🇰🇷 Korean</div>
+                            <div class="select-option" data-value="arabic">🇸🇦 Arabic</div>
+                            <div class="select-option" data-value="russian">🇷🇺 Russian</div>
+                            <div class="select-option" data-value="turkish">🇹🇷 Turkish</div>
+                            <div class="select-option" data-value="thai">🇹🇭 Thai</div>
                         </div>
                     </div>
                 </div>
@@ -287,8 +296,132 @@
         </div>
     </section>
 
-    <!-- Tools Section (anchor) -->
-    <section id="tools"></section>
+    <!-- ===== RIZZ ROULETTE ===== -->
+    <section class="roulette-section" id="rouletteSection">
+        <div class="container">
+            <div class="section-badge">🎰 Rizz Roulette</div>
+            <h2 class="section-title">Spin & <span class="gradient-text">Rizz</span></h2>
+            <p class="section-sub">Let fate decide your next move — spin the wheel!</p>
+            <div class="roulette-wrapper">
+                <canvas id="rouletteWheel" width="300" height="300"></canvas>
+                <button class="roulette-spin-btn" id="spinBtn">🎰 SPIN</button>
+            </div>
+            <div class="roulette-result" id="rouletteResult" style="display:none">
+                <div class="roulette-result-cat" id="rouletteResCat"></div>
+                <p class="roulette-result-text" id="rouletteResText"></p>
+                <div class="roulette-result-actions">
+                    <button class="result-action-btn" onclick="copyText(document.getElementById('rouletteResText').textContent)">📋 Copy</button>
+                    <button class="result-action-btn" onclick="speakText(document.getElementById('rouletteResText').textContent)">🔊 Speak</button>
+                    <button class="result-action-btn" onclick="document.getElementById('spinBtn').click()">🔄 Spin Again</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== AI TOOLS ===== -->
+    <section class="tools-section" id="tools">
+        <div class="container">
+            <div class="section-badge">🛠️ AI Rizz Tools</div>
+            <h2 class="section-title">Power <span class="gradient-text">Tools</span></h2>
+            <p class="section-sub">Advanced AI-powered tools to level up your game</p>
+            <div class="tools-grid">
+                <div class="tool-card" onclick="openTool('profileRoast')">
+                    <span class="tool-icon">🔥</span>
+                    <span class="tool-name">Profile Roast</span>
+                    <span class="tool-desc">Get your bio roasted & improved</span>
+                </div>
+                <div class="tool-card" onclick="openTool('responsePred')">
+                    <span class="tool-icon">🔮</span>
+                    <span class="tool-name">Response Predictor</span>
+                    <span class="tool-desc">Predict what they'll reply</span>
+                </div>
+                <div class="tool-card" onclick="openTool('remixer')">
+                    <span class="tool-icon">🎵</span>
+                    <span class="tool-name">Line Remixer</span>
+                    <span class="tool-desc">Remix any line in different styles</span>
+                </div>
+                <div class="tool-card" onclick="openTool('situational')">
+                    <span class="tool-icon">📍</span>
+                    <span class="tool-name">Situational Rizz</span>
+                    <span class="tool-desc">Lines for specific places & vibes</span>
+                </div>
+                <div class="tool-card" onclick="openTool('screenshotReply')">
+                    <span class="tool-icon">📸</span>
+                    <span class="tool-name">Screenshot Reply</span>
+                    <span class="tool-desc">Upload chat screenshot, get AI reply</span>
+                </div>
+                <div class="tool-card" onclick="openTool('flowBuilder')">
+                    <span class="tool-icon">🌊</span>
+                    <span class="tool-name">Convo Flow Builder</span>
+                    <span class="tool-desc">Build full conversation trees</span>
+                </div>
+                <div class="tool-card" onclick="openTool('compatibility')">
+                    <span class="tool-icon">💕</span>
+                    <span class="tool-name">Compatibility</span>
+                    <span class="tool-desc">Zodiac & personality matching</span>
+                </div>
+                <div class="tool-card" onclick="openTool('emojiDecoder')">
+                    <span class="tool-icon">🧩</span>
+                    <span class="tool-name">Emoji Decoder</span>
+                    <span class="tool-desc">Decode hidden emoji meanings</span>
+                </div>
+                <div class="tool-card" onclick="openTool('dateIdea')">
+                    <span class="tool-icon">💡</span>
+                    <span class="tool-name">Date Ideas</span>
+                    <span class="tool-desc">Creative AI-generated date plans</span>
+                </div>
+                <div class="tool-card" onclick="openTool('complimentSched')">
+                    <span class="tool-icon">⏰</span>
+                    <span class="tool-name">Compliment Scheduler</span>
+                    <span class="tool-desc">Schedule daily compliments</span>
+                </div>
+                <div class="tool-card" onclick="openTool('redFlag')">
+                    <span class="tool-icon">🚩</span>
+                    <span class="tool-name">Red Flag Detector</span>
+                    <span class="tool-desc">Analyze texts for red/green flags</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== STATS DASHBOARD ===== -->
+    <section class="stats-section" id="statsSection">
+        <div class="container">
+            <div class="section-badge">📊 Dashboard</div>
+            <h2 class="section-title">Your Rizz <span class="gradient-text">Stats</span></h2>
+            <p class="section-sub">Track your rizz journey</p>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="statGenerations">0</div>
+                    <div class="stat-label">Lines Generated</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statFavorites">0</div>
+                    <div class="stat-label">Favorites Saved</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statBattles">0</div>
+                    <div class="stat-label">Battles Played</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statAvgScore">—</div>
+                    <div class="stat-label">Avg Rizz Score</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statTopStyle">—</div>
+                    <div class="stat-label">Fav Style</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statStreak">0</div>
+                    <div class="stat-label">Day Streak 🔥</div>
+                </div>
+            </div>
+            <div class="stats-chart">
+                <h3 class="stats-chart-title">Style Usage</h3>
+                <div class="stats-bars" id="statsBars"></div>
+            </div>
+        </div>
+    </section>
 
     <!-- Examples -->
     <section class="examples" id="examples">
@@ -389,6 +522,21 @@
             </div>
         </div>
     </div>
+
+    <!-- ===== TOOL MODAL ===== -->
+    <div class="tool-overlay" id="toolOverlay" style="display:none" onclick="if(event.target===this)closeTool()">
+        <div class="tool-modal">
+            <div class="tool-modal-header">
+                <h3 id="toolModalTitle"></h3>
+                <button class="tool-close-btn" onclick="closeTool()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="tool-modal-body" id="toolModalBody"></div>
+        </div>
+    </div>
+
+    <input type="file" id="mainSSUpload" accept="image/*" style="display:none">
 
     <div class="confetti-wrap" id="confettiWrap"></div>
 
