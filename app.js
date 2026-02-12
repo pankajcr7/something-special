@@ -2,6 +2,46 @@ const DB={pickup:{smooth:{mild:["Do you have a map? Because I just got lost in y
 
 const toolCfg={pickup:{title:"Pickup Line Generator",ctxLabel:"Describe the situation or your crush",ctxPlace:"e.g., She loves coffee and has the most beautiful smile...",reply:false},reply:{title:"Rizz Reply Generator",ctxLabel:"Paste their message you want to reply to",ctxPlace:"e.g., How are you? / You're not that tall are you? / What makes you different?",reply:true},bio:{title:"Dating Bio Generator",ctxLabel:"Describe yourself and what you're looking for",ctxPlace:"e.g., 24-year-old software engineer who loves hiking and bad puns...",reply:false},starter:{title:"Conversation Starter Generator",ctxLabel:"Describe the person or situation",ctxPlace:"e.g., She's into photography and travel, matched on Bumble...",reply:false},compliment:{title:"Compliment Generator",ctxLabel:"Describe the person you want to compliment",ctxPlace:"e.g., She's kind, funny, and has the most amazing laugh...",reply:false}};
 
+const SUGGESTIONS={
+pickup:[
+"Matched on Bumble, she's into travel and dogs",
+"Cute girl at the gym, always wears headphones",
+"She liked my story, we have mutual friends",
+"He's into anime and coding, met at a hackathon",
+"Instagram DM to someone who posts aesthetic pics",
+"College crush who sits next to me in class"
+],
+reply:[
+"haha you're funny",
+"You're not that tall are you?",
+"I don't usually reply to DMs",
+"What makes you different from other guys?",
+"We should hang out sometime",
+"You seem too good to be true lol"
+],
+bio:[
+"22, software dev who loves gaming and midnight drives",
+"Med student, gym rat, can cook better than your mom",
+"Introvert who'll become your favorite person",
+"Dog mom, coffee addict, looking for my last first date",
+"Tall, sarcastic, will make you laugh then steal your fries"
+],
+starter:[
+"She's into photography and travel, matched on Hinge",
+"He plays guitar and posts gym selfies",
+"We matched but nobody texted first for 2 days",
+"Her profile says she loves horror movies and ramen",
+"He's a chef, has a cute dog in all his pics"
+],
+compliment:[
+"She's really smart and always makes everyone laugh",
+"He helped me with something without me even asking",
+"She has the best energy, lights up every room",
+"He's always so calm and patient with everyone",
+"She's been working really hard on her fitness journey"
+]
+};
+
 let curTool='pickup',curStyle='smooth',genLines=[];
 const AI_CONNECTED=true;
 
@@ -22,7 +62,7 @@ sl.addEventListener('input',()=>labs.forEach((l,i)=>l.classList.toggle('active',
 const ci=document.getElementById('contextInput'),cc=document.getElementById('charCount');
 ci.addEventListener('input',()=>cc.textContent=ci.value.length);
 
-heroType();scrollAnim();cursorGlow();countUp();dupTest();
+heroType();scrollAnim();cursorGlow();countUp();dupTest();renderSuggestions('pickup');
 });
 
 function switchTool(t){
@@ -33,10 +73,27 @@ document.getElementById('panelTitleText').textContent=c.title;
 document.getElementById('contextLabel').textContent=c.ctxLabel;
 document.getElementById('contextInput').placeholder=c.ctxPlace;
 document.getElementById('replyGroup').style.display=c.reply?'block':'none';
+renderSuggestions(t);
 document.getElementById('outputContent').innerHTML=`<div class="output-empty"><div class="empty-icon">✨</div><p class="empty-title">Your ${t==='bio'?'bios':'lines'} will appear here</p><p class="empty-subtitle">Fill in the details and hit generate!</p></div>`;
 document.getElementById('outputFooter').style.display='none';
 document.getElementById('copyAllBtn').style.display='none';
 document.getElementById('generator').scrollIntoView({behavior:'smooth'});
+}
+
+function renderSuggestions(tool){
+const container=document.getElementById('suggestionChips');
+if(!container)return;
+const chips=SUGGESTIONS[tool]||[];
+container.innerHTML=chips.map(s=>`<button class="suggestion-chip" onclick="useSuggestion(this)">${s}</button>`).join('');
+}
+
+function useSuggestion(el){
+const input=document.getElementById('contextInput');
+input.value=el.textContent;
+input.dispatchEvent(new Event('input'));
+el.style.background='rgba(168,85,247,0.35)';
+el.style.borderColor='#a855f7';
+el.style.color='#f0f0f5';
 }
 
 async function generateRizz(){
@@ -222,88 +279,82 @@ let prompt='';
 if(opts.tool==='reply'){
 const theirMsg=opts.context||'';
 const extraCtx=opts.replyTo||'';
-prompt=`You are RizzGPT, an AI that generates clever, flirty, witty REPLIES to messages.
-
-Someone sent this message:
+prompt=`Someone texted me this:
 """${theirMsg}"""
-${extraCtx?`\nAdditional context about the conversation: ${extraCtx}`:''}
+${extraCtx?`\nContext: ${extraCtx}`:''}
 
-Generate exactly ${opts.count} unique reply options that DIRECTLY RESPOND to what they said above.
-Style: ${opts.style} (${intDesc}).${targetNote}
+Generate ${opts.count} reply options I can send back. These should read like REAL text messages — the way actual people reply in chats.
+Vibe: ${opts.style} (${intDesc}).${targetNote}
 ${emojiNote}${langNote}
 
-CRITICAL RULES:
-- Each reply MUST be a direct, relevant response to "${theirMsg}"
-- The reply must make sense as an answer/reaction to their specific message
-- Do NOT generate generic pickup lines — these are REPLIES to what they said
-- Be ${opts.style} in tone while staying relevant to their message
-- Vary the replies — different angles, different approaches
-- Keep each reply 1-3 sentences max
-- Return ONLY the numbered replies, one per line (1. 2. 3. etc)
-- No explanations, no headers`;
+Rules:
+- Reply DIRECTLY to what they said — acknowledge their message, react to it, then add your flavor
+- Sound like a real person texting back, not a robot or a pickup line generator
+- Use the texting style people actually use: short msgs, casual tone, maybe a haha or lol where it fits
+- Some replies can be playful callbacks to their exact words
+- Mix it up: one could be witty, one flirty, one teasing, one smooth
+- 1-2 sentences max per reply. Real texts are short
+- Return ONLY numbered replies (1. 2. 3.)`;
 
 }else if(opts.tool==='pickup'){
-prompt=`You are RizzGPT, the world's best pickup line generator.
-${opts.context?`\nThe user wants pickup lines for this specific situation/person:\n"""${opts.context}"""\n\nThe lines MUST be relevant and personalized to this description.`:''}
+prompt=`Generate ${opts.count} opening messages / first texts I can send.
+${opts.context?`\nAbout the person/situation:\n"""${opts.context}"""\n\nMake each line specific to this — reference their interests, vibe, or something from their profile.`:''}
 
-Generate exactly ${opts.count} unique, creative pickup lines.
-Style: ${opts.style} (${intDesc}).${targetNote}
+These should sound like real DMs or first texts — NOT cheesy pickup lines.
+Vibe: ${opts.style} (${intDesc}).${targetNote}
 ${emojiNote}${langNote}
 
 Rules:
-${opts.context?'- Each line MUST reference or relate to the situation/person described above\n':''}- Be original, clever, and feel natural
-- Match the ${opts.style} tone perfectly
-- Vary the structure — different approaches each time
-- Keep each line 1-3 sentences max
-- Return ONLY the numbered lines (1. 2. 3. etc)
-- No explanations, no headers`;
+${opts.context?'- Personalize each one to the person/situation described\n':''}- Write like you're actually sliding into someone's DMs — casual, confident, real
+- The kind of message that makes someone smile and WANT to reply
+- Mix approaches: some observational, some playful, some direct, some teasing
+- No generic "did it hurt when you fell from heaven" type cringe
+- 1-2 sentences max. Short and punchy like real texts
+- Return ONLY numbered lines (1. 2. 3.)`;
 
 }else if(opts.tool==='bio'){
-prompt=`You are RizzGPT, an expert dating profile bio writer.
-${opts.context?`\nThe user described themselves as:\n"""${opts.context}"""\n\nThe bios MUST reflect their personality and details from this description.`:''}
+prompt=`Write ${opts.count} dating app bios that sound like a real person wrote them, not a marketing agency.
+${opts.context?`\nAbout me:\n"""${opts.context}"""\n\nUse these details to make each bio feel personal and specific to who I am.`:''}
 
-Generate exactly ${opts.count} unique dating app bios.
-Style: ${opts.style} (${intDesc}).${targetNote}
+Vibe: ${opts.style} (${intDesc}).${targetNote}
 ${emojiNote}${langNote}
 
 Rules:
-${opts.context?'- Each bio MUST incorporate details from the user\'s self-description above\n':''}- Make each bio feel authentic and personal, not generic
-- Perfect for Tinder, Bumble, or Hinge
-- Keep each bio 2-4 sentences max
-- Match the ${opts.style} vibe perfectly
-- Return ONLY the numbered bios (1. 2. 3. etc)
-- No explanations, no headers`;
+${opts.context?'- Weave in real details from my description — make it feel authentically me\n':''}- Sound like a real person, not a template. Personality > perfection
+- The kind of bio that makes someone think "ok this person is actually interesting"
+- Mix formats: one-liners, bullet-style, short paragraph — keep it fresh
+- 2-3 sentences max. Nobody reads long bios
+- Works for Tinder, Bumble, Hinge — that casual dating app energy
+- Return ONLY numbered bios (1. 2. 3.)`;
 
 }else if(opts.tool==='starter'){
-prompt=`You are RizzGPT, a conversation starter expert.
-${opts.context?`\nThe user wants to start a conversation with someone described as:\n"""${opts.context}"""\n\nThe conversation starters MUST be tailored to this specific person/situation.`:''}
+prompt=`Write ${opts.count} conversation starters — the kind of message that breaks the ice and actually gets a reply.
+${opts.context?`\nAbout the person/situation:\n"""${opts.context}"""\n\nTailor each starter to something specific about them.`:''}
 
-Generate exactly ${opts.count} unique conversation starters.
-Style: ${opts.style} (${intDesc}).${targetNote}
+Vibe: ${opts.style} (${intDesc}).${targetNote}
 ${emojiNote}${langNote}
 
 Rules:
-${opts.context?'- Each starter MUST relate to the person/situation described above\n':''}- Make them engaging and easy to respond to
-- Not generic — each should feel personal and specific
-- Match the ${opts.style} tone
-- Keep each starter 1-2 sentences max
-- Return ONLY the numbered starters (1. 2. 3. etc)
-- No explanations, no headers`;
+${opts.context?'- Reference something specific about them — shows you actually paid attention\n':''}- These should feel like natural first messages, not interview questions
+- Ask something they'd actually WANT to answer, or say something that sparks curiosity
+- Mix it up: some are questions, some are observations, some are playful statements
+- The goal is to start a real conversation, not just get a "thanks"
+- 1-2 sentences max. Keep it light
+- Return ONLY numbered starters (1. 2. 3.)`;
 
 }else if(opts.tool==='compliment'){
-prompt=`You are RizzGPT, a compliment generator.
-${opts.context?`\nThe user wants to compliment someone described as:\n"""${opts.context}"""\n\nThe compliments MUST be specific to this person and their qualities.`:''}
+prompt=`Write ${opts.count} compliments that sound genuine — like something you'd actually say to someone you like, not a Hallmark card.
+${opts.context?`\nAbout the person:\n"""${opts.context}"""\n\nMake each compliment specific to who they actually are.`:''}
 
-Generate exactly ${opts.count} unique, genuine compliments.
-Style: ${opts.style} (${intDesc}).${targetNote}
+Vibe: ${opts.style} (${intDesc}).${targetNote}
 ${emojiNote}${langNote}
 
 Rules:
-${opts.context?'- Each compliment MUST reference specific traits/qualities from the description above\n':''}- Make them feel sincere and personal, not generic
-- Match the ${opts.style} tone
-- Keep each compliment 1-2 sentences max
-- Return ONLY the numbered compliments (1. 2. 3. etc)
-- No explanations, no headers`;
+${opts.context?'- Reference real things about them — generic compliments feel fake\n':''}- Sound like a real person genuinely appreciating someone, not performing
+- The kind of compliment that catches someone off guard in the best way
+- Mix: some about personality, some about energy/vibe, some about specific things
+- 1-2 sentences max. Genuine compliments don't need to be essays
+- Return ONLY numbered compliments (1. 2. 3.)`;
 }
 return prompt;
 }
@@ -311,7 +362,18 @@ return prompt;
 async function callAI(opts){
 const prompt=buildPrompt(opts);
 const messages=[
-{role:'system',content:'You are RizzGPT, the world\'s best AI rizz and flirting assistant. You ONLY output numbered lines. No explanations, no intros, no outros.'},
+{role:'system',content:`You are RizzGPT — you write like a real person texting on WhatsApp, Instagram DMs, or Snapchat. Your job is to generate messages that sound 100% human and natural.
+
+CRITICAL VOICE RULES:
+- Write like a real 18-25 year old texts — casual, imperfect, with natural rhythm
+- Use lowercase freely. Real people don't capitalize everything
+- Short sentences. Fragment ok. Like how people actually type
+- Throw in fillers naturally: "ngl", "lowkey", "tbh", "lol", "haha", "nah", "fr", "yk", "ion know"
+- Mix sentence lengths — one long, two short, one medium. Like real texting patterns
+- NEVER sound like a chatbot, AI, or a greeting card
+- NEVER use cringe pickup lines from 2010. No "did it hurt when you fell from heaven" energy
+- The vibe should be: if someone received this text, they'd think a real charming person wrote it
+- Output ONLY numbered lines (1. 2. 3. etc). No explanations, no intros, no outros.`},
 {role:'user',content:prompt}
 ];
 const active=AI_PROVIDERS.filter(p=>p.enabled());
