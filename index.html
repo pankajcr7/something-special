@@ -18,20 +18,20 @@
         <div class="nav-inner">
             <a href="#" class="logo">
                 <span class="logo-icon">⚡</span>
-                <span>Rizz<span class="logo-hl">GPT</span></span>
+                <span class="logo-text">RizzGPT</span>
             </a>
-            <div class="nav-links" id="navLinks">
-                <a href="#generator" class="nav-link">Generator</a>
-                <a href="chat.html" class="nav-link">Chat AI</a>
-                <a href="#how-it-works" class="nav-link">How It Works</a>
-                <a href="#faq" class="nav-link">FAQ</a>
-            </div>
-            <div class="nav-end">
-                <a href="chat.html" class="nav-chat-btn">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                    Chat AI
-                </a>
-                <button class="menu-btn" id="menuBtn" aria-label="Menu">
+            <div class="nav-right">
+                <button class="fav-nav-btn" onclick="openFavDrawer()" title="Favorites">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    <span class="fav-badge" id="favBadge" style="display:none">0</span>
+                </button>
+                <div class="nav-links" id="navLinks">
+                    <a href="#generator" class="nav-link">Generator</a>
+                    <a href="chat.html" class="nav-link">Chat AI</a>
+                    <a href="#how-it-works" class="nav-link">How</a>
+                    <a href="#faq" class="nav-link">FAQ</a>
+                </div>
+                <button class="menu-btn" id="menuBtn">
                     <span></span><span></span><span></span>
                 </button>
             </div>
@@ -39,14 +39,11 @@
     </nav>
 
     <section class="hero">
-        <div class="hero-bg">
-            <div class="orb orb-1"></div>
-            <div class="orb orb-2"></div>
-        </div>
+        <div class="hero-bg"></div>
         <div class="hero-content">
-            <div class="hero-badge">🔥 #1 AI Rizz Generator</div>
-            <h1>Your AI<br><span class="gradient-text">Wingman</span></h1>
-            <p class="hero-sub">Generate killer pickup lines, flirty replies, dating bios & more — powered by AI. Sounds like a real human, not a robot.</p>
+            <div class="hero-badge">⚡ #1 AI Rizz Generator — 100% Free</div>
+            <h1>Turn your texts into <span class="gradient-text">pure rizz</span></h1>
+            <p class="hero-sub">AI-powered pickup lines, flirty replies, dating bios & more. Sound like a natural charmer in seconds.</p>
             <div class="hero-btns">
                 <a href="#generator" class="btn-primary">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
@@ -62,7 +59,7 @@
                 <div class="stat-divider"></div>
                 <div class="stat"><span class="stat-num" data-target="12000">0</span><span class="stat-label">Happy Users</span></div>
                 <div class="stat-divider"></div>
-                <div class="stat"><span class="stat-num" data-target="8">0</span><span class="stat-label">Rizz Styles</span></div>
+                <div class="stat"><span class="stat-num" data-target="10">0</span><span class="stat-label">AI Tools</span></div>
             </div>
         </div>
     </section>
@@ -74,8 +71,18 @@
             <button class="tool-pill" data-tool="bio">✨ Bios</button>
             <button class="tool-pill" data-tool="starter">💘 Starters</button>
             <button class="tool-pill" data-tool="compliment">🌹 Compliments</button>
+            <button class="tool-pill tool-pill-new" data-tool="flirt">🔍 Flirt Detector</button>
+            <button class="tool-pill tool-pill-new" data-tool="rewrite">✏️ Rewriter</button>
             <a href="chat.html" class="tool-pill tool-pill-alt">💭 Chat AI</a>
         </div>
+    </section>
+
+    <section class="scenarios-section" id="scenarios">
+        <div class="scenarios-header">
+            <span>🎯</span>
+            <span>Quick Scenarios</span>
+        </div>
+        <div class="scenarios-scroll" id="scenarioButtons"></div>
     </section>
 
     <section class="generator" id="generator">
@@ -213,131 +220,74 @@
     </section>
 
     <section class="examples" id="examples">
-        <h2 class="sec-title">Rizz That <span class="gradient-text">Hits Different</span></h2>
+        <h2 class="section-title">🔥 Example Rizz Lines</h2>
+        <p class="section-sub">Real AI-generated lines our users love</p>
         <div class="examples-scroll">
-            <div class="ex-card">
-                <span class="ex-style">😎 Smooth</span>
-                <p>"ngl i kinda cant stop thinking about you and its lowkey annoying"</p>
-                <div class="ex-meta"><span>For Her</span><span>🔥🔥🔥🔥</span></div>
-            </div>
-            <div class="ex-card">
-                <span class="ex-style">😂 Funny</span>
-                <p>"are you wifi?? cause im feeling a real connection rn haha"</p>
-                <div class="ex-meta"><span>Ice Breaker</span><span>😂😂😂😂</span></div>
-            </div>
-            <div class="ex-card">
-                <span class="ex-style">🔥 Bold</span>
-                <p>"this is random but your vibe is immaculate.. had to say hi"</p>
-                <div class="ex-meta"><span>DM Opener</span><span>🔥🔥🔥🔥🔥</span></div>
-            </div>
-            <div class="ex-card">
-                <span class="ex-style">🍯 Sweet</span>
-                <p>"you make me wanna be cheesy and i literally hate cheesy people"</p>
-                <div class="ex-meta"><span>Wholesome</span><span>🥰🥰🥰🥰</span></div>
-            </div>
-            <div class="ex-card">
-                <span class="ex-style">💀 Savage</span>
-                <p>"you're out of my league but lucky for you i don't follow rules"</p>
-                <div class="ex-meta"><span>Confident</span><span>💀💀💀💀</span></div>
-            </div>
+            <div class="ex-card"><div class="ex-style">😎 Smooth</div><p>"you have the kind of smile that makes me forget what I was gonna say"</p></div>
+            <div class="ex-card"><div class="ex-style">😂 Funny</div><p>"are you a parking ticket? cuz you got fine written all over you and i can't afford to ignore that"</p></div>
+            <div class="ex-card"><div class="ex-style">❤️ Romantic</div><p>"the way you laugh makes me wanna be the reason behind it every single day"</p></div>
+            <div class="ex-card"><div class="ex-style">🔥 Bold</div><p>"not gonna lie, i've been thinking about what it'd be like to hear your voice before falling asleep"</p></div>
+            <div class="ex-card"><div class="ex-style">💀 Savage</div><p>"you're out of my league and we both know it, but i'm still shooting my shot"</p></div>
         </div>
     </section>
 
-    <section class="how-section" id="how-it-works">
-        <h2 class="sec-title">How It <span class="gradient-text">Works</span></h2>
+    <section class="how-it-works" id="how-it-works">
+        <h2 class="section-title">How It Works</h2>
+        <p class="section-sub">3 simple steps to upgrade your text game</p>
         <div class="steps">
             <div class="step">
                 <div class="step-num">1</div>
-                <div class="step-info">
-                    <h3>Describe Your Vibe</h3>
-                    <p>Tell us who you're texting, the context, what vibe you want</p>
-                </div>
+                <h3>Pick Your Tool</h3>
+                <p>Choose from pickup lines, replies, bios, starters, flirt detector & more</p>
             </div>
             <div class="step">
                 <div class="step-num">2</div>
-                <div class="step-info">
-                    <h3>Pick Your Style</h3>
-                    <p>Choose from 8+ styles — smooth, funny, bold, savage, sweet</p>
-                </div>
+                <h3>Add Context</h3>
+                <p>Tell AI about your situation, crush, or the message you received</p>
             </div>
             <div class="step">
                 <div class="step-num">3</div>
-                <div class="step-info">
-                    <h3>Get AI Replies</h3>
-                    <p>Our AI generates replies that sound like a real human texting</p>
-                </div>
+                <h3>Get Perfect Lines</h3>
+                <p>AI generates lines that sound like a real, charming person wrote them</p>
             </div>
         </div>
     </section>
 
     <section class="reviews">
-        <h2 class="sec-title">What Users <span class="gradient-text">Say</span></h2>
+        <h2 class="section-title">❤️ Loved by 12K+ Users</h2>
         <div class="reviews-scroll">
-            <div class="review-card">
-                <div class="review-stars">★★★★★</div>
-                <p>"Used a smooth line on Tinder and got an instant date. This thing is magic."</p>
-                <div class="review-author"><div class="avatar">A</div><div><b>Alex K.</b><span>Tinder</span></div></div>
-            </div>
-            <div class="review-card">
-                <div class="review-stars">★★★★★</div>
-                <p>"The reply generator saved me when my crush sent a tricky message."</p>
-                <div class="review-author"><div class="avatar">S</div><div><b>Sarah M.</b><span>Instagram</span></div></div>
-            </div>
-            <div class="review-card">
-                <div class="review-stars">★★★★★</div>
-                <p>"Way better than other generators. Lines actually feel natural, not cringe."</p>
-                <div class="review-author"><div class="avatar">J</div><div><b>Jake R.</b><span>Bumble</span></div></div>
-            </div>
-            <div class="review-card">
-                <div class="review-stars">★★★★★</div>
-                <p>"The bio generator gave me a profile that gets 3x more likes."</p>
-                <div class="review-author"><div class="avatar">M</div><div><b>Maya T.</b><span>Hinge</span></div></div>
-            </div>
+            <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><p>"Used the chat AI feature and literally got a date the same night. This thing is scary good."</p><span class="review-author">— @vishal_k</span></div>
+            <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><p>"The flirt detector feature is genius — now I actually know when someone's into me lol"</p><span class="review-author">— @neha_89</span></div>
+            <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><p>"Best bio generator ever. My matches literally tripled after using the Hinglish bios."</p><span class="review-author">— @rohit.m</span></div>
+            <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><p>"The fact that it sounds like an actual person and not ChatGPT is what makes it different."</p><span class="review-author">— @priya_xo</span></div>
         </div>
     </section>
 
-    <section class="faq-section" id="faq">
-        <h2 class="sec-title">FAQ</h2>
+    <section class="faq" id="faq">
+        <h2 class="section-title">FAQ</h2>
         <div class="faq-list">
-            <details class="faq-item">
-                <summary>Is RizzGPT really free?</summary>
-                <p>Yes, 100% free. No signup, no credit card, no limits. Just generate and go.</p>
-            </details>
-            <details class="faq-item">
-                <summary>Does the AI sound like a real person?</summary>
-                <p>Yes! Our AI is trained to text like a real human — lowercase, casual, with natural slang. No robot energy.</p>
-            </details>
-            <details class="faq-item">
-                <summary>What is Chat AI?</summary>
-                <p>Chat AI lets you build a full conversation (add messages from both sides) and generate AI replies that fit the context perfectly.</p>
-            </details>
-            <details class="faq-item">
-                <summary>What languages are supported?</summary>
-                <p>English, Hinglish, Hindi, Spanish, French, German, Japanese, Korean, Arabic, Chinese and more.</p>
-            </details>
-            <details class="faq-item">
-                <summary>Can I use these for dating apps?</summary>
-                <p>Absolutely. Works perfect for Tinder, Bumble, Hinge, Instagram DMs, WhatsApp — anywhere you text.</p>
-            </details>
+            <details class="faq-item"><summary>Is RizzGPT really free?</summary><p>Yes! 100% free, no signup, no limits. Just generate and go.</p></details>
+            <details class="faq-item"><summary>How does the Flirt Detector work?</summary><p>Paste any message someone sent you and our AI analyzes the language, emojis, and context to give you a flirt score (0-100) along with suggested responses.</p></details>
+            <details class="faq-item"><summary>What's the Tone Rewriter?</summary><p>Type any message and AI rewrites it in 5 different tones — flirty, confident, funny, sweet, and bold. Perfect for when you know what to say but not how to say it.</p></details>
+            <details class="faq-item"><summary>Does it work in Hinglish?</summary><p>Absolutely! RizzGPT excels in Hinglish — the casual Hindi-English mix that young Indians actually text in.</p></details>
+            <details class="faq-item"><summary>Are the lines generated by real AI?</summary><p>Yes — we use Groq's Llama 3.3 70B model with custom prompts to generate human-like text. Fallbacks to Gemini & more ensure reliability.</p></details>
+            <details class="faq-item"><summary>What about the Chat AI feature?</summary><p>Build an entire conversation thread, then let AI read the full context and suggest the perfect reply. It's like having a texting coach in your pocket.</p></details>
         </div>
     </section>
 
     <section class="cta-section">
         <div class="cta-card">
-            <h2>Ready to Level Up<br>Your <span class="gradient-text">Rizz Game</span>?</h2>
-            <p>Join thousands who are already crushing it</p>
-            <div class="cta-btns">
-                <a href="#generator" class="btn-primary">Generate Rizz ⚡</a>
-                <a href="chat.html" class="btn-secondary">Try Chat AI 💬</a>
-            </div>
+            <h2>Ready to upgrade your rizz? ⚡</h2>
+            <p>Join 12,000+ users who text with confidence</p>
+            <a href="#generator" class="btn-primary">Start Generating — It's Free</a>
         </div>
     </section>
 
-    <footer class="footer">
+    <footer>
         <div class="footer-inner">
             <div class="footer-top">
                 <div class="footer-brand">
-                    <span class="logo"><span class="logo-icon">⚡</span> Rizz<span class="logo-hl">GPT</span></span>
+                    <span class="logo-icon">⚡</span> <span class="logo-text">RizzGPT</span>
                     <p>AI-powered rizz for better conversations</p>
                 </div>
                 <div class="footer-links">
@@ -352,6 +302,21 @@
             </div>
         </div>
     </footer>
+
+    <div class="fav-drawer" id="favDrawer">
+        <div class="fav-drawer-backdrop" onclick="closeFavDrawer()"></div>
+        <div class="fav-drawer-panel">
+            <div class="fav-drawer-header">
+                <h3>❤️ Saved Lines</h3>
+                <button class="fav-drawer-close" onclick="closeFavDrawer()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="fav-list" id="favList"></div>
+        </div>
+    </div>
+
+    <div class="confetti-wrap" id="confettiWrap"></div>
 
     <div class="toast" id="toast">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
