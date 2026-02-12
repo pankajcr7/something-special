@@ -85,6 +85,20 @@
         <div class="coach-body" id="coachBody"></div>
     </div>
 
+    <!-- Scenario Picker -->
+    <div class="scenario-overlay" id="scenarioOverlay" style="display:none">
+        <div class="scenario-modal">
+            <div class="scenario-header">
+                <h3>🎭 Pick a Scenario</h3>
+                <button class="scenario-close" id="closeScenario">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <p class="scenario-desc">Choose a conversation scenario and AI will set the context</p>
+            <div class="scenario-grid" id="scenarioGrid"></div>
+        </div>
+    </div>
+
     <input type="file" id="ssUploadInput" accept="image/*" style="display:none">
 
     <div class="ss-panel" id="ssPanel" style="display:none;">
@@ -110,6 +124,12 @@
                     <button class="hint-btn" data-sender="them" data-text="you're kinda cute ngl">+ "you're kinda cute ngl"</button>
                     <button class="hint-btn" data-sender="them" data-text="wanna hang out sometime?">+ "wanna hang out sometime?"</button>
                 </div>
+                <div class="hint-divider"><span>or</span></div>
+                <button class="scenario-trigger-btn" id="scenarioBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                    Pick a Scenario
+                    <span class="upload-ss-sub">Pre-built conversation starters</span>
+                </button>
                 <div class="hint-divider"><span>or</span></div>
                 <button class="upload-ss-btn" id="uploadSSHint" title="Upload chat screenshot">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>

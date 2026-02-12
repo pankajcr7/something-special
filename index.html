@@ -5,306 +5,329 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RizzGPT - #1 Free AI Rizz Generator | Pickup Lines, Flirty Texts & Replies</title>
     <meta name="description" content="Free AI Rizz Generator - Create killer pickup lines, flirty texts, witty replies & dating bios instantly. No signup needed. Powered by AI.">
+    <meta name="theme-color" content="#a855f7">
+    <link rel="manifest" href="manifest.json">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💜</text></svg>">
-    <meta name="theme-color" content="#0a0a0f">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
+    <meta property="og:title" content="RizzGPT - AI Rizz Generator">
+    <meta property="og:description" content="Generate killer pickup lines, flirty texts & replies with AI">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
 </head>
 <body>
+    <!-- PWA Install Banner -->
+    <div class="pwa-banner" id="pwaBanner" style="display:none">
+        <div class="pwa-banner-inner">
+            <span class="pwa-icon">📲</span>
+            <div class="pwa-text">
+                <strong>Install RizzGPT</strong>
+                <span>Add to home screen for quick access</span>
+            </div>
+            <button class="pwa-install-btn" id="pwaInstallBtn">Install</button>
+            <button class="pwa-close-btn" id="pwaCloseBtn">✕</button>
+        </div>
+    </div>
 
-    <nav class="navbar" id="navbar">
+    <!-- Navbar -->
+    <nav class="nav">
         <div class="nav-inner">
-            <a href="#" class="logo">
+            <a href="index.html" class="logo">
                 <span class="logo-icon">⚡</span>
                 <span class="logo-text">RizzGPT</span>
             </a>
-            <div class="nav-right">
-                <button class="fav-nav-btn" onclick="openFavDrawer()" title="Favorites">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                    <span class="fav-badge" id="favBadge" style="display:none">0</span>
+            <div class="nav-links" id="navLinks">
+                <a href="#generator" class="nav-link active">Generate</a>
+                <a href="chat.html" class="nav-link">Chat Mode</a>
+                <a href="#tools" class="nav-link">Tools</a>
+                <a href="#battle" class="nav-link">Battle</a>
+            </div>
+            <div class="nav-actions">
+                <button class="nav-icon-btn" id="soundToggle" title="Sound Effects">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
                 </button>
-                <div class="nav-links" id="navLinks">
-                    <a href="#generator" class="nav-link">Generator</a>
-                    <a href="chat.html" class="nav-link">Chat AI</a>
-                    <a href="#how-it-works" class="nav-link">How</a>
-                    <a href="#faq" class="nav-link">FAQ</a>
-                </div>
-                <button class="menu-btn" id="menuBtn">
-                    <span></span><span></span><span></span>
+                <button class="nav-icon-btn" id="themeToggle" title="Toggle Light/Dark Mode">
+                    <svg class="theme-icon-dark" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                    <svg class="theme-icon-light" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                </button>
+                <button class="nav-icon-btn" id="historyBtn" title="History">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </button>
+                <button class="nav-icon-btn fav-btn" id="favBtn" title="Saved Lines">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    <span class="fav-count" id="favCount">0</span>
+                </button>
+                <button class="menu-btn" id="menuBtn" aria-label="Menu">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
                 </button>
             </div>
         </div>
     </nav>
 
-    <section class="hero">
-        <div class="hero-bg"></div>
+    <!-- Hero -->
+    <section class="hero" id="top">
+        <div class="hero-glow"></div>
         <div class="hero-content">
-            <div class="hero-badge">⚡ #1 AI Rizz Generator — 100% Free</div>
-            <h1>Turn your texts into <span class="gradient-text">pure rizz</span></h1>
-            <p class="hero-sub">AI-powered pickup lines, flirty replies, dating bios & more. Sound like a natural charmer in seconds.</p>
-            <div class="hero-btns">
-                <a href="#generator" class="btn-primary">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                    Generate Now
-                </a>
-                <a href="chat.html" class="btn-secondary">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                    Chat AI
-                </a>
+            <div class="hero-badge">⚡ AI-Powered Rizz Engine</div>
+            <h1>Unlimited <span class="gradient-text">Rizz</span> on Demand</h1>
+            <p class="hero-sub">Generate killer pickup lines, flirty texts, savage replies & dating bios — powered by AI. 100% free.</p>
+            <div class="hero-cta">
+                <a href="#generator" class="cta-btn primary">Start Generating</a>
+                <a href="chat.html" class="cta-btn secondary">💬 Chat Mode</a>
             </div>
             <div class="hero-stats">
-                <div class="stat"><span class="stat-num" data-target="50000">0</span><span class="stat-label">Lines Generated</span></div>
-                <div class="stat-divider"></div>
-                <div class="stat"><span class="stat-num" data-target="12000">0</span><span class="stat-label">Happy Users</span></div>
-                <div class="stat-divider"></div>
-                <div class="stat"><span class="stat-num" data-target="10">0</span><span class="stat-label">AI Tools</span></div>
+                <div class="stat"><span class="stat-num">500K+</span><span class="stat-label">Lines Generated</span></div>
+                <div class="stat"><span class="stat-num">100%</span><span class="stat-label">Free Forever</span></div>
+                <div class="stat"><span class="stat-num">⚡</span><span class="stat-label">Instant Results</span></div>
             </div>
         </div>
     </section>
 
-    <section class="tools-strip" id="tools">
-        <div class="tools-scroll">
-            <button class="tool-pill active" data-tool="pickup">🔥 Pickup Lines</button>
-            <button class="tool-pill" data-tool="reply">💬 Replies</button>
-            <button class="tool-pill" data-tool="bio">✨ Bios</button>
-            <button class="tool-pill" data-tool="starter">💘 Starters</button>
-            <button class="tool-pill" data-tool="compliment">🌹 Compliments</button>
-            <button class="tool-pill tool-pill-new" data-tool="flirt">🔍 Flirt Detector</button>
-            <button class="tool-pill tool-pill-new" data-tool="rewrite">✏️ Rewriter</button>
-            <a href="chat.html" class="tool-pill tool-pill-alt">💭 Chat AI</a>
+    <!-- Daily Challenge -->
+    <section class="daily-challenge" id="dailyChallenge">
+        <div class="challenge-card">
+            <div class="challenge-header">
+                <span class="challenge-badge">🔥 Daily Rizz Challenge</span>
+                <span class="challenge-date" id="challengeDate"></span>
+            </div>
+            <h3 class="challenge-prompt" id="challengePrompt"></h3>
+            <p class="challenge-desc" id="challengeDesc"></p>
+            <div class="challenge-actions">
+                <button class="gen-btn challenge-gen-btn" id="challengeGenBtn">⚡ Accept Challenge</button>
+                <div class="challenge-streak" id="challengeStreak">
+                    <span class="streak-fire">🔥</span>
+                    <span class="streak-count" id="streakCount">0</span>
+                    <span class="streak-label">day streak</span>
+                </div>
+            </div>
+            <div class="challenge-results" id="challengeResults" style="display:none"></div>
         </div>
     </section>
 
-    <section class="scenarios-section" id="scenarios">
-        <div class="scenarios-header">
-            <span>🎯</span>
-            <span>Quick Scenarios</span>
-        </div>
-        <div class="scenarios-scroll" id="scenarioButtons"></div>
-    </section>
-
+    <!-- Generator -->
     <section class="generator" id="generator">
-        <div class="gen-card">
-            <div class="gen-header">
-                <div class="gen-title-row">
-                    <h2 id="panelTitleText">Pickup Line Generator</h2>
-                    <span class="ai-badge">⚡ AI</span>
-                </div>
-            </div>
+        <div class="gen-tabs">
+            <button class="gen-tab active" data-tab="generate">⚡ Generate</button>
+            <button class="gen-tab" data-tab="rizzscore">🎯 Rizz Score</button>
+            <button class="gen-tab" data-tab="vibecheck">💜 Vibe Check</button>
+        </div>
 
-            <div class="gen-body">
-                <div class="field" id="contextGroup">
-                    <label id="contextLabel">Describe the situation or your crush</label>
-                    <textarea id="contextInput" placeholder="e.g., She loves coffee and has the most beautiful smile..." rows="3" maxlength="300"></textarea>
-                    <div class="suggestion-chips" id="suggestionChips"></div>
-                    <span class="char-ct"><span id="charCount">0</span>/300</span>
-                </div>
-
-                <div class="field" id="replyGroup" style="display:none;">
-                    <label>Extra context (optional)</label>
-                    <textarea id="replyInput" placeholder="e.g., We matched on Tinder, she seems into fitness..." rows="2" maxlength="300"></textarea>
-                </div>
-
-                <div class="field">
-                    <label>Style</label>
-                    <div class="style-row">
-                        <button class="style-chip active" data-style="smooth">😎 Smooth</button>
-                        <button class="style-chip" data-style="funny">😂 Funny</button>
-                        <button class="style-chip" data-style="romantic">❤️ Romantic</button>
-                        <button class="style-chip" data-style="bold">🔥 Bold</button>
-                        <button class="style-chip" data-style="nerdy">🤓 Nerdy</button>
-                        <button class="style-chip" data-style="savage">💀 Savage</button>
-                        <button class="style-chip" data-style="sweet">🍯 Sweet</button>
-                        <button class="style-chip" data-style="mysterious">🕶️ Mysterious</button>
-                    </div>
-                </div>
-
-                <div class="options-grid">
-                    <div class="field">
-                        <label>For Whom</label>
-                        <select id="targetSelect">
-                            <option value="anyone">Anyone</option>
-                            <option value="her">For Her 👩</option>
-                            <option value="him">For Him 👨</option>
-                            <option value="crush">For Crush 💕</option>
-                            <option value="partner">For Partner 💑</option>
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label>Language</label>
-                        <select id="langSelect">
-                            <option value="hinglish" selected>Hinglish</option>
-                            <option value="english">English</option>
-                            <option value="hindi">Hindi</option>
-                            <option value="spanish">Spanish</option>
-                            <option value="french">French</option>
-                            <option value="german">German</option>
-                            <option value="japanese">Japanese</option>
-                            <option value="korean">Korean</option>
-                            <option value="arabic">Arabic</option>
-                            <option value="chinese">Chinese</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="field">
-                    <label>Intensity</label>
-                    <div class="intensity-bar">
-                        <input type="range" min="1" max="3" value="2" id="intensitySlider">
-                        <div class="intensity-labels">
-                            <span class="i-label">Mild</span>
-                            <span class="i-label active">Bold</span>
-                            <span class="i-label">Extreme</span>
+        <!-- Generate Panel (existing) -->
+        <div class="gen-panel active" id="panelGenerate">
+            <div class="options-grid">
+                <div class="option-group">
+                    <label class="option-label">Category</label>
+                    <div class="custom-select" id="categorySelect">
+                        <div class="select-display" id="categoryDisplay">
+                            <span class="select-icon">💘</span>
+                            <span class="select-text">Pickup Lines</span>
+                            <svg class="select-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+                        <div class="select-dropdown" id="categoryDropdown">
+                            <div class="select-option selected" data-value="pickup" data-icon="💘">Pickup Lines</div>
+                            <div class="select-option" data-value="reply" data-icon="💬">Witty Replies</div>
+                            <div class="select-option" data-value="bio" data-icon="✍️">Dating Bios</div>
+                            <div class="select-option" data-value="opener" data-icon="👋">Conversation Openers</div>
+                            <div class="select-option" data-value="compliment" data-icon="🌹">Compliments</div>
+                            <div class="select-option" data-value="roast" data-icon="🔥">Friendly Roasts</div>
+                            <div class="select-option" data-value="goodnight" data-icon="🌙">Good Night Texts</div>
+                            <div class="select-option" data-value="goodmorning" data-icon="☀️">Good Morning Texts</div>
                         </div>
                     </div>
                 </div>
-
-                <div class="toggles-row">
-                    <label class="toggle-label">
-                        <input type="checkbox" id="emojiToggle" checked>
-                        <span class="toggle-switch"></span>
-                        <span>Emojis</span>
-                    </label>
-                    <label class="toggle-label">
-                        <input type="checkbox" id="multipleToggle" checked>
-                        <span class="toggle-switch"></span>
-                        <span>5 Lines</span>
-                    </label>
+                <div class="option-group">
+                    <label class="option-label">Style</label>
+                    <div class="custom-select" id="styleSelect">
+                        <div class="select-display" id="styleDisplay">
+                            <span class="select-icon">😎</span>
+                            <span class="select-text">Smooth</span>
+                            <svg class="select-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+                        <div class="select-dropdown" id="styleDropdown">
+                            <div class="select-option selected" data-value="smooth" data-icon="😎">Smooth</div>
+                            <div class="select-option" data-value="funny" data-icon="😂">Funny</div>
+                            <div class="select-option" data-value="romantic" data-icon="❤️">Romantic</div>
+                            <div class="select-option" data-value="bold" data-icon="🔥">Bold</div>
+                            <div class="select-option" data-value="nerdy" data-icon="🤓">Nerdy</div>
+                            <div class="select-option" data-value="poetic" data-icon="🎭">Poetic</div>
+                        </div>
+                    </div>
                 </div>
-
-                <button class="gen-btn" id="generateBtn" onclick="generateRizz()">
-                    <span class="gen-btn-text" id="btnText">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                        Generate Rizz
-                    </span>
-                    <span class="gen-btn-loading" id="btnLoading">
-                        <div class="spinner"></div>
-                        <span id="loadingText">AI is cooking...</span>
-                    </span>
-                </button>
             </div>
+            <div class="extra-options">
+                <div class="option-group">
+                    <label class="option-label">Language</label>
+                    <div class="custom-select small" id="langSelect">
+                        <div class="select-display" id="langDisplay">
+                            <span class="select-text">Hinglish</span>
+                            <svg class="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+                        <div class="select-dropdown" id="langDropdown">
+                            <div class="select-option selected" data-value="hinglish">🇮🇳 Hinglish</div>
+                            <div class="select-option" data-value="english">🇺🇸 English</div>
+                            <div class="select-option" data-value="hindi">🇮🇳 Hindi</div>
+                            <div class="select-option" data-value="spanish">🇪🇸 Spanish</div>
+                            <div class="select-option" data-value="french">🇫🇷 French</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="option-group">
+                    <label class="option-label">Intensity</label>
+                    <div class="intensity-btns">
+                        <button class="int-btn" data-int="mild">Mild</button>
+                        <button class="int-btn active" data-int="bold">Bold</button>
+                        <button class="int-btn" data-int="extreme">Extreme 🔥</button>
+                    </div>
+                </div>
+            </div>
+            <div class="context-input">
+                <label class="option-label">Context <span class="optional">(optional)</span></label>
+                <input type="text" id="contextInput" placeholder="e.g., She likes anime, He's a gym bro..." maxlength="120">
+            </div>
+            <button class="gen-btn" id="generateBtn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                <span>Generate Rizz</span>
+            </button>
+            <div class="results" id="results"></div>
+        </div>
 
-            <div class="output" id="outputPanel">
-                <div class="output-head">
-                    <div class="output-title">
-                        <span class="pulse-dot"></span>
-                        <span id="outputTitleText">Generated Rizz Lines</span>
-                    </div>
-                    <div class="output-actions-top">
-                        <span class="ai-tag" id="geminiTag" style="display:none">AI ⚡</span>
-                        <button class="icon-btn" id="copyAllBtn" onclick="copyAll()" title="Copy all" style="display:none;">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                        </button>
+        <!-- Rizz Score Panel -->
+        <div class="gen-panel" id="panelRizzscore">
+            <div class="tool-header">
+                <h3>🎯 Rizz Score Analyzer</h3>
+                <p class="tool-desc">Paste any message and get your Rizz scientifically rated</p>
+            </div>
+            <textarea class="tool-textarea" id="rizzScoreInput" placeholder="Paste your pickup line, text, or DM here..." maxlength="500" rows="3"></textarea>
+            <button class="gen-btn" id="analyzeRizzBtn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                <span>Analyze My Rizz</span>
+            </button>
+            <div class="rizz-score-result" id="rizzScoreResult" style="display:none">
+                <div class="score-gauge-wrap">
+                    <svg class="score-gauge" viewBox="0 0 200 200">
+                        <circle class="gauge-track" cx="100" cy="100" r="85" fill="none" stroke-width="12"/>
+                        <circle class="gauge-fill" id="gaugeFill" cx="100" cy="100" r="85" fill="none" stroke-width="12" stroke-linecap="round" transform="rotate(-90 100 100)"/>
+                    </svg>
+                    <div class="score-center">
+                        <div class="score-number" id="scoreNumber">0</div>
+                        <div class="score-label" id="scoreLabel">—</div>
                     </div>
                 </div>
-                <div class="output-list" id="outputContent">
-                    <div class="output-empty">
-                        <div class="empty-icon">✨</div>
-                        <p>Your rizz lines will appear here</p>
-                    </div>
-                </div>
-                <div class="output-foot" id="outputFooter" style="display:none;">
-                    <button class="btn-outline" onclick="generateRizz()">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-                        Regenerate
-                    </button>
-                    <button class="btn-outline" onclick="shareLines()">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                        Share
-                    </button>
-                </div>
+                <div class="score-breakdown" id="scoreBreakdown"></div>
+                <div class="score-verdict" id="scoreVerdict"></div>
+            </div>
+        </div>
+
+        <!-- Vibe Check Panel -->
+        <div class="gen-panel" id="panelVibecheck">
+            <div class="tool-header">
+                <h3>💜 Vibe Check / Tone Analyzer</h3>
+                <p class="tool-desc">Paste a message you received — AI tells you what they really mean</p>
+            </div>
+            <textarea class="tool-textarea" id="vibeInput" placeholder="Paste the message you received here..." maxlength="500" rows="3"></textarea>
+            <div class="vibe-context-row">
+                <input type="text" id="vibeContext" placeholder="Context (e.g., talking for 2 weeks, first DM)" maxlength="100" class="vibe-context-input">
+            </div>
+            <button class="gen-btn" id="vibeCheckBtn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <span>Check the Vibe</span>
+            </button>
+            <div class="vibe-result" id="vibeResult" style="display:none">
+                <div class="vibe-meters" id="vibeMeters"></div>
+                <div class="vibe-analysis" id="vibeAnalysis"></div>
+                <div class="vibe-flags" id="vibeFlags"></div>
+                <div class="vibe-suggestion" id="vibeSuggestion"></div>
             </div>
         </div>
     </section>
 
+    <!-- Rizz Battle -->
+    <section class="battle-section" id="battle">
+        <div class="battle-inner">
+            <div class="battle-header">
+                <h2>⚔️ Rizz <span class="gradient-text">Battle</span></h2>
+                <p class="battle-sub">Two AI lines face off. You decide the winner.</p>
+                <div class="battle-stats">
+                    <span class="battle-stat" id="battleCount">0 battles</span>
+                </div>
+            </div>
+            <div class="battle-arena" id="battleArena">
+                <div class="battle-card left" id="battleLeft">
+                    <div class="battle-label">🅰️ Contender</div>
+                    <p class="battle-text" id="battleTextA">—</p>
+                    <button class="battle-vote-btn" data-side="A" id="voteA">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+                        Vote A
+                    </button>
+                </div>
+                <div class="battle-vs">VS</div>
+                <div class="battle-card right" id="battleRight">
+                    <div class="battle-label">🅱️ Challenger</div>
+                    <p class="battle-text" id="battleTextB">—</p>
+                    <button class="battle-vote-btn" data-side="B" id="voteB">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+                        Vote B
+                    </button>
+                </div>
+            </div>
+            <button class="gen-btn battle-new-btn" id="newBattleBtn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                <span>New Battle</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- Tools Section (anchor) -->
+    <section id="tools"></section>
+
+    <!-- Examples -->
     <section class="examples" id="examples">
-        <h2 class="section-title">🔥 Example Rizz Lines</h2>
-        <p class="section-sub">Real AI-generated lines our users love</p>
+        <h2>See What <span class="gradient-text">RizzGPT</span> Can Do</h2>
         <div class="examples-scroll">
-            <div class="ex-card"><div class="ex-style">😎 Smooth</div><p>"you have the kind of smile that makes me forget what I was gonna say"</p></div>
-            <div class="ex-card"><div class="ex-style">😂 Funny</div><p>"are you a parking ticket? cuz you got fine written all over you and i can't afford to ignore that"</p></div>
-            <div class="ex-card"><div class="ex-style">❤️ Romantic</div><p>"the way you laugh makes me wanna be the reason behind it every single day"</p></div>
-            <div class="ex-card"><div class="ex-style">🔥 Bold</div><p>"not gonna lie, i've been thinking about what it'd be like to hear your voice before falling asleep"</p></div>
-            <div class="ex-card"><div class="ex-style">💀 Savage</div><p>"you're out of my league and we both know it, but i'm still shooting my shot"</p></div>
+            <div class="ex-card"><div class="ex-cat">💘 Pickup Line</div><p>"Are you a magician? Because whenever I look at you, everyone else disappears."</p><div class="ex-style">Smooth • Mild</div></div>
+            <div class="ex-card"><div class="ex-cat">💬 Reply</div><p>"I'd agree with you but then we'd both be wrong 😏"</p><div class="ex-style">Funny • Bold</div></div>
+            <div class="ex-card"><div class="ex-cat">✍️ Bio</div><p>"Part-time overthinker, full-time vibe. Looking for someone to split dessert with (but not really)."</p><div class="ex-style">Smooth • Bold</div></div>
+            <div class="ex-card"><div class="ex-cat">🔥 Roast</div><p>"You're like a cloud — everything brightens up when you go away."</p><div class="ex-style">Savage • Extreme</div></div>
+            <div class="ex-card"><div class="ex-cat">🌹 Compliment</div><p>"You have the kind of smile that makes people wonder what you're up to."</p><div class="ex-style">Romantic • Mild</div></div>
         </div>
     </section>
 
-    <section class="how-it-works" id="how-it-works">
-        <h2 class="section-title">How It Works</h2>
-        <p class="section-sub">3 simple steps to upgrade your text game</p>
-        <div class="steps">
-            <div class="step">
-                <div class="step-num">1</div>
-                <h3>Pick Your Tool</h3>
-                <p>Choose from pickup lines, replies, bios, starters, flirt detector & more</p>
-            </div>
-            <div class="step">
-                <div class="step-num">2</div>
-                <h3>Add Context</h3>
-                <p>Tell AI about your situation, crush, or the message you received</p>
-            </div>
-            <div class="step">
-                <div class="step-num">3</div>
-                <h3>Get Perfect Lines</h3>
-                <p>AI generates lines that sound like a real, charming person wrote them</p>
-            </div>
-        </div>
-    </section>
-
+    <!-- Reviews -->
     <section class="reviews">
-        <h2 class="section-title">❤️ Loved by 12K+ Users</h2>
+        <h2>Loved by <span class="gradient-text">Millions</span></h2>
         <div class="reviews-scroll">
-            <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><p>"Used the chat AI feature and literally got a date the same night. This thing is scary good."</p><span class="review-author">— @vishal_k</span></div>
-            <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><p>"The flirt detector feature is genius — now I actually know when someone's into me lol"</p><span class="review-author">— @neha_89</span></div>
-            <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><p>"Best bio generator ever. My matches literally tripled after using the Hinglish bios."</p><span class="review-author">— @rohit.m</span></div>
-            <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><p>"The fact that it sounds like an actual person and not ChatGPT is what makes it different."</p><span class="review-author">— @priya_xo</span></div>
+            <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><p>"This app literally saved my Hinge game. Got 3 dates in one week."</p><div class="review-author">— @smoothoperator</div></div>
+            <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><p>"The chat mode is insane. It reads the convo and gives perfect replies."</p><div class="review-author">— @datingking</div></div>
+            <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><p>"Bro the Hinglish mode is 🔥 finally something that sounds natural."</p><div class="review-author">— @desirizzler</div></div>
+            <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><p>"Better than ChatGPT for this. Way more creative and actually funny."</p><div class="review-author">— @textqueen</div></div>
         </div>
     </section>
 
-    <section class="faq" id="faq">
-        <h2 class="section-title">FAQ</h2>
-        <div class="faq-list">
-            <details class="faq-item"><summary>Is RizzGPT really free?</summary><p>Yes! 100% free, no signup, no limits. Just generate and go.</p></details>
-            <details class="faq-item"><summary>How does the Flirt Detector work?</summary><p>Paste any message someone sent you and our AI analyzes the language, emojis, and context to give you a flirt score (0-100) along with suggested responses.</p></details>
-            <details class="faq-item"><summary>What's the Tone Rewriter?</summary><p>Type any message and AI rewrites it in 5 different tones — flirty, confident, funny, sweet, and bold. Perfect for when you know what to say but not how to say it.</p></details>
-            <details class="faq-item"><summary>Does it work in Hinglish?</summary><p>Absolutely! RizzGPT excels in Hinglish — the casual Hindi-English mix that young Indians actually text in.</p></details>
-            <details class="faq-item"><summary>Are the lines generated by real AI?</summary><p>Yes — we use Groq's Llama 3.3 70B model with custom prompts to generate human-like text. Fallbacks to Gemini & more ensure reliability.</p></details>
-            <details class="faq-item"><summary>What about the Chat AI feature?</summary><p>Build an entire conversation thread, then let AI read the full context and suggest the perfect reply. It's like having a texting coach in your pocket.</p></details>
-        </div>
-    </section>
-
-    <section class="cta-section">
-        <div class="cta-card">
-            <h2>Ready to upgrade your rizz? ⚡</h2>
-            <p>Join 12,000+ users who text with confidence</p>
-            <a href="#generator" class="btn-primary">Start Generating — It's Free</a>
-        </div>
-    </section>
-
-    <footer>
-        <div class="footer-inner">
-            <div class="footer-top">
-                <div class="footer-brand">
-                    <span class="logo-icon">⚡</span> <span class="logo-text">RizzGPT</span>
-                    <p>AI-powered rizz for better conversations</p>
-                </div>
-                <div class="footer-links">
-                    <a href="#generator">Generator</a>
-                    <a href="chat.html">Chat AI</a>
-                    <a href="#how-it-works">How It Works</a>
-                    <a href="#faq">FAQ</a>
-                </div>
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-top">
+            <div class="footer-brand">
+                <span class="logo-icon">⚡</span>
+                <span class="logo-text">RizzGPT</span>
+                <p class="footer-desc">The world's most advanced AI rizz generator. Free forever.</p>
             </div>
-            <div class="footer-bottom">
-                <p>&copy; 2026 RizzGPT. Made with 💜</p>
+            <div class="footer-links">
+                <a href="#generator">Generator</a>
+                <a href="chat.html">Chat Mode</a>
+                <a href="#battle">Rizz Battle</a>
+                <a href="#dailyChallenge">Daily Challenge</a>
             </div>
+        </div>
+        <div class="footer-bottom">
+            <p>Made with ❤️ and AI • RizzGPT © 2025</p>
         </div>
     </footer>
 
+    <!-- Favorites Drawer -->
     <div class="fav-drawer" id="favDrawer">
-        <div class="fav-drawer-backdrop" onclick="closeFavDrawer()"></div>
+        <div class="fav-drawer-overlay" onclick="closeFavDrawer()"></div>
         <div class="fav-drawer-panel">
             <div class="fav-drawer-header">
                 <h3>❤️ Saved Lines</h3>
@@ -313,6 +336,49 @@
                 </button>
             </div>
             <div class="fav-list" id="favList"></div>
+        </div>
+    </div>
+
+    <!-- History Drawer -->
+    <div class="history-drawer" id="historyDrawer">
+        <div class="history-drawer-overlay" onclick="closeHistoryDrawer()"></div>
+        <div class="history-drawer-panel">
+            <div class="history-drawer-header">
+                <h3>🕐 Recent Generations</h3>
+                <div class="history-actions">
+                    <input type="text" class="history-search" id="historySearch" placeholder="Search...">
+                    <button class="history-clear-btn" id="clearHistoryBtn" title="Clear All">🗑️</button>
+                </div>
+                <button class="history-drawer-close" onclick="closeHistoryDrawer()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="history-list" id="historyList"></div>
+        </div>
+    </div>
+
+    <!-- Share Card Modal -->
+    <div class="share-modal" id="shareModal" style="display:none">
+        <div class="share-modal-overlay" onclick="closeShareModal()"></div>
+        <div class="share-modal-content">
+            <div class="share-modal-header">
+                <h3>📤 Share Card</h3>
+                <button class="share-modal-close" onclick="closeShareModal()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <canvas id="shareCanvas" width="1080" height="1080" style="display:none"></canvas>
+            <img class="share-preview" id="sharePreview" alt="Share card preview">
+            <div class="share-actions">
+                <button class="share-action-btn" id="shareDownload">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download
+                </button>
+                <button class="share-action-btn primary" id="shareNative">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                    Share
+                </button>
+            </div>
         </div>
     </div>
 

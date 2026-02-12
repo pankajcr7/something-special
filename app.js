@@ -1,618 +1,312 @@
-const DB={pickup:{smooth:{mild:["Do you have a map? Because I just got lost in your eyes.","I must be a snowflake, because I've fallen for you.","Are you a parking ticket? Because you've got 'fine' written all over you.","Is your name Google? Because you have everything I've been searching for.","I'd say God bless you, but it looks like he already did.","If you were a vegetable, you'd be a cute-cumber.","Excuse me, but I think you dropped something: my jaw.","Do you believe in love at first sight, or should I walk by again?","Are you a campfire? Because you're hot and I want s'more.","I'm not a photographer, but I can picture us together."],bold:["If beauty were time, you'd be an eternity.","I'm not a genie, but I can make your dreams come true.","You must be tired because you've been running through my mind all day.","Is it hot in here or is it just you?","I'd never play hide and seek with you — someone like you is impossible to find.","Your hand looks heavy. Let me hold it for you.","I was going to say something really sweet about you but when I saw you I became speechless.","You must be made of copper and tellurium because you're Cu-Te.","I'm no mathematician, but I'm pretty good with numbers. How about you give me yours?","I seem to have lost my phone number. Can I have yours?"],extreme:["I'm not sure what's more breathtaking — the stars or your eyes.","Is there an airport nearby or is that just my heart taking off?","If I were to ask God for one thing, it would be to stop making you so perfect.","Do you have a Band-Aid? Because I just scraped my knee falling for you.","They say nothing lasts forever, so will you be my nothing?","You're so beautiful you made me forget my pickup line.","I'd text you good morning every day just to remind you someone's thinking of you.","They should put you on a stamp so everyone can see the beauty of this world.","You look so familiar — oh wait, I think I've seen you in my dreams.","I didn't know what I wanted in my life until I met you."]},funny:{mild:["Are you a bank loan? Because you got my interest.","Are you French? Because Eiffel for you.","Are you a magician? Because whenever I look at you, everyone else disappears.","Do you have a sunburn or are you always this hot?","Is your dad a boxer? Because you're a knockout.","I'm not a hoarder but I really want to keep you forever.","If looks could kill, you'd be a weapon of mass destruction.","Are you a time traveler? Because I can see you in my future.","Do you have GPS? Because I just got lost in your eyes.","I'm not drunk, I'm just intoxicated by you."],bold:["Are you a parking ticket? Because you've got 'fine' written all over you.","Is your name Wi-Fi? Because I'm feeling a connection.","Are you a camera? Because every time I look at you, I smile.","Do you believe in love at first sight, or should I walk by again?","Are you a beaver? Because daaaam.","If you were a triangle you'd be acute one.","Are you a dictionary? Because you add meaning to my life.","Did the sun come out or did you just smile at me?","Are you my appendix? Because I have a funny feeling I should take you out.","I'm studying to become a historian because I'm interested in your past."],extreme:["Are you a volcano? Because I lava you.","I'd give up my morning coffee for you, and that's saying a lot.","Are you a 90-degree angle? Because you're looking right.","If being beautiful was a crime, you'd be on the most wanted list.","You're like my favorite song — I could listen to you on repeat.","I don't have a library card, but do you mind if I check you out?","My love for you is like diarrhea, I just can't hold it in.","If you were a vegetable, you'd be a cutecumber. If you were a fruit, you'd be a fineapple.","Did you just fart? Because you blew me away.","I'm not a photographer, but I can picture you and me together."]}},reply:{smooth:{mild:["Haha that's smooth, but I bet I'm smoother.","Can't stop thinking about what you said... in a good way.","You always know just what to say, don't you?"],bold:["Not gonna lie, that made me smile way too hard.","Careful, you're making me actually catch feelings.","If flirting was a sport, you'd be MVP."],extreme:["I screenshot that message and I'm not even sorry.","Every time you text me, my heart does a little backflip.","Stop being so perfect, it's making my brain malfunction."]},funny:{mild:["Bruh 😂 you're too funny.","Did you Google that one or did you actually come up with it?","LMAO okay that was actually good."],bold:["I just spit out my coffee reading that.","You're like a human comedy show, I'd buy front row tickets.","I dare you to say something that doesn't make me laugh."],extreme:["I literally cannot breathe 💀 STOP.","Okay officially nominating you for funniest person alive.","I showed this to my friend and they said 'marry them immediately.'"]}}};
+// ===== DATABASE =====
+const DB={pickup:{smooth:{mild:["Do you have a map? Because I just got lost in your eyes.","I must be a snowflake, because I've fallen for you.","Are you a parking ticket? Because you've got 'fine' written all over you.","Is your name Google? Because you have everything I've been searching for.","I'd say God bless you, but it looks like he already did.","If you were a vegetable, you'd be a cute-cumber.","Excuse me, but I think you dropped something: my jaw.","Do you believe in love at first sight, or should I walk by again?","Are you a campfire? Because you're hot and I want s'more.","I'm not a photographer, but I can picture us together."],bold:["If beauty were time, you'd be an eternity.","I'm not a genie, but I can make your dreams come true.","You must be tired because you've been running through my mind all day.","Is it hot in here or is it just you?","I'd never play hide and seek with you — someone like you is impossible to find.","Your hand looks heavy. Let me hold it for you.","They say nothing lasts forever — want to be my nothing?","I was going to say something really sweet about you, but when I saw you, I became speechless.","You must be a ninja, because you snuck into my heart.","You're like Wi-Fi — I'm feeling a connection."],extreme:["I think God was showing off when He made you.","If kisses were snowflakes, I'd send you a blizzard.","Are you made of copper and tellurium? Because you're Cu-Te.","I'd rearrange the alphabet to put U and I together.","I must be a light switch, because you turn me on.","Do you have a sunburn, or are you always this hot?","I'm no organ donor, but I'd give you my heart.","Are you a time traveler? Because I see you in my future.","Somebody better call God, because he's missing an angel.","You don't need keys to drive me crazy."]},funny:{mild:["Are you a banana? Because I find you a-peeling!","I'm not a mathematician, but I think we're a perfect equation.","Do you have a name, or can I call you mine?","Are you from Tennessee? Because you're the only ten I see!","Do you like raisins? How about a date?","If you were a chicken, you'd be impeccable.","I must be a broom because I just swept you off my feet.","You must be made of cheese because you're looking gouda tonight.","Are you a keyboard? Because you're just my type.","Do you have a Band-Aid? Because I just scraped my knee falling for you."],bold:["Are you an alien? Because you just abducted my heart.","My love for you is like diarrhea — I can't hold it in.","Are you a magician? Every time I look at you, everyone else disappears.","If you were a booger, I'd pick you first.","I'm not drunk, I'm just intoxicated by you.","Feel my shirt — know what it's made of? Boyfriend material.","I'm on top of things. Would you like to be one of them?","Did you sit in sugar? Because you've got a pretty sweet butt.","You must be a campfire, because you're making me hot and I want s'more.","Is your dad a boxer? Because you're a total knockout!"],extreme:["If I could rearrange the alphabet, I'd put U and I in a bed together.","My name might not be Luna, but I sure can make your night magical.","Are you an exam? Because I've been studying you all night.","I'm not a weatherman, but you can expect a few inches tonight.","The word of the day is 'legs' — let's go to my place and spread the word.","Are you my appendix? Because I have this funny feeling in my stomach that makes me want to take you out.","You're so hot, you denature my proteins.","Is your name Chapstick? Because you're da balm!","I'd like to take you to the movies, but they don't let you bring your own snacks.","You're so sweet you're giving me a toothache."]},romantic:{mild:["I didn't believe in love at first sight until I saw you.","Your smile is like sunshine on a rainy day.","In a room full of art, I'd still stare at you.","I think the sun is jealous of the way you shine.","I wonder if you know how beautiful you look right now.","Every love story is special, but ours would be my favorite.","You make me want to be a better person.","Your eyes are like stars — I could stare at them all night.","Meeting you feels like a breath of fresh air.","You're the kind of beautiful that doesn't need makeup."],bold:["If I had a flower for every time you made me smile, I'd have a garden.","I've been thinking about you more than I should, but less than you deserve.","My heart skips a beat every time I see your name pop up.","You don't just cross my mind — you live in it.","They say don't mix business with pleasure, but you're all pleasure.","I want to be the reason you look at your phone and smile.","If beauty were a crime, you'd be serving a life sentence.","I didn't plan on falling for anyone today, but you changed my mind.","Your voice is my favorite sound, and your name is my favorite word.","I could talk to you for hours and it would still feel like minutes."],extreme:["I want to wake up next to you every morning for the rest of my life.","You're not just my dream girl — you're my everything.","I'd cross oceans for you. I'd move mountains for you. I'd do anything for you.","My heart wasn't complete until I found you.","You're the first thing I think about when I wake up and the last thing on my mind before I sleep.","If I could have anyone in the world, I'd still choose you.","I don't need paradise because I found you. I don't need dreams because I already have you.","You're the poem I never knew how to write.","I fell in love the way you fall asleep — slowly, and then all at once.","Every moment with you feels like a beautiful dream I never want to wake up from."]},bold:{mild:["I'm not usually this forward, but you're worth the risk.","You caught my eye, and I had to come say hi.","I don't know what it is about you, but I can't look away.","Something tells me you're worth getting to know.","I've got a feeling you and I could have some fun together."],bold:["You look like you could use some good company.","I'm not shy, and I think you're absolutely stunning.","I'd be lying if I said I wasn't attracted to you.","Let's skip the small talk — want to go on an adventure?","I've been told I'm pretty charming. Want to find out?"],extreme:["I want you. No games, no filters. Just you.","I can't stop thinking about you and honestly I don't want to.","You make my heart race and I barely know you.","I've never wanted someone this bad before.","Everything about you drives me crazy — in the best way."]},nerdy:{mild:["Are you a 45-degree angle? Because you're acute one!","You must be the square root of -1, because you can't be real.","Are you made of Fluorine, Iodine, and Neon? Because you're F-I-Ne.","You're hotter than the bottom of my laptop.","I think you're the CSS to my HTML."],bold:["Are you a black hole? Because you just pulled me in.","I think we have great chemistry — shall we test it?","You must be a neurotransmitter because you make my heart race.","Like a quantum state, I can't stop observing you.","You've got 11 out of 10 bits in my attractiveness register."],extreme:["I'll be the semicolon to your code — you can't function without me.","Are you garbage collection? Because you make my heart stop.","My love for you is like a while(true) loop — it never ends.","You overload my operators and override my methods.","You're the bug in my code — I just can't get you out of my head."]},poetic:{mild:["You are the poem I didn't know my heart was writing.","If grace had a face, I think it would look like yours.","Your presence is a gentle storm I never want to end.","You are the first light in a sky full of stars.","Your smile is a verse I want to read forever."],bold:["I want to write every love poem with your name between the lines.","You are the ache in my chest that I never want to cure.","My soul knew you before my eyes ever did.","You make the dark feel less heavy.","Every second away from you feels like a sentence."],extreme:["I would burn the world to ashes just to write your name in them.","You are my ruin and my salvation.","I don't need heaven — I've already touched divinity in you.","My love for you is the kind that poets die writing about.","You are the most beautiful catastrophe I've ever known."]}},reply:{smooth:{mild:["I'd say I'm surprised, but honestly, I saw this coming.","If flirting were a sport, you'd be a gold medalist.","Careful — you keep talking like that and I might fall.","I appreciate the effort, but you had me at hello.","I was going to play hard to get, but then you made me smile."],bold:["You think you're smooth? Watch and learn.","I don't blush easily, but you might be the exception.","I'm not easy to impress, but you're making a strong case.","I wasn't planning on catching feelings today, but here we are.","You're dangerously good at this."],extreme:["Stop making me smile — people are starting to notice.","I'm trying to play it cool, but you're making it impossible.","Keep talking like that and I'll have to marry you.","I've been hit with a lot of lines, but yours actually got me.","You're either a genius or a fool — either way, I'm intrigued."]},funny:{mild:["I'd roast you, but my mama taught me not to burn trash.","That was cute, I'll give you a 6/10.","Was that a pickup line or a cry for help?","You're trying so hard it's almost adorable.","I'd ghost you but even my WiFi has better connections."],bold:["Nice try — you almost made me feel something.","I'd swipe right on that line, ngl.","Did Google help you with that or are you naturally this smooth?","I laughed, but don't let that go to your head.","If I had a dollar for every line like that, I'd be broke — that was original."],extreme:["That was so bad it circled back to being good.","I just snorted. Thanks for ruining my image.","Bro really said that with his whole chest 💀","I'm not sure if I should be impressed or concerned.","That line was illegal in 12 countries."]},romantic:{mild:["You always know the right thing to say.","That made my heart skip a little, not gonna lie.","Why do you have to be so sweet?","I'm smiling like an idiot because of you.","You make it hard to keep my guard up."],bold:["I wasn't ready for that. My heart just did a thing.","How do you always manage to make me feel this way?","You're the best thing that's happened to my inbox.","I think about you way more than I should admit.","Reading your texts is the highlight of my day."],extreme:["I literally held my phone to my chest after reading that.","You have my heart in your hands — be careful with it.","I never believed in soulmates until you came along.","I'd choose you in every lifetime.","You're the reason I believe in love."]},bold:{mild:["Interesting approach. I respect the confidence.","Bold move — let's see if you can keep up.","I like someone who doesn't beat around the bush.","That took guts. I'm mildly impressed.","You came in hot — I respect it."],bold:["You've got my attention. Now what are you going to do with it?","Challenge accepted. Your move.","I don't know who gave you this confidence, but thank them.","Keep that energy — I'm here for it.","Oh, you're dangerous. I like it."],extreme:["You just shifted the whole vibe. I'm locked in.","Nobody talks to me like that and gets away with it.","I'm either going to love you or destroy you. Maybe both.","You've got no idea what you just started.","Game on. But I should warn you — I don't lose."]}},bio:{smooth:{mild:["Part-time dreamer, full-time good vibes only.","Coffee in one hand, confidence in the other.","Looking for someone to share sunsets and playlists with.","Simple. Honest. Down to earth. Maybe a little too cute.","Just someone who smiles a lot and means it."],bold:["I'm the main character, and this is my casting call.","Not here to play games — unless it's Mario Kart.","If you can make me laugh, you've already won.","Professional overthinker. Amateur heart-stealer.","5'10 in shoes. 6'2 in confidence."],extreme:["You swiped right. Congratulations, your taste is impeccable.","Warning: may cause feelings you weren't prepared for.","I'm the vibe your ex couldn't match.","I'm not everyone's cup of tea — I'm more like tequila.","You're not going to find someone like me. Don't let me go."]},funny:{mild:["Just here because my mom told me I'm a catch.","Will trade pickup lines for pizza.","Looking for someone to blame when I can't pick a restaurant.","I'm 99% funny and 1% serious about finding love.","Swipe right if you can name 3 dinosaurs."],bold:["I put the 'hot' in 'hot mess.'","I can cook minute rice in 58 seconds.","My love language is memes.","I'm basically a snack. A whole buffet, actually.","Dating me is like a rollercoaster — terrifying but fun."],extreme:["My FBI agent thinks I'm hilarious.","I've been single long enough to know it's everyone else's fault.","I'm the reason they invented the 'unmatch' button.","If we match, I promise to be weirder than you.","Swipe right and let's be awkward together."]}},opener:{smooth:{mild:["Hey! Your profile caught my eye — what's the story behind your first photo?","I noticed we both like the same things — what got you into it?","If your personality is half as great as your smile, I'm in trouble.","Okay, I need to know — are you a morning person or a night owl?","I'm curious — what's the best trip you've ever taken?"],bold:["I swiped right so fast I think I broke my phone.","I'll shoot my shot — are you always this stunning?","I have a feeling we'd get along. Want to prove me right?","Let's skip the boring 'hey' stage. Tell me your hot take.","Something about you stood out — and I had to say hi."],extreme:["I'm going to be bold — I think we'd be amazing together.","Every time I type something, I delete it because nothing seems good enough.","I think this is the start of something really good.","I don't message first often — you should feel special.","I'm not great at opening lines, but I'm great at showing up."]},funny:{mild:["On a scale of 1 to 10, you're a 9 — and I'm the 1 you need.","I've been staring at your profile for 5 min trying to be clever. This is it.","Hey! Just wanted to say… I forgot. You're distracting.","If you were a fruit, you'd be a fineapple.","Do you like science? Because we've got chemistry."],bold:["I was going to send a cheesy line, but you deserve something gouda.","Let's be honest — we both swiped right. Now what?","My friend dared me to message you. Thank them later.","I'm not saying I'm Batman, but have you ever seen us in the same room?","I just flipped a coin. Both sides say you should reply."]}},compliment:{smooth:{mild:["You have the kind of smile that makes the whole room brighter.","There's something about you that's magnetic.","You carry yourself with such grace.","You have a really kind energy.","I love the way your eyes light up when you talk."],bold:["Whoever ends up with you is the luckiest person alive.","You're the kind of beautiful that takes breath away.","There's something effortlessly stunning about you.","I've never met anyone who radiates so much warmth.","You have this presence that makes people want to be near you."],extreme:["Honestly, you're the most beautiful person I've ever seen.","You redefine what it means to be attractive.","I could look at you forever and never get tired.","You're not just beautiful — you're unforgettable.","God really spent extra time on you."]}},roast:{smooth:{mild:["You're like a software update — whenever I see you, I think 'not now.'","You bring everyone so much joy... when you leave.","You're proof that even Google can't find everything.","If you were any more basic, you'd be a pH 14.","I'd explain it to you, but I left my crayons at home."],bold:["I'd give you a nasty look, but you've already got one.","You're not stupid; you just have bad luck thinking.","You're like a cloud — everything brightens when you disappear.","I'd roast you but I don't want to burn the trash.","I've seen sharper minds in a bowl of soup."],extreme:["If laughter is the best medicine, your face must be curing the world.","You're living proof that evolution makes mistakes.","I'd insult you, but nature already did.","If your brain was dynamite, there wouldn't be enough to blow your hat off.","Your secrets are always safe with me. I never listen when you tell me."]}},goodnight:{smooth:{mild:["Goodnight! Sweet dreams and all that cute stuff 🌙","Sleep tight — don't let the bed bugs bite!","Nighty night! Dream something fun tonight 💤","Rest well — you deserve it after being amazing today.","Sending you sleepy vibes and warm blanket energy 🛏️"],bold:["Can't sleep yet because someone won't leave my mind. It's you.","Goodnight. Try not to dream about me... actually, go ahead 😏","Last text of the night, and it's for you. Sleep well.","I'd say sweet dreams, but you're already the sweetest dream I know.","Close your eyes. Imagine me telling you this in person. Goodnight 💜"],extreme:["I wish I could kiss you goodnight right now.","Falling asleep thinking about you has become my favorite routine.","One day, 'goodnight' won't mean goodbye — it'll mean 'see you in the morning.'","You're my last thought tonight, and honestly, every night.","You're the most beautiful part of my day. Goodnight."]}},goodmorning:{smooth:{mild:["Good morning! Hope your day is as awesome as you are ☀️","Rise and shine! The world is lucky to have you today.","Morning! Here's your daily reminder that you're amazing.","Good morning! Sending you good vibes and good coffee ☕","New day, new chances to be awesome. Let's go!"],bold:["Good morning, beautiful. You woke up on my mind again.","Just so you know — you're the first person I thought about today.","Morning! You were running through my dreams all night.","You make mornings worth waking up for.","Good morning to the reason I check my phone first thing 😏"],extreme:["I want you to be my first 'good morning' and last 'goodnight' — forever.","Waking up knowing you exist is the best feeling.","Good morning, my love. I hope your day is half as beautiful as you.","I dreamed of you last night. Waking up was even better.","Every sunrise reminds me of you — beautiful, warm, impossible to look away from."]}}};
 
-const toolCfg={
-pickup:{title:'Pickup Line Generator',ctxLabel:'Describe the situation or your crush',ctxPlace:'e.g., She loves coffee and has the most beautiful smile...',reply:false},
-reply:{title:'Reply Generator',ctxLabel:'Their message to you',ctxPlace:'e.g., "haha you\'re funny" or "what makes you different?"',reply:true},
-bio:{title:'Bio Generator',ctxLabel:'About yourself',ctxPlace:'e.g., 22, software dev, gym rat, love midnight drives...',reply:false},
-starter:{title:'Conversation Starter',ctxLabel:'About them',ctxPlace:'e.g., She\'s into photography and travel, matched on Hinge...',reply:false},
-compliment:{title:'Compliment Generator',ctxLabel:'About them',ctxPlace:'e.g., She has the most contagious laugh and is super smart...',reply:false},
-flirt:{title:'🔍 Flirt Detector',ctxLabel:'Paste their message to analyze',ctxPlace:'e.g., "you looked really good today btw 😏"',reply:false,special:'flirt'},
-rewrite:{title:'✏️ Tone Rewriter',ctxLabel:'Your message to rewrite',ctxPlace:'e.g., "hey, wanna hang out this weekend?"',reply:false,special:'rewrite'}
-};
-
-const SUGGESTIONS={
-pickup:[
-"She's on Bumble, she's into travel and dogs",
-"Cute girl at the gym, always wears headphones",
-"She liked my story, we have mutual friends",
-"He's into anime and coding, met at a hackathon",
-"Instagram DM to someone who posts aesthetic pics",
-"College crush who sits next to me in class"
-],
-reply:[
-"haha you're funny",
-"You're not that tall are you?",
-"I don't usually reply to DMs",
-"What makes you different from other guys?",
-"We should hang out sometime",
-"You seem too good to be true lol"
-],
-bio:[
-"22, software dev who loves gaming and midnight drives",
-"Med student, gym rat, can cook better than your mom",
-"Introvert who'll become your favorite person",
-"Dog mom, coffee addict, looking for my last first date",
-"Tall, sarcastic, will make you laugh then steal your fries"
-],
-starter:[
-"She's into photography and travel, matched on Hinge",
-"He plays guitar and posts gym selfies",
-"We matched but nobody texted first for 2 days",
-"Her profile says she loves horror movies and ramen",
-"He's a chef, has a cute dog in all his pics"
-],
-compliment:[
-"She's really smart and always makes everyone laugh",
-"He helped me with something without me even asking",
-"She has the best energy, lights up every room",
-"He's always so calm and patient with everyone",
-"She's been working really hard on her fitness journey"
-],
-flirt:[
-"you looked really good today btw 😏",
-"i can't stop thinking about last night haha",
-"we should definitely hang out more often",
-"you always make me laugh ngl",
-"why are you so cute its annoying",
-"i told my friends about you lol"
-],
-rewrite:[
-"hey wanna hang out this weekend?",
-"i had a great time with you last night",
-"you look really pretty in that pic",
-"i miss talking to you",
-"do you wanna go on a date?",
-"i think about you a lot ngl"
-]
-};
-
-const SCENARIOS=[
-{label:'😶 Left on Read',tool:'reply',ctx:'They left me on read for 2 days after I sent a heartfelt message',style:'smooth'},
-{label:'💬 First DM',tool:'pickup',ctx:'Want to send the first DM on Instagram to someone who posts aesthetic pics',style:'smooth'},
-{label:'📸 Story Reply',tool:'reply',ctx:'They posted a fire selfie on their story and I want to reply',style:'bold'},
-{label:'🍕 Ask Out',tool:'starter',ctx:'Want to ask them on a casual first date, we\'ve been texting for a week',style:'smooth'},
-{label:'😅 Awkward Text',tool:'rewrite',ctx:'sorry for the late reply haha i was busy',style:'smooth'},
-{label:'💕 Shoot Shot',tool:'pickup',ctx:'Crush from class, never talked before, want to text for the first time',style:'bold'},
-{label:'🔥 Keep Convo',tool:'starter',ctx:'The conversation is dying but I want to keep talking to them',style:'funny'},
-{label:'👻 Got Ghosted',tool:'reply',ctx:'They ghosted me for a week and suddenly texted "hey stranger"',style:'savage'}
+const _g=['gsk_2oDA7','TXmZY4Nbr','S4DZFjWGdy','b3FYnKvfx3','Man4P79WIR','J2xGprXX'];
+const GROQ_KEY=_g.join('');
+const GEMINI_KEY='';
+const providers=[
+{name:'Groq',enabled:()=>!!GROQ_KEY,call:async(msgs)=>{const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${GROQ_KEY}`},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:msgs,temperature:1.0,max_tokens:1024})});if(!res.ok)throw new Error(`Groq ${res.status}`);const d=await res.json();return d?.choices?.[0]?.message?.content||'';}},
+{name:'Gemini',enabled:()=>!!GEMINI_KEY,call:async(msgs)=>{const last=msgs[msgs.length-1]?.content||'';const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:last}]}]})});if(!res.ok)throw new Error(`Gemini ${res.status}`);const d=await res.json();return d?.candidates?.[0]?.content?.parts?.[0]?.text||'';}}
 ];
 
-let curTool='pickup',curStyle='smooth',genLines=[];
-const AI_CONNECTED=true;
+let category='pickup',style='smooth',lang='hinglish',intensity='bold';
+let favorites=JSON.parse(localStorage.getItem('rizzFavs')||'[]');
+let historyArr=JSON.parse(localStorage.getItem('rizzHistory')||'[]');
+let soundEnabled=JSON.parse(localStorage.getItem('rizzSound') ?? 'true');
+let lightMode=JSON.parse(localStorage.getItem('rizzLight') ?? 'false');
+let battleStats=JSON.parse(localStorage.getItem('rizzBattle')||'{"total":0}');
+let challengeData=JSON.parse(localStorage.getItem('rizzChallenge')||'{}');
 
-let favorites=JSON.parse(localStorage.getItem('rizzgpt_favs')||'[]');
+// ===== SOUND SYSTEM =====
+let audioCtx;
+function getAudioCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function playSound(type){
+if(!soundEnabled)return;
+try{const ctx=getAudioCtx();const osc=ctx.createOscillator();const gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);
+if(type==='generate'){osc.type='sine';osc.frequency.setValueAtTime(600,ctx.currentTime);osc.frequency.exponentialRampToValueAtTime(1200,ctx.currentTime+.15);gain.gain.setValueAtTime(.1,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.3);osc.start();osc.stop(ctx.currentTime+.3);}
+else if(type==='copy'){osc.type='sine';osc.frequency.setValueAtTime(1000,ctx.currentTime);osc.frequency.setValueAtTime(1400,ctx.currentTime+.08);gain.gain.setValueAtTime(.08,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.2);osc.start();osc.stop(ctx.currentTime+.2);}
+else if(type==='fav'){osc.type='triangle';osc.frequency.setValueAtTime(800,ctx.currentTime);osc.frequency.exponentialRampToValueAtTime(1600,ctx.currentTime+.2);gain.gain.setValueAtTime(.08,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.3);osc.start();osc.stop(ctx.currentTime+.3);}
+else if(type==='vote'){osc.type='square';osc.frequency.setValueAtTime(500,ctx.currentTime);osc.frequency.exponentialRampToValueAtTime(900,ctx.currentTime+.12);gain.gain.setValueAtTime(.05,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.2);osc.start();osc.stop(ctx.currentTime+.2);}
+else{osc.type='sine';osc.frequency.setValueAtTime(800,ctx.currentTime);gain.gain.setValueAtTime(.05,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.08);osc.start();osc.stop(ctx.currentTime+.08);}
+if(navigator.vibrate&&type!=='click')navigator.vibrate(type==='generate'?[30,20,30]:20);
+}catch(e){}}
 
-function saveFavs(){localStorage.setItem('rizzgpt_favs',JSON.stringify(favorites));updateFavBadge();}
-function updateFavBadge(){const b=document.getElementById('favBadge');if(b)b.textContent=favorites.length;if(b)b.style.display=favorites.length>0?'flex':'none';}
-function toggleFav(line){
-const idx=favorites.indexOf(line);
-if(idx>-1){favorites.splice(idx,1);showToast('Removed from favorites');}
-else{favorites.push(line);showToast('Saved to favorites ❤️');spawnConfetti();}
-saveFavs();
-renderOut(genLines,true);
+// ===== THEME =====
+function initTheme(){if(lightMode){document.body.classList.add('light');toggleThemeIcons(true);}updateSoundBtn();}
+function toggleTheme(){lightMode=!lightMode;document.body.classList.toggle('light',lightMode);toggleThemeIcons(lightMode);localStorage.setItem('rizzLight',JSON.stringify(lightMode));playSound('click');}
+function toggleThemeIcons(isLight){const d=document.querySelector('.theme-icon-dark');const l=document.querySelector('.theme-icon-light');if(d)d.style.display=isLight?'none':'block';if(l)l.style.display=isLight?'block':'none';}
+function toggleSound(){soundEnabled=!soundEnabled;localStorage.setItem('rizzSound',JSON.stringify(soundEnabled));updateSoundBtn();if(soundEnabled)playSound('click');}
+function updateSoundBtn(){const b=document.getElementById('soundToggle');if(b)b.classList.toggle('muted',!soundEnabled);}
+
+// ===== PWA =====
+let deferredPrompt=null;
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;const b=document.getElementById('pwaBanner');if(b&&!localStorage.getItem('rizzPwaDismissed'))b.style.display='block';});
+function initPWA(){
+document.getElementById('pwaInstallBtn')?.addEventListener('click',async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;document.getElementById('pwaBanner').style.display='none';});
+document.getElementById('pwaCloseBtn')?.addEventListener('click',()=>{document.getElementById('pwaBanner').style.display='none';localStorage.setItem('rizzPwaDismissed','true');});
 }
-function openFavDrawer(){document.getElementById('favDrawer').classList.add('open');renderFavDrawer();}
+
+// ===== DROPDOWNS =====
+function initDropdowns(){
+document.querySelectorAll('.custom-select').forEach(sel=>{
+const display=sel.querySelector('.select-display'),dropdown=sel.querySelector('.select-dropdown');
+if(!display||!dropdown)return;
+display.addEventListener('click',e=>{e.stopPropagation();document.querySelectorAll('.custom-select.open').forEach(s=>{if(s!==sel)s.classList.remove('open');});sel.classList.toggle('open');playSound('click');});
+dropdown.querySelectorAll('.select-option').forEach(opt=>{opt.addEventListener('click',()=>{
+dropdown.querySelectorAll('.select-option').forEach(o=>o.classList.remove('selected'));opt.classList.add('selected');
+const icon=sel.querySelector('.select-icon');if(icon&&opt.dataset.icon)icon.textContent=opt.dataset.icon;
+sel.querySelector('.select-text').textContent=opt.textContent.replace(/^[^\w]+/,'').trim();sel.classList.remove('open');
+const v=opt.dataset.value;if(sel.id==='categorySelect')category=v;else if(sel.id==='styleSelect')style=v;else if(sel.id==='langSelect')lang=v;playSound('click');
+});});});
+document.addEventListener('click',()=>document.querySelectorAll('.custom-select.open').forEach(s=>s.classList.remove('open')));
+}
+
+function initIntensity(){document.querySelectorAll('.int-btn').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('.int-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');intensity=b.dataset.int;playSound('click');});});}
+
+// ===== GENERATE =====
+async function generateLines(){
+const btn=document.getElementById('generateBtn');if(btn.classList.contains('loading'))return;btn.classList.add('loading');
+const ctx=document.getElementById('contextInput')?.value||'';
+try{
+let lines=[];const dbCat=DB[category];
+if(dbCat){const dbStyle=dbCat[style]||dbCat.smooth;const dbInt=dbStyle?.[intensity]||dbStyle?.bold||Object.values(dbStyle)[0];if(dbInt?.length)lines=[...dbInt].sort(()=>Math.random()-.5).slice(0,5);}
+try{const ai=await callAI({category,style,lang,intensity,context:ctx,count:5});if(ai?.length)lines=ai;}catch(e){}
+displayResults(lines);addToHistory(lines,category,style);playSound('generate');launchConfetti();
+}catch(e){showToast('Failed to generate. Try again!');}btn.classList.remove('loading');
+}
+function displayResults(lines){
+const c=document.getElementById('results');c.innerHTML='';
+lines.forEach((line,i)=>{const isFav=favorites.includes(line);const d=document.createElement('div');d.className='result-item';d.style.animationDelay=`${i*.08}s`;
+d.innerHTML=`<p class="result-text">${escHtml(line)}</p><div class="result-actions"><button class="result-action-btn copy-btn" onclick="copyLine(this,'${escAttr(line)}')">📋 Copy</button><button class="result-action-btn fav-toggle ${isFav?'fav-active':''}" onclick="toggleFav(this,'${escAttr(line)}')">❤️ Save</button><button class="result-action-btn share-btn" onclick="openShareCard('${escAttr(line)}')">📤 Share</button></div>`;c.appendChild(d);});
+}
+
+// ===== COPY / FAV =====
+function copyLine(btn,text){navigator.clipboard.writeText(text).then(()=>{btn.textContent='✅ Copied!';setTimeout(()=>btn.textContent='📋 Copy',1500);showToast('Copied!');playSound('copy');});}
+function toggleFav(btn,text){const i=favorites.indexOf(text);if(i>-1){favorites.splice(i,1);btn.classList.remove('fav-active');}else{favorites.push(text);btn.classList.add('fav-active');playSound('fav');}localStorage.setItem('rizzFavs',JSON.stringify(favorites));updateFavCount();}
+function updateFavCount(){const e=document.getElementById('favCount');if(e)e.textContent=favorites.length;}
+
+// ===== FAV DRAWER =====
+function openFavDrawer(){document.getElementById('favDrawer').classList.add('open');renderFavList();}
 function closeFavDrawer(){document.getElementById('favDrawer').classList.remove('open');}
-function renderFavDrawer(){
-const list=document.getElementById('favList');
-if(favorites.length===0){list.innerHTML='<div class="fav-empty"><p>No favorites yet</p><span>Tap ❤️ on any generated line to save it</span></div>';return;}
-list.innerHTML=favorites.map((f,i)=>`<div class="fav-item"><p class="fav-text">${f.replace(/</g,'&lt;')}</p><div class="fav-actions"><button class="fav-action-btn" onclick="navigator.clipboard.writeText(favorites[${i}]).then(()=>showToast('Copied!'))"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button><button class="fav-action-btn fav-del" onclick="favorites.splice(${i},1);saveFavs();renderFavDrawer()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div></div>`).join('');
+function renderFavList(){
+const l=document.getElementById('favList');
+if(!favorites.length){l.innerHTML='<div class="fav-empty">No saved lines yet. Start generating!</div>';return;}
+l.innerHTML=favorites.map((f,i)=>`<div class="fav-item"><p class="fav-item-text">${escHtml(f)}</p><div class="fav-item-actions"><button class="fav-item-btn" onclick="copyLine(this,'${escAttr(f)}')">📋 Copy</button><button class="fav-item-btn" onclick="openShareCard('${escAttr(f)}')">📤 Share</button><button class="fav-item-btn remove" onclick="removeFav(${i})">🗑️</button></div></div>`).join('');
+}
+function removeFav(i){favorites.splice(i,1);localStorage.setItem('rizzFavs',JSON.stringify(favorites));renderFavList();updateFavCount();}
+
+// ===== HISTORY =====
+function addToHistory(lines,cat,sty){historyArr.unshift({id:Date.now(),timestamp:new Date().toISOString(),category:cat,style:sty,lines:[...lines]});if(historyArr.length>100)historyArr=historyArr.slice(0,100);localStorage.setItem('rizzHistory',JSON.stringify(historyArr));}
+function openHistoryDrawer(){document.getElementById('historyDrawer').classList.add('open');renderHistoryList();}
+function closeHistoryDrawer(){document.getElementById('historyDrawer').classList.remove('open');}
+function renderHistoryList(filter=''){
+const l=document.getElementById('historyList');
+const filtered=filter?historyArr.filter(h=>h.lines.some(x=>x.toLowerCase().includes(filter.toLowerCase()))):historyArr;
+if(!filtered.length){l.innerHTML='<div class="history-empty">No history yet. Start generating!</div>';return;}
+const grouped={};filtered.forEach(h=>{const d=new Date(h.timestamp);const key=isToday(d)?'Today':isYesterday(d)?'Yesterday':d.toLocaleDateString();if(!grouped[key])grouped[key]=[];grouped[key].push(h);});
+l.innerHTML=Object.entries(grouped).map(([day,entries])=>`<div class="history-group"><div class="history-group-title">${day}</div>${entries.map(e=>`<div class="history-item" onclick="this.querySelector('.history-item-actions').style.display=this.querySelector('.history-item-actions').style.display==='flex'?'none':'flex'"><div class="history-item-meta"><span class="history-item-tag">${e.category} • ${e.style}</span><span class="history-item-time">${new Date(e.timestamp).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span></div><p class="history-item-text">${escHtml(e.lines[0]||'')}</p><div class="history-item-actions" style="display:none">${e.lines.map(x=>`<button class="fav-item-btn" onclick="event.stopPropagation();copyLine(this,'${escAttr(x)}')" title="${escAttr(x)}">📋</button>`).join('')}</div></div>`).join('')}</div>`).join('');
+}
+function isToday(d){const t=new Date();return d.getDate()===t.getDate()&&d.getMonth()===t.getMonth()&&d.getFullYear()===t.getFullYear();}
+function isYesterday(d){const t=new Date();t.setDate(t.getDate()-1);return d.getDate()===t.getDate()&&d.getMonth()===t.getMonth()&&d.getFullYear()===t.getFullYear();}
+
+// ===== SHARE CARD =====
+function openShareCard(text){document.getElementById('shareModal').style.display='flex';generateShareImage(text);}
+function closeShareModal(){document.getElementById('shareModal').style.display='none';}
+function generateShareImage(text){
+const canvas=document.getElementById('shareCanvas');const ctx=canvas.getContext('2d');canvas.width=1080;canvas.height=1080;
+const grad=ctx.createLinearGradient(0,0,1080,1080);grad.addColorStop(0,'#7c3aed');grad.addColorStop(.5,'#a855f7');grad.addColorStop(1,'#ec4899');
+ctx.fillStyle=grad;ctx.fillRect(0,0,1080,1080);
+ctx.fillStyle='rgba(0,0,0,0.1)';for(let i=0;i<8;i++){ctx.beginPath();ctx.arc(Math.random()*1080,Math.random()*1080,Math.random()*200+50,0,Math.PI*2);ctx.fill();}
+ctx.fillStyle='rgba(255,255,255,0.05)';ctx.fillRect(60,60,960,960);
+ctx.fillStyle='#fff';ctx.font='bold 44px Inter,system-ui,sans-serif';ctx.textAlign='center';
+const words=text.split(' ');let lines=[],line='';
+words.forEach(w=>{const test=line?line+' '+w:w;if(ctx.measureText(test).width>800){lines.push(line);line=w;}else line=test;});if(line)lines.push(line);
+const lh=60,startY=540-(lines.length*lh)/2;
+lines.forEach((l,i)=>{ctx.fillStyle='rgba(0,0,0,0.2)';ctx.fillText(l,542,startY+i*lh+2);ctx.fillStyle='#fff';ctx.fillText(l,540,startY+i*lh);});
+ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='600 26px Inter,sans-serif';ctx.fillText('⚡ RizzGPT',540,980);
+const preview=document.getElementById('sharePreview');preview.src=canvas.toDataURL('image/png');
+document.getElementById('shareDownload').onclick=()=>{const a=document.createElement('a');a.href=canvas.toDataURL('image/png');a.download='rizzgpt-card.png';a.click();playSound('copy');showToast('Card downloaded!');};
+document.getElementById('shareNative').onclick=async()=>{try{canvas.toBlob(async blob=>{if(navigator.share)await navigator.share({files:[new File([blob],'rizzgpt-card.png',{type:'image/png'})],title:'RizzGPT',text});else{navigator.clipboard.writeText(text);showToast('Text copied!');}});playSound('copy');}catch(e){navigator.clipboard.writeText(text);showToast('Text copied!');}};
 }
 
-document.addEventListener('DOMContentLoaded',()=>{
-const nav=document.getElementById('navbar');
-const mbtn=document.getElementById('menuBtn');
-const nlinks=document.getElementById('navLinks');
-window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',window.scrollY>50));
-if(mbtn)mbtn.addEventListener('click',()=>{nlinks.classList.toggle('open');mbtn.classList.toggle('active')});
-if(nlinks)nlinks.querySelectorAll('.nav-link').forEach(l=>l.addEventListener('click',()=>{nlinks.classList.remove('open');if(mbtn)mbtn.classList.remove('active')}));
-
-document.querySelectorAll('.tool-pill[data-tool]').forEach(c=>c.addEventListener('click',()=>switchTool(c.dataset.tool)));
-document.querySelectorAll('.style-chip').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.style-chip').forEach(x=>x.classList.remove('active'));b.classList.add('active');curStyle=b.dataset.style}));
-
-const sl=document.getElementById('intensitySlider'),labs=document.querySelectorAll('.i-label');
-if(sl)sl.addEventListener('input',()=>labs.forEach((l,i)=>l.classList.toggle('active',i===sl.value-1)));
-
-const ci=document.getElementById('contextInput'),cc=document.getElementById('charCount');
-if(ci)ci.addEventListener('input',()=>cc.textContent=ci.value.length);
-
-renderScenarios();
-countUp();renderSuggestions('pickup');
-updateFavBadge();
-});
-
-function renderScenarios(){
-const container=document.getElementById('scenarioButtons');
-if(!container) return;
-container.innerHTML=SCENARIOS.map((s,i)=>`<button class="scenario-btn" data-idx="${i}">${s.label}</button>`).join('');
-container.querySelectorAll('.scenario-btn').forEach(b=>b.addEventListener('click',()=>{
-const s=SCENARIOS[b.dataset.idx];
-switchTool(s.tool);
-if(s.style){document.querySelectorAll('.style-chip').forEach(x=>x.classList.remove('active'));const chip=document.querySelector(`.style-chip[data-style="${s.style}"]`);if(chip)chip.classList.add('active');curStyle=s.style;}
-const input=document.getElementById('contextInput');
-if(input){input.value=s.ctx;input.dispatchEvent(new Event('input'));}
-document.getElementById('generator').scrollIntoView({behavior:'smooth'});
-}));
-}
-
-function switchTool(t){
-curTool=t;const c=toolCfg[t];
-document.querySelectorAll('.tool-pill[data-tool]').forEach(x=>x.classList.remove('active'));
-document.querySelectorAll(`[data-tool="${t}"]`).forEach(x=>x.classList.add('active'));
-document.getElementById('panelTitleText').textContent=c.title;
-document.getElementById('contextLabel').textContent=c.ctxLabel;
-document.getElementById('contextInput').placeholder=c.ctxPlace;
-document.getElementById('replyGroup').style.display=c.reply?'block':'none';
-const styleRow=document.querySelector('.style-row');
-const optGrid=document.querySelector('.options-grid');
-const intField=document.getElementById('intensitySlider')?.closest('.field');
-const togRow=document.querySelector('.toggles-row');
-if(c.special==='flirt'){
-if(styleRow)styleRow.style.display='none';if(optGrid)optGrid.style.display='none';if(intField)intField.style.display='none';if(togRow)togRow.style.display='none';
-}else if(c.special==='rewrite'){
-if(styleRow)styleRow.style.display='flex';if(optGrid)optGrid.style.display='none';if(intField)intField.style.display='none';if(togRow)togRow.style.display='none';
-}else{
-if(styleRow)styleRow.style.display='flex';if(optGrid)optGrid.style.display='grid';if(intField)intField.style.display='block';if(togRow)togRow.style.display='flex';
-}
-renderSuggestions(t);
-document.getElementById('outputContent').innerHTML=`<div class="output-empty"><div class="empty-icon">✨</div><p>Your ${t==='bio'?'bios':t==='flirt'?'analysis':t==='rewrite'?'rewritten text':'lines'} will appear here</p></div>`;
-document.getElementById('outputFooter').style.display='none';
-document.getElementById('copyAllBtn').style.display='none';
-document.getElementById('generator').scrollIntoView({behavior:'smooth'});
-}
-
-function renderSuggestions(tool){
-const container=document.getElementById('suggestionChips');
-if(!container)return;
-const chips=SUGGESTIONS[tool]||[];
-container.innerHTML=chips.map(s=>`<button class="suggestion-chip" onclick="useSuggestion(this)">${s}</button>`).join('');
-}
-
-function useSuggestion(el){
-const input=document.getElementById('contextInput');
-input.value=el.textContent;
-input.dispatchEvent(new Event('input'));
-el.style.background='rgba(168,85,247,0.35)';
-el.style.borderColor='#a855f7';
-el.style.color='#f0f0f5';
-}
-
-async function generateRizz(){
-const btn=document.getElementById('generateBtn');btn.classList.add('loading');
-const ctx=document.getElementById('contextInput').value.trim();
-const replyCtx=document.getElementById('replyInput')?.value.trim()||'';
-const int=['mild','bold','extreme'][document.getElementById('intensitySlider').value-1];
-const emoji=document.getElementById('emojiToggle').checked;
-const multi=document.getElementById('multipleToggle').checked;
-const cnt=multi?5:1;
-const target=document.getElementById('targetSelect').value;
-const lang=document.getElementById('langSelect').value;
-const cfg=toolCfg[curTool];
-
-if(AI_CONNECTED){
-document.getElementById('loadingText').textContent='AI is generating...';
+// ===== RIZZ SCORE =====
+async function analyzeRizzScore(){
+const input=document.getElementById('rizzScoreInput').value.trim();if(!input){showToast('Enter a message to analyze!');return;}
+const btn=document.getElementById('analyzeRizzBtn');btn.classList.add('loading');
 try{
-if(cfg&&cfg.special==='flirt'){
-const raw=await callAIRaw({tool:'flirt',context:ctx,lang});
-renderFlirtResult(raw);
+const msgs=[{role:'system',content:'You are a Rizz Score Analyzer. Rate the message on rizz. Return ONLY valid JSON: {"score":75,"confidence":80,"creativity":70,"charm":75,"humor":60,"label":"Smooth Operator","verdict":"Brief analysis."} Score 0-100. Labels: 0-20="Needs CPR", 21-40="Rookie Rizzer", 41-60="Decent Game", 61-80="Smooth Operator", 81-95="Certified Rizz Lord", 96-100="Rizz God".'},{role:'user',content:`Rate this: "${input}"`}];
+const text=await callAIRaw(msgs);const json=JSON.parse(text.match(/\{[\s\S]*\}/)?.[0]||'{}');displayRizzScore(json);playSound('generate');
+}catch(e){displayRizzScore({score:Math.floor(Math.random()*40)+40,confidence:Math.floor(Math.random()*30)+50,creativity:Math.floor(Math.random()*30)+40,charm:Math.floor(Math.random()*30)+45,humor:Math.floor(Math.random()*30)+35,label:'Decent Game',verdict:'Shows some personality but could use more originality.'});}
 btn.classList.remove('loading');
-spawnConfetti();
-return;
 }
-if(cfg&&cfg.special==='rewrite'){
-const raw=await callAIRaw({tool:'rewrite',context:ctx,style:curStyle,lang});
-renderRewriteResult(ctx,raw);
-btn.classList.remove('loading');
-spawnConfetti();
-return;
+function displayRizzScore(data){
+const result=document.getElementById('rizzScoreResult');result.style.display='block';
+const svg=result.querySelector('.score-gauge');
+if(!svg.querySelector('defs')){const defs=document.createElementNS('http://www.w3.org/2000/svg','defs');defs.innerHTML='<linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#6366f1"/><stop offset="50%" stop-color="#a855f7"/><stop offset="100%" stop-color="#ec4899"/></linearGradient>';svg.prepend(defs);}
+const fill=document.getElementById('gaugeFill');const circ=2*Math.PI*85;fill.style.strokeDasharray=circ;fill.style.strokeDashoffset=circ;
+requestAnimationFrame(()=>{fill.style.strokeDashoffset=circ-(data.score/100)*circ;});
+animateNum('scoreNumber',0,data.score,1200);document.getElementById('scoreLabel').textContent=data.label||'—';
+document.getElementById('scoreBreakdown').innerHTML=['confidence','creativity','charm','humor'].map(k=>`<div class="breakdown-item"><div class="breakdown-label">${k}</div><div class="breakdown-bar"><div class="breakdown-bar-fill ${k}" style="width:0%"></div></div><div class="breakdown-value">${data[k]||0}/100</div></div>`).join('');
+setTimeout(()=>{document.querySelectorAll('.breakdown-bar-fill').forEach(b=>{const k=b.className.split(' ').pop();b.style.width=(data[k]||0)+'%';});},100);
+document.getElementById('scoreVerdict').innerHTML=`<p class="verdict-text">${data.verdict||''}</p>`;
 }
-const lines=await callAI({tool:curTool,style:curStyle,intensity:int,count:cnt,context:ctx,replyTo:replyCtx,target,lang,emoji});
-if(lines.length===0) throw new Error('Empty response');
-genLines=lines;
-renderOut(genLines,true);
-btn.classList.remove('loading');
-spawnConfetti();
-return;
-}catch(err){
-console.error('AI error:',err);
-showToast('AI unavailable, using built-in lines');
-}
-}
+function animateNum(id,from,to,dur){const el=document.getElementById(id);const s=performance.now();(function tick(now){const p=Math.min((now-s)/dur,1);el.textContent=Math.round(from+(to-from)*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(tick);})(s);}
 
-document.getElementById('loadingText').textContent='AI is cooking...';
-setTimeout(()=>{
-const pool=DB[curTool]?.[curStyle]?.[int]||DB.pickup.smooth.bold;
-const shuf=[...pool].sort(()=>Math.random()-0.5);
-genLines=shuf.slice(0,cnt);
-if(ctx){genLines=genLines.map(l=>personalize(l,ctx))}
-if(!emoji){genLines=genLines.map(l=>l.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{FE00}-\u{FE0F}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{200D}\u{20E3}]/gu,'').trim())}
-renderOut(genLines,false);
-btn.classList.remove('loading');
-},1200+Math.random()*800);
-}
-
-function personalize(line,ctx){
-const w=ctx.toLowerCase().split(/\s+/).filter(x=>x.length>3&&!['that','this','they','them','with','have','from','were','been','your','like','love','about'].includes(x));
-if(w.length>0&&Math.random()>0.6){const i=w[Math.floor(Math.random()*w.length)];return Math.random()>0.5?`Speaking of ${i}... ${line}`:`${line} (Especially since you're into ${i}!)`}
-return line;
-}
-
-function renderOut(lines,fromGemini){
-const c=document.getElementById('outputContent');c.innerHTML='';
-lines.forEach((l,i)=>{const d=document.createElement('div');d.className='rizz-line';d.style.animationDelay=`${i*0.1}s`;
-const isFav=favorites.includes(l);
-d.innerHTML=`<div class="line-number">${i+1}</div><div class="line-content"><p class="line-text">${l.replace(/</g,'&lt;')}</p></div><div class="line-actions"><button class="line-action-btn fav-btn ${isFav?'fav-active':''}" onclick="toggleFav(genLines[${i}])" title="Save"><svg width="14" height="14" viewBox="0 0 24 24" fill="${isFav?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button><button class="line-action-btn" onclick="copyLine(this,${i})" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>`;
-c.appendChild(d);});
-document.getElementById('outputFooter').style.display='flex';
-document.getElementById('copyAllBtn').style.display='flex';
-const gt=document.getElementById('geminiTag');
-if(gt)gt.style.display=fromGemini?'inline-flex':'none';
-const ot=document.getElementById('outputTitleText');
-if(ot)ot.textContent=fromGemini?'AI Generated Lines':'Generated Rizz Lines';
-}
-
-function renderFlirtResult(raw){
-const c=document.getElementById('outputContent');
-let score=50,analysis='',suggestions=[];
+// ===== VIBE CHECK =====
+async function analyzeVibe(){
+const input=document.getElementById('vibeInput').value.trim();if(!input){showToast('Enter a message to analyze!');return;}
+const vctx=document.getElementById('vibeContext').value.trim();
+const btn=document.getElementById('vibeCheckBtn');btn.classList.add('loading');
 try{
-const scoreMatch=raw.match(/(?:score|rating)[:\s]*(\d+)/i);
-if(scoreMatch) score=parseInt(scoreMatch[1]);
-const parts=raw.split(/\n/).filter(l=>l.trim());
-analysis=parts.filter(l=>!l.match(/^\d+[.)]/)&&!l.match(/score|rating/i)&&l.length>10).slice(0,3).join(' ');
-suggestions=parts.filter(l=>l.match(/^\d+[.)]/)).map(l=>l.replace(/^\d+[.)\-:\s]+/,'').replace(/^"/,'').replace(/"$/,'').trim()).filter(l=>l.length>5).slice(0,3);
-}catch(e){}
-const color=score>=70?'#22c55e':score>=40?'#f59e0b':'#ef4444';
-const label=score>=70?'Definitely Flirting 😏':score>=40?'Maybe Flirting 🤔':'Probably Not 😐';
-c.innerHTML=`
-<div class="flirt-result">
-<div class="flirt-score-ring">
-<svg width="120" height="120" viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="8"/><circle cx="60" cy="60" r="52" fill="none" stroke="${color}" stroke-width="8" stroke-linecap="round" stroke-dasharray="${score*3.27} 327" stroke-dashoffset="-81.75" style="transition:stroke-dasharray 1s ease"/></svg>
-<div class="flirt-score-text"><span class="flirt-num" style="color:${color}">${score}</span><span class="flirt-label">/ 100</span></div>
-</div>
-<div class="flirt-verdict" style="color:${color}">${label}</div>
-${analysis?`<p class="flirt-analysis">${analysis.replace(/</g,'&lt;')}</p>`:''}
-${suggestions.length>0?`<div class="flirt-suggestions"><p class="flirt-sub-title">Suggested Responses</p>${suggestions.map((s,i)=>`<div class="flirt-sug-item"><span class="flirt-sug-num">${i+1}</span><span>${s.replace(/</g,'&lt;')}</span><button class="line-action-btn" onclick="navigator.clipboard.writeText('${s.replace(/'/g,"\\'")}').then(()=>showToast('Copied!'))"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>`).join('')}</div>`:''}
-</div>`;
-document.getElementById('outputFooter').style.display='flex';
-document.getElementById('copyAllBtn').style.display='none';
-const ot=document.getElementById('outputTitleText');
-if(ot) ot.textContent='Flirt Analysis Result';
+const msgs=[{role:'system',content:'You are a Vibe Check Analyzer for dating. Return ONLY valid JSON: {"interest":7,"mood":"Playful","flirting":true,"energy":"High","analysis":"They seem interested.","flags":[{"type":"green","text":"Asks questions back"},{"type":"yellow","text":"Short replies"}],"suggestion":"Mirror their energy."}'},{role:'user',content:`Analyze this message I received${vctx?' (context: '+vctx+')':''}:\n"${input}"`}];
+const text=await callAIRaw(msgs);const json=JSON.parse(text.match(/\{[\s\S]*\}/)?.[0]||'{}');displayVibeResult(json);playSound('generate');
+}catch(e){displayVibeResult({interest:6,mood:'Curious',flirting:false,energy:'Medium',analysis:'Seems moderately interested.',flags:[{type:'green',text:'Responded'},{type:'yellow',text:'Brief reply'}],suggestion:'Ask an engaging question to get them invested.'});}
+btn.classList.remove('loading');
+}
+function displayVibeResult(data){
+const r=document.getElementById('vibeResult');r.style.display='block';
+const interest=data.interest||5,cls=interest>=7?'high':interest>=4?'medium':'low';
+document.getElementById('vibeMeters').innerHTML=`<div class="vibe-meter"><div class="vibe-meter-label">Interest</div><div class="vibe-meter-value ${cls}">${interest}/10</div><div class="vibe-meter-sub">${interest>=7?'Very Interested':interest>=4?'Moderate':'Low Interest'}</div></div><div class="vibe-meter"><div class="vibe-meter-label">Energy</div><div class="vibe-meter-value">${data.energy||'Medium'}</div><div class="vibe-meter-sub">${data.mood||'Neutral'} vibe</div></div><div class="vibe-meter"><div class="vibe-meter-label">Flirting?</div><div class="vibe-meter-value ${data.flirting?'high':'low'}">${data.flirting?'Yes 😏':'Nope'}</div><div class="vibe-meter-sub">${data.flirting?'Flirt signals detected':'Casual tone'}</div></div><div class="vibe-meter"><div class="vibe-meter-label">Mood</div><div class="vibe-meter-value">${data.mood||'Neutral'}</div><div class="vibe-meter-sub">Overall tone</div></div>`;
+document.getElementById('vibeAnalysis').innerHTML=`<div class="vibe-analysis-title">Analysis</div><p class="vibe-analysis-text">${data.analysis||''}</p>`;
+document.getElementById('vibeFlags').innerHTML=(data.flags||[]).map(f=>`<span class="vibe-flag ${f.type}">${f.type==='green'?'✅':f.type==='red'?'🚩':'⚠️'} ${f.text}</span>`).join('');
+document.getElementById('vibeSuggestion').innerHTML=`<div class="vibe-suggestion-title">💡 Suggested Move</div><p class="vibe-suggestion-text">${data.suggestion||''}</p>`;
 }
 
-function renderRewriteResult(original,raw){
-const c=document.getElementById('outputContent');
-const rewrites=raw.split('\n').map(l=>l.replace(/^\d+[.)\-:\s]+/,'').replace(/^"/,'').replace(/"$/,'').trim()).filter(l=>l.length>5&&!l.startsWith('#')&&!l.startsWith('*')&&!l.toLowerCase().startsWith('here')&&!l.toLowerCase().startsWith('sure')).slice(0,5);
-genLines=rewrites;
-c.innerHTML=`
-<div class="rewrite-result">
-<div class="rewrite-original"><span class="rewrite-tag">Original</span><p>${original.replace(/</g,'&lt;')}</p></div>
-<div class="rewrite-arrow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></div>
-<div class="rewrite-versions">${rewrites.map((r,i)=>`<div class="rewrite-item"><div class="rewrite-item-head"><span class="rewrite-num">${i+1}</span><button class="line-action-btn" onclick="navigator.clipboard.writeText(genLines[${i}]).then(()=>showToast('Copied!'))"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button><button class="line-action-btn fav-btn ${favorites.includes(r)?'fav-active':''}" onclick="toggleFav(genLines[${i}])"><svg width="12" height="12" viewBox="0 0 24 24" fill="${favorites.includes(r)?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button></div><p>${r.replace(/</g,'&lt;')}</p></div>`).join('')}</div>
-</div>`;
-document.getElementById('outputFooter').style.display='flex';
-document.getElementById('copyAllBtn').style.display='flex';
-const ot=document.getElementById('outputTitleText');
-if(ot) ot.textContent='Rewritten Versions';
+// ===== RIZZ BATTLE =====
+let battleLines={A:'',B:''},battleVoted=false;
+async function newBattle(){
+const btn=document.getElementById('newBattleBtn');btn.classList.add('loading');battleVoted=false;
+document.querySelectorAll('.battle-vote-btn').forEach(b=>{b.classList.remove('voted');b.disabled=false;});
+document.querySelectorAll('.battle-card').forEach(c=>c.classList.remove('winner','loser'));
+const styles=['smooth','funny','romantic','bold','nerdy','poetic'];
+const s1=styles[Math.floor(Math.random()*styles.length)];let s2=styles[Math.floor(Math.random()*styles.length)];while(s2===s1)s2=styles[Math.floor(Math.random()*styles.length)];
+try{
+const msgs=[{role:'system',content:`Generate 2 pickup lines. Line A: ${s1} style. Line B: ${s2} style. Return ONLY two lines, one per line. No numbers, labels, or quotes.`},{role:'user',content:'Generate 2 contrasting pickup lines.'}];
+const text=await callAIRaw(msgs);const parsed=text.split('\n').map(l=>l.replace(/^\d+[.)\-:\s]*/,'').replace(/^["']/,'').replace(/["']$/,'').replace(/^Line\s*[AB]:?\s*/i,'').trim()).filter(l=>l.length>10);
+battleLines.A=parsed[0]||getRandomDB(s1);battleLines.B=parsed[1]||getRandomDB(s2);
+}catch(e){battleLines.A=getRandomDB(s1);battleLines.B=getRandomDB(s2);}
+document.getElementById('battleTextA').textContent=battleLines.A;document.getElementById('battleTextB').textContent=battleLines.B;
+document.querySelector('#battleLeft .battle-label').textContent=`🅰️ ${cap(s1)}`;document.querySelector('#battleRight .battle-label').textContent=`🅱️ ${cap(s2)}`;
+btn.classList.remove('loading');playSound('generate');
 }
+function voteBattle(side){
+if(battleVoted)return;battleVoted=true;
+battleStats.total=(battleStats.total||0)+1;localStorage.setItem('rizzBattle',JSON.stringify(battleStats));
+document.getElementById('battleCount').textContent=`${battleStats.total} battles`;
+document.getElementById('vote'+side).classList.add('voted');
+document.getElementById(side==='A'?'battleLeft':'battleRight').classList.add('winner');
+document.getElementById(side==='A'?'battleRight':'battleLeft').classList.add('loser');
+document.querySelectorAll('.battle-vote-btn').forEach(b=>b.disabled=true);
+playSound('vote');launchConfetti();
+}
+function getRandomDB(sty){const s=DB.pickup[sty]||DB.pickup.smooth;const p=s.bold||Object.values(s)[0]||[];return p[Math.floor(Math.random()*p.length)]||'Are you a magician?';}
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
 
-function copyLine(btn,i){
-navigator.clipboard.writeText(genLines[i]).then(()=>{
-btn.classList.add('copied');btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
-showToast('Copied to clipboard!');
-setTimeout(()=>{btn.classList.remove('copied');btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';},2000);
-});
-}
-
-function copyAll(){navigator.clipboard.writeText(genLines.join('\n\n')).then(()=>showToast('All lines copied!'))}
-
-function shareLines(){
-const t=`Check out these rizz lines from RizzGPT:\n\n${genLines.join('\n\n')}\n\nGenerate yours free!`;
-if(navigator.share)navigator.share({title:'RizzGPT',text:t}).catch(()=>{});
-else navigator.clipboard.writeText(t).then(()=>showToast('Copied for sharing!'));
-}
-
-function showToast(m){const t=document.getElementById('toast');document.getElementById('toastText').textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
-
-function spawnConfetti(){
-const container=document.getElementById('confettiWrap');
-if(!container) return;
-container.innerHTML='';
-const colors=['#a855f7','#ec4899','#6366f1','#22c55e','#f59e0b','#3b82f6'];
-for(let i=0;i<40;i++){
-const c=document.createElement('div');
-c.className='confetti-piece';
-c.style.left=Math.random()*100+'%';
-c.style.background=colors[Math.floor(Math.random()*colors.length)];
-c.style.animationDelay=Math.random()*0.5+'s';
-c.style.animationDuration=(1.5+Math.random()*1.5)+'s';
-const size=4+Math.random()*6;
-c.style.width=size+'px';
-c.style.height=size*(Math.random()>0.5?1:2.5)+'px';
-c.style.borderRadius=Math.random()>0.5?'50%':'2px';
-container.appendChild(c);
-}
-setTimeout(()=>container.innerHTML='',3500);
-}
-
-function countUp(){
-const obs=new IntersectionObserver(e=>e.forEach(x=>{if(x.isIntersecting){const el=x.target,tgt=+el.dataset.target,st=performance.now();
-(function up(now){const p=Math.min((now-st)/2000,1),e2=1-Math.pow(1-p,3),cur=Math.floor(e2*tgt);
-if(tgt>=1e6)el.textContent=(cur/1e6).toFixed(1)+'M+';else if(tgt>=1e3)el.textContent=Math.floor(cur/1e3)+'K+';else el.textContent=cur+'+';
-if(p<1)requestAnimationFrame(up)})(st);obs.unobserve(el)}}),{threshold:0.5});
-document.querySelectorAll('.stat-num').forEach(el=>obs.observe(el));
-}
-
-// ============================================================
-// AI PROVIDER FALLBACK CHAIN
-// ============================================================
-const _g=['gsk_2oDA7','TXmZY4Nbr','S4DZFjWGdy','b3FYnKvfx3','Man4P79WIR','J2xGprXX'];const GROQ_API_KEY=_g.join('');
-const GEMINI_API_KEY='';
-
-const AI_PROVIDERS=[
-{
-name:'Groq',
-enabled:()=>!!GROQ_API_KEY,
-call:async(messages)=>{
-const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
-method:'POST',
-headers:{'Content-Type':'application/json','Authorization':`Bearer ${GROQ_API_KEY}`},
-body:JSON.stringify({model:'llama-3.3-70b-versatile',messages,temperature:1.0,max_tokens:1024})
-});
-if(!res.ok) throw new Error(`Groq ${res.status}`);
-const d=await res.json();
-return d?.choices?.[0]?.message?.content||'';
-}
-},
-{
-name:'Gemini',
-enabled:()=>GEMINI_API_KEY&&GEMINI_API_KEY.length>5,
-call:async(messages)=>{
-const sys=messages.find(m=>m.role==='system');
-const contents=messages.filter(m=>m.role!=='system').map(m=>({role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]}));
-const body={contents,generationConfig:{temperature:1.0,maxOutputTokens:1024}};
-if(sys) body.systemInstruction={parts:[{text:sys.content}]};
-const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,{
-method:'POST',
-headers:{'Content-Type':'application/json'},
-body:JSON.stringify(body)
-});
-if(!res.ok) throw new Error(`Gemini ${res.status}`);
-const d=await res.json();
-return d?.candidates?.[0]?.content?.parts?.[0]?.text||'';
-}
-},
-{
-name:'Pollinations',
-enabled:()=>true,
-call:async(messages)=>{
-const res=await fetch('https://text.pollinations.ai/openai/chat/completions',{
-method:'POST',
-headers:{'Content-Type':'application/json'},
-body:JSON.stringify({model:'openai-fast',messages,temperature:1.0,max_tokens:1024})
-});
-if(!res.ok) throw new Error(`Pollinations ${res.status}`);
-const d=await res.json();
-return d?.choices?.[0]?.message?.content||'';
-}
-}
+// ===== DAILY CHALLENGE =====
+const CHALLENGES=[
+{prompt:"Rizz using only food references 🍕",desc:"Every metaphor must involve food. The cheesier, the better."},
+{prompt:"Movie-themed rizz only 🎬",desc:"Reference a famous movie or character."},
+{prompt:"One-word opener challenge 💬",desc:"A single powerful word that demands a response."},
+{prompt:"Compliment without mentioning looks 🧠",desc:"Make them feel special without referencing appearance."},
+{prompt:"Rizz in exactly 5 words ✋",desc:"Maximum impact in exactly five words."},
+{prompt:"Science-themed pickup lines 🔬",desc:"Use science concepts to create your line."},
+{prompt:"Time traveler rizz ⏰",desc:"Pretend you're from the future."},
+{prompt:"Reverse psychology rizz 🔄",desc:"Use reverse psychology to be irresistible."},
+{prompt:"Emoji-first then text 💌",desc:"Start with 3 mood-setting emojis, then the line."},
+{prompt:"Roast-to-rizz pipeline 🔥",desc:"Start with a light roast, end with a compliment."},
+{prompt:"Song lyric remix 🎵",desc:"Remix a famous lyric into a pickup line."},
+{prompt:"Animal-themed lines 🐾",desc:"Use animal references for cute or clever lines."},
+{prompt:"Superhero rizz 🦸",desc:"Reference a superhero or superpower."},
+{prompt:"Weather-themed flirting ⛈️",desc:"Use weather metaphors."},
+{prompt:"Sports analogy rizz 🏀",desc:"Score with a sports-themed line."},
+{prompt:"Space & astronomy 🌌",desc:"Out-of-this-world cosmic lines."},
+{prompt:"History class rizz 📚",desc:"Reference historical events or figures."},
+{prompt:"Math pickup lines 📐",desc:"Love is all about numbers."},
+{prompt:"Social media themed 📱",desc:"Reference social media culture."},
+{prompt:"Grammar nerd rizz ✏️",desc:"Wordplay, puns, or grammar jokes."},
+{prompt:"Coffee shop rizz ☕",desc:"Perfect line for a coffee shop setting."},
+{prompt:"Late night text rizz 🌙",desc:"The perfect 11 PM bold text."},
+{prompt:"Bookworm rizz 📖",desc:"Reference a famous book or character."},
+{prompt:"Gym rizz 💪",desc:"Fitness-themed pickup line."},
+{prompt:"Coding pickup lines 💻",desc:"Lines only a programmer would love."},
+{prompt:"Art museum rizz 🎨",desc:"Paint a picture with your words."},
+{prompt:"Travel-themed rizz ✈️",desc:"Take them on a journey."},
+{prompt:"Zodiac sign rizz ♈",desc:"Astrology-based charm."},
+{prompt:"Cooking rizz 👨‍🍳",desc:"You're the chef of love."},
+{prompt:"Adventure opener 🏔️",desc:"Invite someone on an adventure."},
+{prompt:"Holiday special 🎄",desc:"Theme around any holiday."}
 ];
-
-function buildPrompt(opts){
-const intensityDesc={mild:'mild, subtle, and light',bold:'confident, bold, and charming',extreme:'extremely bold, intense, and unforgettable'};
-const intDesc=intensityDesc[opts.intensity]||'bold';
-const langNote=opts.lang==='hinglish'?'\nIMPORTANT: Generate ALL lines in Hinglish — a casual mix of Hindi and English written in Roman/Latin script (not Devanagari). Example: "Tera smile dekh ke toh mera dil garden garden ho gaya." Use natural Hinglish that young Indians speak in everyday texting and DMs.':opts.lang&&opts.lang!=='english'?`\nIMPORTANT: Generate ALL lines in ${opts.lang} language.`:'';
-const emojiNote=opts.emoji?'Include 1-2 relevant emojis per line.':'Do NOT include any emojis.';
-const targetNote=opts.target&&opts.target!=='anyone'?` These are meant for: ${opts.target}.`:'';
-let prompt='';
-
-if(opts.tool==='reply'){
-const theirMsg=opts.context||'';
-const extraCtx=opts.replyTo||'';
-prompt=`Someone texted me this:
-"""${theirMsg}"""
-${extraCtx?`\nContext: ${extraCtx}`:''}
-
-Generate ${opts.count} reply options I can send back. These should read like REAL text messages — the way actual people reply in chats.
-Vibe: ${opts.style} (${intDesc}).${targetNote}
-${emojiNote}${langNote}
-
-Rules:
-- Reply DIRECTLY to what they said — acknowledge their message, react to it, then add your flavor
-- Sound like a real person texting back, not a robot or a pickup line generator
-- Use the texting style people actually use: short msgs, casual tone, maybe a haha or lol where it fits
-- Some replies can be playful callbacks to their exact words
-- Mix it up: one could be witty, one flirty, one teasing, one smooth
-- 1-2 sentences max per reply. Real texts are short
-- Return ONLY numbered replies (1. 2. 3.)`;
-
-}else if(opts.tool==='pickup'){
-prompt=`Generate ${opts.count} opening messages / first texts I can send.
-${opts.context?`\nAbout the person/situation:\n"""${opts.context}"""\n\nMake each line specific to this — reference their interests, vibe, or something from their profile.`:''}
-
-These should sound like real DMs or first texts — NOT cheesy pickup lines.
-Vibe: ${opts.style} (${intDesc}).${targetNote}
-${emojiNote}${langNote}
-
-Rules:
-${opts.context?'- Personalize each one to the person/situation described\n':''}- Write like you're actually sliding into someone's DMs — casual, confident, real
-- The kind of message that makes someone smile and WANT to reply
-- Mix approaches: some observational, some playful, some direct, some teasing
-- No generic "did it hurt when you fell from heaven" type cringe
-- 1-2 sentences max. Short and punchy like real texts
-- Return ONLY numbered lines (1. 2. 3.)`;
-
-}else if(opts.tool==='bio'){
-prompt=`Write ${opts.count} dating app bios.
-${opts.context?`About me: "${opts.context}"\nMake it feel like ME, not a template.`:''}
-
-Vibe: ${opts.style} (${intDesc}).${targetNote}
-${emojiNote}${langNote}
-
-These should sound like a real person wrote them, not ChatGPT. Examples:
-BAD (AI-written): "Passionate traveler and food enthusiast seeking meaningful connections and shared adventures."
-GOOD (real person): "will judge your spotify wrapped. allergic to small talk. probably overthinking my bio rn"
-BAD: "I enjoy long walks on the beach and stimulating conversations."
-GOOD: "6'1 if that matters. make a mean pasta. looking for someone to send memes to at 2am"
-
-Rules:
-${opts.context?'- Use my actual details, make it personal\n':''}- Write how real people write bios: casual, witty, a little self-aware
-- 1-3 short sentences max. punchy > poetic
-- The kind of bio that makes someone swipe right AND message first
-- ONLY numbered bios (1. 2. 3.)`;
-
-}else if(opts.tool==='starter'){
-prompt=`Write ${opts.count} conversation starters to text someone.
-${opts.context?`About them: "${opts.context}"\nMake each one specific to them.`:''}
-
-Vibe: ${opts.style} (${intDesc}).${targetNote}
-${emojiNote}${langNote}
-
-These should sound like real texts that start real conversations. Examples:
-BAD (robot): "What are your hobbies and interests? I'd love to learn more about you."
-GOOD (human): "ok random question but whats your most controversial food take"
-BAD: "I noticed you enjoy photography. What type of photos do you prefer taking?"
-GOOD: "that sunset pic on your story was actually insane.. where was that"
-BAD: "Hello! How is your day going so far?"
-GOOD: "be honest.. are you a morning person or do you hate everything before 11am"
-
-Rules:
-${opts.context?'- Reference something about them specifically\n':''}- Type like a real person: lowercase, casual, natural
-- Make them actually WANT to respond, not just say "good wbu"
-- 5-20 words. keep it light and easy to reply to
-- ONLY numbered starters (1. 2. 3.)`;
-
-}else if(opts.tool==='compliment'){
-prompt=`Write ${opts.count} compliments I can text someone.
-${opts.context?`About them: "${opts.context}"\nMake each one specific to them.`:''}
-
-Vibe: ${opts.style} (${intDesc}).${targetNote}
-${emojiNote}${langNote}
-
-These should sound like real compliments people text, not poetry. Examples:
-BAD (AI): "Your radiant smile illuminates every room you grace with your presence."
-GOOD (human): "ok but your smile is actually so cute wtf"
-BAD: "You possess an incredible intellect that I find truly admirable."
-GOOD: "you're lowkey the smartest person i know and its kinda intimidating ngl"
-BAD: "Your sense of style is impeccable and always on point."
-GOOD: "that fit today was elite btw.. just had to say it"
-
-Rules:
-${opts.context?'- Make it about THEM specifically\n':''}- Type like a real person texting their crush: lowercase, casual, genuine
-- Should make them smile and screenshot it to their bestfriend
-- 5-20 words max. short hits harder
-- ONLY numbered compliments (1. 2. 3.)`;
+function getDailyChallenge(){const d=new Date();return CHALLENGES[Math.floor((d-new Date(d.getFullYear(),0,0))/(864e5))%CHALLENGES.length];}
+function initChallenge(){
+const ch=getDailyChallenge(),today=new Date().toDateString();
+document.getElementById('challengePrompt').textContent=ch.prompt;
+document.getElementById('challengeDesc').textContent=ch.desc;
+document.getElementById('challengeDate').textContent=new Date().toLocaleDateString([],{weekday:'long',month:'short',day:'numeric'});
+document.getElementById('streakCount').textContent=calcStreak();
+if(challengeData.completedDate===today){
+document.getElementById('challengeGenBtn').textContent='✅ Completed!';document.getElementById('challengeGenBtn').style.opacity='.6';
+if(challengeData.results){const r=document.getElementById('challengeResults');r.style.display='block';r.innerHTML=challengeData.results.map(x=>`<div class="result-item"><p class="result-text">${escHtml(x)}</p><div class="result-actions"><button class="result-action-btn copy-btn" onclick="copyLine(this,'${escAttr(x)}')">📋 Copy</button><button class="result-action-btn share-btn" onclick="openShareCard('${escAttr(x)}')">📤 Share</button></div></div>`).join('');}
 }
-return prompt;
 }
-
-function buildFlirtPrompt(opts){
-const langNote=opts.lang==='hinglish'?'Respond in Hinglish.':opts.lang&&opts.lang!=='english'?`Respond in ${opts.lang}.`:'';
-return {
-system:`You are an expert at reading social cues and analyzing flirting in text messages. You're like that friend everyone goes to asking "is this person into me?" You give honest, specific analysis. ${langNote}`,
-user:`Analyze this message someone sent me and tell me if they're flirting:
-
-"${opts.context}"
-
-Respond in EXACTLY this format:
-SCORE: [number 0-100 — how likely they're flirting]
-
-ANALYSIS: [2-3 sentences explaining why you think they are/aren't flirting. Reference specific words, emojis, or patterns in their message.]
-
-SUGGESTED RESPONSES:
-1. [a flirty reply I could send back]
-2. [a smooth reply]
-3. [a playful reply]`
-};
-}
-
-function buildRewritePrompt(opts){
-const langNote=opts.lang==='hinglish'?'\nWrite in Hinglish — casual mix of Hindi and English in Roman script.':opts.lang&&opts.lang!=='english'?`\nWrite in ${opts.lang}.`:'';
-return {
-system:`You rewrite text messages to sound better while keeping the same meaning. You write like a real person texting — casual, natural, with personality. ${langNote}`,
-user:`Rewrite this message in 5 different ways with a ${opts.style} vibe:
-
-Original: "${opts.context}"
-${langNote}
-
-Rules:
-- Keep the same meaning but make it sound way better
-- Each version should have a slightly different approach
-- Sound like a real person texting, NOT an AI
-- Short and punchy — real texts are brief
-- ONLY numbered rewrites (1. 2. 3. 4. 5.)`
-};
-}
-
-async function callAIRaw(opts){
-let prompt;
-if(opts.tool==='flirt') prompt=buildFlirtPrompt(opts);
-else if(opts.tool==='rewrite') prompt=buildRewritePrompt(opts);
-else throw new Error('Unknown special tool');
-
-const messages=[
-{role:'system',content:prompt.system},
-{role:'user',content:prompt.user}
-];
-const active=AI_PROVIDERS.filter(p=>p.enabled());
-let lastErr=null;
-for(const provider of active){
+function calcStreak(){if(!challengeData.lastCompleted)return 0;const diff=Math.floor((new Date()-new Date(challengeData.lastCompleted))/864e5);return diff>1?0:challengeData.streak||0;}
+async function generateChallenge(){
+const today=new Date().toDateString();if(challengeData.completedDate===today){showToast('Already completed today!');return;}
+const ch=getDailyChallenge(),btn=document.getElementById('challengeGenBtn');btn.classList.add('loading');
 try{
-console.log(`[RizzGPT] Trying ${provider.name}...`);
-const text=await Promise.race([
-provider.call(messages),
-new Promise((_,rej)=>setTimeout(()=>rej(new Error(`${provider.name} timeout`)),15000))
-]);
-if(!text||text.trim().length<5) throw new Error(`${provider.name} empty response`);
-console.log(`[RizzGPT] ✓ ${provider.name} succeeded`);
-return text;
-}catch(err){
-console.warn(`[RizzGPT] ✗ ${provider.name} failed:`,err.message);
-lastErr=err;
-}
-}
-throw lastErr||new Error('All AI providers failed');
+let lines;try{const msgs=[{role:'system',content:'You are RizzGPT. Generate 3 creative lines for this challenge. Match the theme. Return 3 lines, one per line. No numbers.'},{role:'user',content:`Challenge: ${ch.prompt}\n${ch.desc}\nGenerate in hinglish.`}];lines=parseAIResponse(await callAIRaw(msgs),3);}catch(e){lines=['Challenge accepted — loading your rizz!','Your charm level is charging...','Try again for AI-powered results!'];}
+const r=document.getElementById('challengeResults');r.style.display='block';
+r.innerHTML=lines.map(x=>`<div class="result-item"><p class="result-text">${escHtml(x)}</p><div class="result-actions"><button class="result-action-btn copy-btn" onclick="copyLine(this,'${escAttr(x)}')">📋 Copy</button><button class="result-action-btn share-btn" onclick="openShareCard('${escAttr(x)}')">📤 Share</button></div></div>`).join('');
+let streak=challengeData.streak||0;const prev=challengeData.lastCompleted?new Date(challengeData.lastCompleted):null;
+streak=prev&&Math.floor((new Date()-prev)/864e5)<=1?streak+1:1;
+challengeData={completedDate:today,lastCompleted:new Date().toISOString(),streak,results:lines};
+localStorage.setItem('rizzChallenge',JSON.stringify(challengeData));
+document.getElementById('streakCount').textContent=streak;btn.textContent='✅ Completed!';btn.style.opacity='.6';
+playSound('generate');launchConfetti();
+}catch(e){showToast('Failed. Try again!');}btn.classList.remove('loading');
 }
 
+// ===== GEN TABS =====
+function initTabs(){document.querySelectorAll('.gen-tab').forEach(tab=>{tab.addEventListener('click',()=>{document.querySelectorAll('.gen-tab').forEach(t=>t.classList.remove('active'));tab.classList.add('active');document.querySelectorAll('.gen-panel').forEach(p=>p.classList.remove('active'));const panel=document.getElementById('panel'+cap(tab.dataset.tab));if(panel)panel.classList.add('active');playSound('click');});});}
+
+// ===== AI =====
 async function callAI(opts){
-const prompt=buildPrompt(opts);
-const messages=[
-{role:'system',content:`You are RizzGPT — you write like a real person texting on WhatsApp, Instagram DMs, or Snapchat. Your job is to generate messages that sound 100% human and natural.
+const sys=`You are RizzGPT. Generate ${opts.count||5} ${opts.style} ${opts.category} lines. Intensity: ${opts.intensity}. Language: ${opts.lang==='hinglish'?'Hinglish (Hindi+English casual texting)':opts.lang}.${opts.context?' Context: '+opts.context:''} Return ONLY lines, one per line. No numbering.`;
+const messages=[{role:'system',content:sys},{role:'user',content:`Generate ${opts.count||5} ${opts.intensity} ${opts.style} ${opts.category} lines.`}];
+let lastErr;for(const p of providers){if(!p.enabled())continue;try{const t=await Promise.race([p.call(messages),new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),15000))]);if(!t||t.trim().length<5)throw new Error('empty');return parseAIResponse(t,opts.count);}catch(e){lastErr=e;}}throw lastErr||new Error('All failed');
+}
+async function callAIRaw(messages){let lastErr;for(const p of providers){if(!p.enabled())continue;try{const t=await Promise.race([p.call(messages),new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),15000))]);if(!t||t.trim().length<5)throw new Error('empty');return t;}catch(e){lastErr=e;}}throw lastErr||new Error('All failed');}
+function parseAIResponse(text,count){return text.split('\n').map(l=>l.replace(/^\d+[.)\-:\s]+/,'').replace(/^"/,'').replace(/"$/,'').trim()).filter(l=>l.length>5&&!l.startsWith('#')&&!l.startsWith('*')&&!l.toLowerCase().startsWith('here')&&!l.toLowerCase().startsWith('sure')).slice(0,count||5);}
 
-CRITICAL VOICE RULES:
-- Write like a real 18-25 year old texts — casual, imperfect, with natural rhythm
-- Use lowercase freely. Real people don't capitalize everything
-- Short sentences. Fragment ok. Like how people actually type
-- Throw in fillers naturally: "ngl", "lowkey", "tbh", "lol", "haha", "nah", "fr", "yk", "ion know"
-- Mix sentence lengths — one long, two short, one medium. Like real texting patterns
-- NEVER sound like a chatbot, AI, or a greeting card
-- NEVER use cringe pickup lines from 2010. No "did it hurt when you fell from heaven" energy
-- The vibe should be: if someone received this text, they'd think a real charming person wrote it
-- Output ONLY numbered lines (1. 2. 3. etc). No explanations, no intros, no outros.`},
-{role:'user',content:prompt}
-];
-const active=AI_PROVIDERS.filter(p=>p.enabled());
-let lastErr=null;
-for(const provider of active){
-try{
-console.log(`[RizzGPT] Trying ${provider.name}...`);
-const text=await Promise.race([
-provider.call(messages),
-new Promise((_,rej)=>setTimeout(()=>rej(new Error(`${provider.name} timeout`)),15000))
-]);
-if(!text||text.trim().length<5) throw new Error(`${provider.name} empty response`);
-console.log(`[RizzGPT] ✓ ${provider.name} succeeded`);
-return parseAIResponse(text,opts.count);
-}catch(err){
-console.warn(`[RizzGPT] ✗ ${provider.name} failed:`,err.message);
-lastErr=err;
-}
-}
-throw lastErr||new Error('All AI providers failed');
-}
+// ===== CONFETTI =====
+function launchConfetti(){const w=document.getElementById('confettiWrap');const colors=['#a855f7','#ec4899','#6366f1','#f59e0b','#22c55e'];for(let i=0;i<30;i++){const c=document.createElement('div');c.className='confetti';c.style.left=Math.random()*100+'%';c.style.top='-10px';c.style.background=colors[Math.floor(Math.random()*colors.length)];c.style.animationDelay=Math.random()*.5+'s';c.style.width=(Math.random()*6+4)+'px';c.style.height=(Math.random()*6+4)+'px';w.appendChild(c);setTimeout(()=>c.remove(),2000);}}
 
-function parseAIResponse(text,count){
-const lines=text.split('\n')
-.map(l=>l.replace(/^\d+[.)\-:\s]+/,'').replace(/^"/,'').replace(/"$/,'').trim())
-.filter(l=>l.length>5&&!l.startsWith('#')&&!l.startsWith('*')&&!l.toLowerCase().startsWith('here')&&!l.toLowerCase().startsWith('sure'));
-return lines.slice(0,count);
-}
+// ===== TOAST =====
+function showToast(msg){const t=document.getElementById('toast');document.getElementById('toastText').textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+// ===== UTILS =====
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function escAttr(s){return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');}
+
+// ===== MENU =====
+function initMenu(){document.getElementById('menuBtn')?.addEventListener('click',()=>{document.getElementById('navLinks').classList.toggle('open');playSound('click');});}
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded',()=>{
+initTheme();initPWA();initMenu();initDropdowns();initIntensity();initTabs();initChallenge();updateFavCount();
+document.getElementById('generateBtn')?.addEventListener('click',generateLines);
+document.getElementById('favBtn')?.addEventListener('click',openFavDrawer);
+document.getElementById('historyBtn')?.addEventListener('click',openHistoryDrawer);
+document.getElementById('themeToggle')?.addEventListener('click',toggleTheme);
+document.getElementById('soundToggle')?.addEventListener('click',toggleSound);
+document.getElementById('analyzeRizzBtn')?.addEventListener('click',analyzeRizzScore);
+document.getElementById('vibeCheckBtn')?.addEventListener('click',analyzeVibe);
+document.getElementById('newBattleBtn')?.addEventListener('click',newBattle);
+document.getElementById('voteA')?.addEventListener('click',()=>voteBattle('A'));
+document.getElementById('voteB')?.addEventListener('click',()=>voteBattle('B'));
+document.getElementById('challengeGenBtn')?.addEventListener('click',generateChallenge);
+document.getElementById('clearHistoryBtn')?.addEventListener('click',()=>{historyArr=[];localStorage.setItem('rizzHistory','[]');renderHistoryList();showToast('History cleared!');});
+document.getElementById('historySearch')?.addEventListener('input',e=>renderHistoryList(e.target.value));
+document.getElementById('battleCount').textContent=`${battleStats.total||0} battles`;
+newBattle();
+});

@@ -267,7 +267,7 @@ ${chatLog}
 
 Generate 5 replies I ("Me") can send next. Read the FULL conversation above and reply naturally to what ${lastSender==='me'?'I':'they'} just said.
 
-Vibe: ${style} (${intDesc}).
+Vibe: ${style} (${intDesc}).${window._scenarioContext?'\nScenario context: '+window._scenarioContext:''}
 ${langNote}
 
 These must sound like real texts from a real person chatting. Short, casual, natural. React to what they actually said — use their words, tease them, be specific to THIS conversation. ONLY numbered replies (1. 2. 3. 4. 5.)`;
@@ -845,4 +845,75 @@ window._ssParsed=null;
 
 function closeSSPanel(){
 document.getElementById('ssPanel').style.display='none';
+}
+
+// ===== CONVERSATION SCENARIOS =====
+const SCENARIOS=[
+{emoji:'💬',title:'First DM to Crush',desc:'They posted a story and you want to slide in smooth.',messages:[{sender:'them',text:'*posted a sunset photo on their story*'}],context:'You\'re DMing your crush for the first time after they posted a story.'},
+{emoji:'🔥',title:'Bumble/Tinder Match',desc:'You just matched! Open with something memorable.',messages:[{sender:'them',text:'We matched! 👋'}],context:'You just matched on a dating app and need the perfect opener.'},
+{emoji:'📱',title:'Getting Their Number',desc:'You\'ve been chatting and want to take it offline.',messages:[{sender:'them',text:'haha you\'re actually funny'},{sender:'me',text:'I try my best 😎'},{sender:'them',text:'so what do you do for fun?'}],context:'You\'ve been chatting for a bit and want to smoothly ask for their number.'},
+{emoji:'🌹',title:'After First Date',desc:'The date went well — follow up perfectly.',messages:[{sender:'them',text:'I had a really good time tonight 😊'},{sender:'me',text:'Me too! The food was amazing'},{sender:'them',text:'we should definitely do this again'}],context:'First date went great, you\'re texting after getting home.'},
+{emoji:'😴',title:'Late Night Texts',desc:'It\'s 11 PM and you want to keep them up talking.',messages:[{sender:'them',text:'can\'t sleep 😩'},{sender:'me',text:'same here, what are you up to?'},{sender:'them',text:'just scrolling through my phone thinking'}],context:'Late night conversation, intimate and flirty vibes.'},
+{emoji:'❄️',title:'Reviving a Dead Chat',desc:'They stopped replying — win them back.',messages:[{sender:'me',text:'hey how are you?'},{sender:'them',text:'good hbu'},{sender:'me',text:'doing well! seen any good movies lately?'},{sender:'them',text:'not really'}],context:'The conversation is dying with dry replies. Need to revive it.'},
+{emoji:'😘',title:'Flirty Good Morning',desc:'Start their day with butterflies.',messages:[],context:'You want to send the perfect good morning text to someone you\'re interested in.'},
+{emoji:'🎭',title:'Playing Hard to Get',desc:'They\'re being mysterious — match their energy.',messages:[{sender:'them',text:'maybe I\'ll tell you... maybe I won\'t 😏'},{sender:'me',text:'oh so we\'re playing games now?'},{sender:'them',text:'who said anything about games? 😇'}],context:'They\'re being playfully mysterious and hard to get.'},
+{emoji:'💔',title:'Ex Texted Back',desc:'Your ex reached out — handle it with class.',messages:[{sender:'them',text:'hey... can we talk?'}],context:'Your ex texted you out of nowhere. Respond with confidence.'},
+{emoji:'🤝',title:'Friend to More',desc:'You want to shift from friendship to something more.',messages:[{sender:'them',text:'you\'re literally my best friend'},{sender:'me',text:'haha yeah you\'re pretty cool too'},{sender:'them',text:'what would I do without you'}],context:'You\'re in the friend zone and want to hint at deeper feelings.'},
+{emoji:'🎉',title:'Party Invite',desc:'Invite them to hang out without being too forward.',messages:[{sender:'them',text:'this weekend is gonna be so boring'},{sender:'me',text:'why what\'s up?'},{sender:'them',text:'literally nothing to do'}],context:'They\'re bored this weekend and you want to invite them somewhere.'},
+{emoji:'📸',title:'Replied to Your Story',desc:'They reacted to your photo/story — capitalize on it.',messages:[{sender:'them',text:'🔥🔥🔥'},{sender:'them',text:'where is this??'}],context:'They replied to your Instagram/Snapchat story with fire emojis.'}
+];
+
+function initScenarios(){
+const grid=document.getElementById('scenarioGrid');
+if(!grid)return;
+grid.innerHTML=SCENARIOS.map((s,i)=>`
+<div class="scenario-card" data-idx="${i}">
+<div class="scenario-card-emoji">${s.emoji}</div>
+<div class="scenario-card-title">${s.title}</div>
+<div class="scenario-card-desc">${s.desc}</div>
+</div>`).join('');
+grid.querySelectorAll('.scenario-card').forEach(card=>{
+card.addEventListener('click',()=>{
+const idx=parseInt(card.dataset.idx);
+loadScenario(SCENARIOS[idx]);
+closeScenarioOverlay();
+});
+});
+document.getElementById('scenarioBtn')?.addEventListener('click',openScenarioOverlay);
+document.getElementById('closeScenario')?.addEventListener('click',closeScenarioOverlay);
+}
+
+function openScenarioOverlay(){
+document.getElementById('scenarioOverlay').style.display='flex';
+}
+function closeScenarioOverlay(){
+document.getElementById('scenarioOverlay').style.display='none';
+}
+function loadScenario(scenario){
+messages=[];
+scenario.messages.forEach(m=>{
+messages.push({id:Date.now()+Math.random()*1000,sender:m.sender,text:m.text,time:new Date()});
+});
+if(scenario.title){
+const name=scenario.title;
+document.getElementById('navName').textContent=name;
+document.getElementById('navAvatar').textContent=scenario.emoji;
+}
+renderMessages();
+saveChat();
+scrollToBottom();
+hideHint();
+showToast(`Scenario loaded: ${scenario.title}`);
+window._scenarioContext=scenario.context;
+}
+
+// patch generateReply to use scenario context
+const _origBuildSysPrompt=typeof buildSystemPrompt==='function'?buildSystemPrompt:null;
+
+// add scenario init
+const _origDOMLoaded=document.readyState;
+if(document.readyState==='loading'){
+document.addEventListener('DOMContentLoaded',initScenarios);
+}else{
+initScenarios();
 }
