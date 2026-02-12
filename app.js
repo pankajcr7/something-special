@@ -47,34 +47,34 @@ const AI_CONNECTED=true;
 
 document.addEventListener('DOMContentLoaded',()=>{
 const nav=document.getElementById('navbar');
-const mbtn=document.getElementById('mobileMenuBtn');
+const mbtn=document.getElementById('menuBtn');
 const nlinks=document.getElementById('navLinks');
 window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',window.scrollY>50));
-mbtn.addEventListener('click',()=>{nlinks.classList.toggle('open');mbtn.classList.toggle('active')});
-nlinks.querySelectorAll('.nav-link').forEach(l=>l.addEventListener('click',()=>{nlinks.classList.remove('open');mbtn.classList.remove('active')}));
+if(mbtn)mbtn.addEventListener('click',()=>{nlinks.classList.toggle('open');mbtn.classList.toggle('active')});
+if(nlinks)nlinks.querySelectorAll('.nav-link').forEach(l=>l.addEventListener('click',()=>{nlinks.classList.remove('open');if(mbtn)mbtn.classList.remove('active')}));
 
-document.querySelectorAll('.tool-card').forEach(c=>c.addEventListener('click',()=>switchTool(c.dataset.tool)));
-document.querySelectorAll('.style-btn').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.style-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');curStyle=b.dataset.style}));
+document.querySelectorAll('.tool-pill[data-tool]').forEach(c=>c.addEventListener('click',()=>switchTool(c.dataset.tool)));
+document.querySelectorAll('.style-chip').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.style-chip').forEach(x=>x.classList.remove('active'));b.classList.add('active');curStyle=b.dataset.style}));
 
-const sl=document.getElementById('intensitySlider'),labs=document.querySelectorAll('.intensity-label');
-sl.addEventListener('input',()=>labs.forEach((l,i)=>l.classList.toggle('active',i===sl.value-1)));
+const sl=document.getElementById('intensitySlider'),labs=document.querySelectorAll('.i-label');
+if(sl)sl.addEventListener('input',()=>labs.forEach((l,i)=>l.classList.toggle('active',i===sl.value-1)));
 
 const ci=document.getElementById('contextInput'),cc=document.getElementById('charCount');
-ci.addEventListener('input',()=>cc.textContent=ci.value.length);
+if(ci)ci.addEventListener('input',()=>cc.textContent=ci.value.length);
 
-heroType();scrollAnim();cursorGlow();countUp();dupTest();renderSuggestions('pickup');
+countUp();renderSuggestions('pickup');
 });
 
 function switchTool(t){
 curTool=t;const c=toolCfg[t];
-document.querySelectorAll('.tool-card').forEach(x=>x.classList.remove('active'));
-document.querySelector(`[data-tool="${t}"]`).classList.add('active');
+document.querySelectorAll('.tool-pill[data-tool]').forEach(x=>x.classList.remove('active'));
+document.querySelectorAll(`[data-tool="${t}"]`).forEach(x=>x.classList.add('active'));
 document.getElementById('panelTitleText').textContent=c.title;
 document.getElementById('contextLabel').textContent=c.ctxLabel;
 document.getElementById('contextInput').placeholder=c.ctxPlace;
 document.getElementById('replyGroup').style.display=c.reply?'block':'none';
 renderSuggestions(t);
-document.getElementById('outputContent').innerHTML=`<div class="output-empty"><div class="empty-icon">✨</div><p class="empty-title">Your ${t==='bio'?'bios':'lines'} will appear here</p><p class="empty-subtitle">Fill in the details and hit generate!</p></div>`;
+document.getElementById('outputContent').innerHTML=`<div class="output-empty"><div class="empty-icon">✨</div><p>Your ${t==='bio'?'bios':'lines'} will appear here</p></div>`;
 document.getElementById('outputFooter').style.display='none';
 document.getElementById('copyAllBtn').style.display='none';
 document.getElementById('generator').scrollIntoView({behavior:'smooth'});
@@ -171,44 +171,13 @@ else navigator.clipboard.writeText(t).then(()=>showToast('Copied for sharing!'))
 
 function showToast(m){const t=document.getElementById('toast');document.getElementById('toastText').textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
 
-function toggleFaq(btn){
-const item=btn.parentElement,active=item.classList.contains('active');
-document.querySelectorAll('.faq-item').forEach(i=>{i.classList.remove('active');i.querySelector('.faq-answer').style.maxHeight='0'});
-if(!active){item.classList.add('active');const a=item.querySelector('.faq-answer');a.style.maxHeight=a.scrollHeight+'px'}
-}
-
-const hLines=['"If beauty were time, you\'d be an eternity."','"Are you a magician? Everyone disappears when I see you."','"I didn\'t believe in love at first sight... until now."','"You must be tired — running through my mind all day."','"Your smile is like the sunrise — it lights up everything."','"I\'m not a photographer, but I can picture us together."','"Are you a 45-degree angle? Because you\'re a-cute."','"My love for you is like pi — infinite and irrational."'];
-let hIdx=0;
-
-function heroType(){
-const el=document.getElementById('previewLine');
-function go(){const line=hLines[hIdx];el.textContent='';let i=0;
-function ch(){if(i<line.length){el.textContent+=line[i];i++;setTimeout(ch,30+Math.random()*20)}
-else setTimeout(()=>{hIdx=(hIdx+1)%hLines.length;go()},3000)}ch()}go();
-}
-
-function scrollAnim(){
-const obs=new IntersectionObserver(e=>e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('vis')}),{threshold:0.1});
-document.querySelectorAll('.step-card,.feature-card,.example-card,.section-header').forEach(el=>{el.style.opacity='0';el.style.transform='translateY(20px)';el.style.transition='all 0.6s ease';obs.observe(el)});
-const s=document.createElement('style');s.textContent='.vis{opacity:1!important;transform:translateY(0)!important}';document.head.appendChild(s);
-}
-
-function cursorGlow(){
-const g=document.getElementById('cursorGlow');let mx=0,my=0,gx=0,gy=0;
-document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY});
-(function anim(){gx+=(mx-gx)*0.08;gy+=(my-gy)*0.08;g.style.left=gx+'px';g.style.top=gy+'px';requestAnimationFrame(anim)})();
-if(window.innerWidth<768)g.style.display='none';
-}
-
 function countUp(){
-const obs=new IntersectionObserver(e=>e.forEach(x=>{if(x.isIntersecting){const el=x.target,tgt=+el.dataset.count,st=performance.now();
+const obs=new IntersectionObserver(e=>e.forEach(x=>{if(x.isIntersecting){const el=x.target,tgt=+el.dataset.target,st=performance.now();
 (function up(now){const p=Math.min((now-st)/2000,1),e2=1-Math.pow(1-p,3),cur=Math.floor(e2*tgt);
 if(tgt>=1e6)el.textContent=(cur/1e6).toFixed(1)+'M+';else if(tgt>=1e3)el.textContent=Math.floor(cur/1e3)+'K+';else el.textContent=cur+'+';
 if(p<1)requestAnimationFrame(up)})(st);obs.unobserve(el)}}),{threshold:0.5});
-document.querySelectorAll('.stat-number').forEach(el=>obs.observe(el));
+document.querySelectorAll('.stat-num').forEach(el=>obs.observe(el));
 }
-
-function dupTest(){const t=document.querySelector('.testimonials-track');if(t)t.innerHTML+=t.innerHTML}
 
 // ============================================================
 // AI PROVIDER FALLBACK CHAIN
