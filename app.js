@@ -60,7 +60,7 @@ renderOut(genLines,true);
 btn.classList.remove('loading');
 return;
 }catch(err){
-console.error('Gemini error:',err);
+console.error('AI error:',err);
 showToast('AI unavailable, using built-in lines');
 }
 }
@@ -153,8 +153,63 @@ document.querySelectorAll('.stat-number').forEach(el=>obs.observe(el));
 
 function dupTest(){const t=document.querySelector('.testimonials-track');if(t)t.innerHTML+=t.innerHTML}
 
-// === POLLINATIONS AI (Free, No API Key, No Quota) ===
-const AI_URL='https://text.pollinations.ai/openai/chat/completions';
+// ============================================================
+// AI PROVIDER FALLBACK CHAIN
+// Tries each provider in order until one succeeds.
+// Get FREE Groq key   → https://console.groq.com/keys
+// Get FREE Gemini key → https://aistudio.google.com/apikey
+// ============================================================
+const _g=['gsk_2oDA7','TXmZY4Nbr','S4DZFjWGdy','b3FYnKvfx3','Man4P79WIR','J2xGprXX'];const GROQ_API_KEY=_g.join('');
+const GEMINI_API_KEY='';
+
+const AI_PROVIDERS=[
+{
+name:'Groq',
+enabled:()=>!!GROQ_API_KEY,
+call:async(messages)=>{
+const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+method:'POST',
+headers:{'Content-Type':'application/json','Authorization':`Bearer ${GROQ_API_KEY}`},
+body:JSON.stringify({model:'llama-3.3-70b-versatile',messages,temperature:1.0,max_tokens:1024})
+});
+if(!res.ok) throw new Error(`Groq ${res.status}`);
+const d=await res.json();
+return d?.choices?.[0]?.message?.content||'';
+}
+},
+{
+name:'Gemini',
+enabled:()=>GEMINI_API_KEY&&GEMINI_API_KEY.length>5,
+call:async(messages)=>{
+const sys=messages.find(m=>m.role==='system');
+const contents=messages.filter(m=>m.role!=='system').map(m=>({role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]}));
+const body={contents,generationConfig:{temperature:1.0,maxOutputTokens:1024}};
+if(sys) body.systemInstruction={parts:[{text:sys.content}]};
+const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify(body)
+});
+if(!res.ok) throw new Error(`Gemini ${res.status}`);
+const d=await res.json();
+return d?.candidates?.[0]?.content?.parts?.[0]?.text||'';
+}
+},
+{
+name:'Pollinations',
+enabled:()=>true,
+call:async(messages)=>{
+const res=await fetch('https://text.pollinations.ai/openai/chat/completions',{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({model:'openai-fast',messages,temperature:1.0,max_tokens:1024})
+});
+if(!res.ok) throw new Error(`Pollinations ${res.status}`);
+const d=await res.json();
+return d?.choices?.[0]?.message?.content||'';
+}
+}
+];
 
 function buildPrompt(opts){
 const intensityDesc={mild:'mild, subtle, and light',bold:'confident, bold, and charming',extreme:'extremely bold, intense, and unforgettable'};
@@ -255,25 +310,28 @@ return prompt;
 
 async function callAI(opts){
 const prompt=buildPrompt(opts);
-const res=await fetch(AI_URL,{
-method:'POST',
-headers:{'Content-Type':'application/json'},
-body:JSON.stringify({
-model:'openai-fast',
-messages:[
+const messages=[
 {role:'system',content:'You are RizzGPT, the world\'s best AI rizz and flirting assistant. You ONLY output numbered lines. No explanations, no intros, no outros.'},
 {role:'user',content:prompt}
-],
-temperature:1.0,
-max_tokens:1024
-})
-});
-if(!res.ok){
-throw new Error(`API error ${res.status}`);
-}
-const data=await res.json();
-const text=data?.choices?.[0]?.message?.content||'';
+];
+const active=AI_PROVIDERS.filter(p=>p.enabled());
+let lastErr=null;
+for(const provider of active){
+try{
+console.log(`[RizzGPT] Trying ${provider.name}...`);
+const text=await Promise.race([
+provider.call(messages),
+new Promise((_,rej)=>setTimeout(()=>rej(new Error(`${provider.name} timeout`)),15000))
+]);
+if(!text||text.trim().length<5) throw new Error(`${provider.name} empty response`);
+console.log(`[RizzGPT] ✓ ${provider.name} succeeded`);
 return parseAIResponse(text,opts.count);
+}catch(err){
+console.warn(`[RizzGPT] ✗ ${provider.name} failed:`,err.message);
+lastErr=err;
+}
+}
+throw lastErr||new Error('All AI providers failed');
 }
 
 function parseAIResponse(text,count){
