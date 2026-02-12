@@ -712,18 +712,19 @@ ssBtn.classList.remove('loading');
 
 async function runOCR(file){
 showToast('Reading screenshot...');
+if(typeof Tesseract==='undefined'){
+throw new Error('OCR library still loading — wait a moment and try again');
+}
 try{
-const worker=await Tesseract.createWorker('eng',1,{
-workerPath:'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js',
-corePath:'https://cdn.jsdelivr.net/npm/tesseract.js-core@5/tesseract-core.wasm.js',
-});
+const worker=await Tesseract.createWorker('eng');
 const {data:{text}}=await worker.recognize(file);
 await worker.terminate();
 console.log('[OCR] Raw text:',text);
+if(!text||text.trim().length<3) throw new Error('No text found');
 return text.trim();
 }catch(err){
 console.error('[OCR] Failed:',err);
-throw new Error('OCR failed — try a clearer image');
+throw new Error('Could not read text from image — try a clearer screenshot');
 }
 }
 
