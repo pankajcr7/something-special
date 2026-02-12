@@ -313,48 +313,65 @@ ${opts.context?'- Personalize each one to the person/situation described\n':''}-
 - Return ONLY numbered lines (1. 2. 3.)`;
 
 }else if(opts.tool==='bio'){
-prompt=`Write ${opts.count} dating app bios that sound like a real person wrote them, not a marketing agency.
-${opts.context?`\nAbout me:\n"""${opts.context}"""\n\nUse these details to make each bio feel personal and specific to who I am.`:''}
+prompt=`Write ${opts.count} dating app bios.
+${opts.context?`About me: "${opts.context}"\nMake it feel like ME, not a template.`:''}
 
 Vibe: ${opts.style} (${intDesc}).${targetNote}
 ${emojiNote}${langNote}
 
+These should sound like a real person wrote them, not ChatGPT. Examples:
+BAD (AI-written): "Passionate traveler and food enthusiast seeking meaningful connections and shared adventures."
+GOOD (real person): "will judge your spotify wrapped. allergic to small talk. probably overthinking my bio rn"
+BAD: "I enjoy long walks on the beach and stimulating conversations."
+GOOD: "6'1 if that matters. make a mean pasta. looking for someone to send memes to at 2am"
+
 Rules:
-${opts.context?'- Weave in real details from my description — make it feel authentically me\n':''}- Sound like a real person, not a template. Personality > perfection
-- The kind of bio that makes someone think "ok this person is actually interesting"
-- Mix formats: one-liners, bullet-style, short paragraph — keep it fresh
-- 2-3 sentences max. Nobody reads long bios
-- Works for Tinder, Bumble, Hinge — that casual dating app energy
-- Return ONLY numbered bios (1. 2. 3.)`;
+${opts.context?'- Use my actual details, make it personal\n':''}- Write how real people write bios: casual, witty, a little self-aware
+- 1-3 short sentences max. punchy > poetic
+- The kind of bio that makes someone swipe right AND message first
+- ONLY numbered bios (1. 2. 3.)`;
 
 }else if(opts.tool==='starter'){
-prompt=`Write ${opts.count} conversation starters — the kind of message that breaks the ice and actually gets a reply.
-${opts.context?`\nAbout the person/situation:\n"""${opts.context}"""\n\nTailor each starter to something specific about them.`:''}
+prompt=`Write ${opts.count} conversation starters to text someone.
+${opts.context?`About them: "${opts.context}"\nMake each one specific to them.`:''}
 
 Vibe: ${opts.style} (${intDesc}).${targetNote}
 ${emojiNote}${langNote}
 
+These should sound like real texts that start real conversations. Examples:
+BAD (robot): "What are your hobbies and interests? I'd love to learn more about you."
+GOOD (human): "ok random question but whats your most controversial food take"
+BAD: "I noticed you enjoy photography. What type of photos do you prefer taking?"
+GOOD: "that sunset pic on your story was actually insane.. where was that"
+BAD: "Hello! How is your day going so far?"
+GOOD: "be honest.. are you a morning person or do you hate everything before 11am"
+
 Rules:
-${opts.context?'- Reference something specific about them — shows you actually paid attention\n':''}- These should feel like natural first messages, not interview questions
-- Ask something they'd actually WANT to answer, or say something that sparks curiosity
-- Mix it up: some are questions, some are observations, some are playful statements
-- The goal is to start a real conversation, not just get a "thanks"
-- 1-2 sentences max. Keep it light
-- Return ONLY numbered starters (1. 2. 3.)`;
+${opts.context?'- Reference something about them specifically\n':''}- Type like a real person: lowercase, casual, natural
+- Make them actually WANT to respond, not just say "good wbu"
+- 5-20 words. keep it light and easy to reply to
+- ONLY numbered starters (1. 2. 3.)`;
 
 }else if(opts.tool==='compliment'){
-prompt=`Write ${opts.count} compliments that sound genuine — like something you'd actually say to someone you like, not a Hallmark card.
-${opts.context?`\nAbout the person:\n"""${opts.context}"""\n\nMake each compliment specific to who they actually are.`:''}
+prompt=`Write ${opts.count} compliments I can text someone.
+${opts.context?`About them: "${opts.context}"\nMake each one specific to them.`:''}
 
 Vibe: ${opts.style} (${intDesc}).${targetNote}
 ${emojiNote}${langNote}
 
+These should sound like real compliments people text, not poetry. Examples:
+BAD (AI): "Your radiant smile illuminates every room you grace with your presence."
+GOOD (human): "ok but your smile is actually so cute wtf"
+BAD: "You possess an incredible intellect that I find truly admirable."
+GOOD: "you're lowkey the smartest person i know and its kinda intimidating ngl"
+BAD: "Your sense of style is impeccable and always on point."
+GOOD: "that fit today was elite btw.. just had to say it"
+
 Rules:
-${opts.context?'- Reference real things about them — generic compliments feel fake\n':''}- Sound like a real person genuinely appreciating someone, not performing
-- The kind of compliment that catches someone off guard in the best way
-- Mix: some about personality, some about energy/vibe, some about specific things
-- 1-2 sentences max. Genuine compliments don't need to be essays
-- Return ONLY numbered compliments (1. 2. 3.)`;
+${opts.context?'- Make it about THEM specifically\n':''}- Type like a real person texting their crush: lowercase, casual, genuine
+- Should make them smile and screenshot it to their bestfriend
+- 5-20 words max. short hits harder
+- ONLY numbered compliments (1. 2. 3.)`;
 }
 return prompt;
 }
