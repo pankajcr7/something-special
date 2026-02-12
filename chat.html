@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RizzGPT Chat — AI Reply Generator</title>
+    <meta name="description" content="Paste your chat conversation and let AI generate the perfect reply. Reads full context for natural, human-like responses.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="chat.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💜</text></svg>">
+</head>
+<body>
+
+    <nav class="chat-nav">
+        <a href="index.html" class="nav-back">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            RizzGPT
+        </a>
+        <div class="nav-title">
+            <div class="nav-avatar" id="navAvatar">S</div>
+            <div class="nav-info">
+                <span class="nav-name" id="navName">Chat Simulator</span>
+                <span class="nav-status">AI-powered replies</span>
+            </div>
+        </div>
+        <button class="nav-btn" id="settingsToggle" title="Settings">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        </button>
+    </nav>
+
+    <div class="settings-panel" id="settingsPanel">
+        <div class="settings-inner">
+            <div class="setting-group">
+                <label>Their Name</label>
+                <input type="text" id="theirName" placeholder="e.g., Sarah" maxlength="20">
+            </div>
+            <div class="setting-group">
+                <label>Style</label>
+                <div class="style-chips">
+                    <button class="chip active" data-style="smooth">😎 Smooth</button>
+                    <button class="chip" data-style="funny">😂 Funny</button>
+                    <button class="chip" data-style="romantic">❤️ Romantic</button>
+                    <button class="chip" data-style="bold">🔥 Bold</button>
+                    <button class="chip" data-style="savage">💀 Savage</button>
+                    <button class="chip" data-style="sweet">🍯 Sweet</button>
+                </div>
+            </div>
+            <div class="setting-group">
+                <label>Language</label>
+                <select id="chatLang">
+                    <option value="hinglish" selected>Hinglish</option>
+                    <option value="english">English</option>
+                    <option value="hindi">Hindi</option>
+                    <option value="spanish">Spanish</option>
+                    <option value="french">French</option>
+                </select>
+            </div>
+            <div class="setting-row">
+                <label>Intensity</label>
+                <div class="intensity-pills">
+                    <button class="pill" data-int="mild">Mild</button>
+                    <button class="pill active" data-int="bold">Bold</button>
+                    <button class="pill" data-int="extreme">Extreme</button>
+                </div>
+            </div>
+            <button class="clear-chat-btn" id="clearChat">Clear Chat</button>
+        </div>
+    </div>
+
+    <div class="chat-container" id="chatContainer">
+        <div class="chat-messages" id="chatMessages">
+            <div class="chat-date">Today</div>
+            <div class="chat-hint">
+                <p>Add messages to build a conversation, then generate AI replies</p>
+                <div class="hint-examples">
+                    <button class="hint-btn" data-sender="them" data-text="heyy whats up">+ "heyy whats up"</button>
+                    <button class="hint-btn" data-sender="them" data-text="you're kinda cute ngl">+ "you're kinda cute ngl"</button>
+                    <button class="hint-btn" data-sender="them" data-text="wanna hang out sometime?">+ "wanna hang out sometime?"</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="ai-replies-panel" id="aiReplies" style="display:none;">
+            <div class="ai-replies-header">
+                <span class="ai-replies-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                    AI Suggestions
+                </span>
+                <button class="ai-replies-close" id="closeReplies">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="ai-replies-list" id="aiRepliesList"></div>
+            <button class="ai-regen-btn" id="regenBtn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                Regenerate
+            </button>
+        </div>
+    </div>
+
+    <div class="chat-input-area">
+        <div class="sender-toggle">
+            <button class="sender-btn active" data-sender="them" id="senderThem">
+                <span class="sender-dot them-dot"></span>
+                Them
+            </button>
+            <button class="sender-btn" data-sender="me" id="senderMe">
+                <span class="sender-dot me-dot"></span>
+                Me
+            </button>
+        </div>
+        <div class="input-row">
+            <textarea class="chat-textarea" id="msgInput" placeholder="Type their message..." rows="1" maxlength="500"></textarea>
+            <button class="send-btn" id="sendBtn" title="Add message">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+            <button class="ai-btn" id="aiBtn" title="Generate AI reply">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+        <span id="toastText">Copied!</span>
+    </div>
+
+    <script src="chat.js"></script>
+</body>
+</html>

@@ -583,6 +583,19 @@ body {
     box-shadow: 0 0 20px rgba(168, 85, 247, 0.1);
 }
 
+a.chat-tool-card {
+    text-decoration: none;
+    background: rgba(99, 102, 241, 0.06);
+    border: 1px dashed rgba(99, 102, 241, 0.3);
+    position: relative;
+}
+
+a.chat-tool-card:hover {
+    background: rgba(99, 102, 241, 0.12);
+    border-color: var(--accent-secondary);
+    border-style: solid;
+}
+
 .tool-icon {
     font-size: 1.8rem;
 }
