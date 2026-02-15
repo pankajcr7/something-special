@@ -2,581 +2,325 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RizzGPT - #1 Free AI Rizz Generator | Pickup Lines, Flirty Texts & Replies</title>
-    <meta name="description" content="Free AI Rizz Generator - Create killer pickup lines, flirty texts, witty replies & dating bios instantly. No signup needed. Powered by AI.">
-    <meta name="theme-color" content="#a855f7">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>RizzGPT - AI Rizz Coach</title>
+    <meta name="description" content="Level up your dating game with AI. Pickup lines, reply generator, and chat coach.">
+    <meta name="theme-color" content="#0a0a0f">
     <link rel="manifest" href="manifest.json">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
-    <meta property="og:title" content="RizzGPT - AI Rizz Generator">
-    <meta property="og:description" content="Generate killer pickup lines, flirty texts & replies with AI">
-    <meta property="og:type" content="website">
-    <meta name="twitter:card" content="summary_large_image">
+    <style>
+        /* Mobile App Layout Overrides */
+        body { overflow: hidden; height: 100vh; display: flex; flex-direction: column; background: var(--bg); }
+        .app-container { flex: 1; overflow-y: auto; overflow-x: hidden; position: relative; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            height: 64px;
+            background: rgba(10,10,15,0.94);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding-bottom: env(safe-area-inset-bottom);
+            z-index: 100;
+        }
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text3);
+            font-size: 0.65rem;
+            font-weight: 600;
+            gap: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .nav-item svg { width: 22px; height: 22px; stroke-width: 2; transition: all 0.2s; }
+        .nav-item.active { color: var(--accent); }
+        .nav-item.active svg { stroke: var(--accent); fill: rgba(168,85,247,0.15); transform: translateY(-2px); }
+
+        /* Views */
+        .app-view { display: none; padding-bottom: 20px; animation: fadeIn 0.2s ease; }
+        .app-view.active { display: block; }
+
+        /* Header logic */
+        .app-header {
+            position: sticky; top: 0; z-index: 90;
+            background: rgba(10,10,15,0.92);
+            backdrop-filter: blur(12px);
+            padding: 12px 16px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+        .header-logo { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.2rem; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .header-actions { display: flex; gap: 12px; }
+        .icon-btn { background: none; border: none; color: var(--text); cursor: pointer; }
+
+        /* Mobile specific adjustments to existing components */
+        .hero-section { padding: 20px 0 30px; min-height: auto; }
+        .hero-title { font-size: 2.2rem; }
+        .gen-section { padding-top: 10px; }
+        .container { padding: 0 16px; }
+        .tools-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .tool-card { padding: 16px; min-height: 100px; }
+        
+        /* Chat iframe */
+        .chat-frame { width: 100%; height: 100%; border: none; display: block; }
+        #viewChat { height: 100%; overflow: hidden; padding-bottom: 0; }
+        
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
 </head>
 <body>
-    <!-- PWA Install Banner -->
-    <div class="pwa-banner" id="pwaBanner" style="display:none">
-        <div class="pwa-banner-inner">
-            <span class="pwa-icon">📲</span>
-            <div class="pwa-text">
-                <strong>Install RizzGPT</strong>
-                <span>Add to home screen for quick access</span>
-            </div>
-            <button class="pwa-install-btn" id="pwaInstallBtn">Install</button>
-            <button class="pwa-close-btn" id="pwaCloseBtn">✕</button>
+
+    <!-- App Header (Visible on Home/Tools/Profile) -->
+    <div class="app-header" id="mainHeader">
+        <div class="header-logo">RizzGPT</div>
+        <div class="header-actions">
+            <button class="icon-btn" onclick="toggleTheme()" title="Toggle Theme">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            </button>
+            <div class="streak-badge" id="streakBadgeHeader">🔥 0</div>
         </div>
     </div>
 
-    <!-- Navbar -->
-    <nav class="nav">
-        <div class="nav-inner">
-            <a href="index.html" class="logo">
-                <span class="logo-icon">⚡</span>
-                <span class="logo-text">RizzGPT</span>
-            </a>
-            <div class="nav-links" id="navLinks">
-                <a href="#generator" class="nav-link active">Generate</a>
-                <a href="chat.html" class="nav-link">Chat Mode</a>
-                <a href="#tools" class="nav-link">Tools</a>
-                <a href="#battle" class="nav-link">Battle</a>
+    <div class="app-container">
+        
+        <!-- === VIEW: HOME === -->
+        <main class="app-view active" id="viewHome">
+            
+            <!-- Daily Challenge (Compact) -->
+            <div class="container" style="margin-top: 16px;">
+                <div class="daily-challenge loaded" id="dailyChallenge" style="margin: 0;">
+                    <div class="dc-header">
+                        <span class="dc-badge">⚡ Daily Drop</span>
+                        <div class="dc-timer">Ends in <span id="dcTimer">12:00:00</span></div>
+                    </div>
+                    <h3 class="dc-title" id="dcTitle">Loading challenge...</h3>
+                    <p class="dc-desc" id="dcDesc">Get fresh lines daily</p>
+                    <button class="dc-btn" onclick="generateChallenge()">Generate Lines</button>
+                    <div class="dc-results" id="dcResults"></div>
+                </div>
             </div>
-            <div class="nav-actions">
-                <button class="nav-icon-btn" id="soundToggle" title="Sound Effects">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-                </button>
-                <button class="nav-icon-btn" id="themeToggle" title="Toggle Light/Dark Mode">
-                    <svg class="theme-icon-dark" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-                    <svg class="theme-icon-light" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                </button>
-                <button class="nav-icon-btn" id="historyBtn" title="History">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                </button>
-                <button class="nav-icon-btn fav-btn" id="favBtn" title="Saved Lines">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                    <span class="fav-count" id="favCount">0</span>
-                </button>
-                <button class="menu-btn" id="menuBtn" aria-label="Menu">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-                </button>
+
+            <!-- Main Generator -->
+            <section class="gen-section" id="generator">
+                <div class="container">
+                    <div class="gen-tabs">
+                        <button class="gen-tab active" data-tab="pickup">💘 Pickup</button>
+                        <button class="gen-tab" data-tab="flirty">💬 Flirty</button>
+                        <button class="gen-tab" data-tab="reply">↩️ Reply</button>
+                        <button class="gen-tab" data-tab="bio">📝 Bio</button>
+                    </div>
+
+                    <!-- Pickup Lines Panel -->
+                    <div class="gen-panel active" id="panelPickup">
+                        <div class="style-selector">
+                            <label>Vibe</label>
+                            <div class="style-chips-scroll">
+                                <div class="style-chip active" data-value="smooth">😎 Smooth</div>
+                                <div class="style-chip" data-value="funny">😂 Funny</div>
+                                <div class="style-chip" data-value="romantic">❤️ Romantic</div>
+                                <div class="style-chip" data-value="bold">🔥 Bold</div>
+                                <div class="style-chip" data-value="savage">💀 Savage</div>
+                                <div class="style-chip" data-value="desi">🇮🇳 Desi</div>
+                                <div class="style-chip" data-value="nerdy">🤓 Nerdy</div>
+                            </div>
+                        </div>
+                        <div class="intensity-selector">
+                            <label>Intensity</label>
+                            <div class="intensity-track">
+                                <div class="intensity-opt active" data-value="mild">Mild</div>
+                                <div class="intensity-opt" data-value="bold">Bold</div>
+                                <div class="intensity-opt" data-value="extreme">Extreme</div>
+                            </div>
+                        </div>
+                        <button class="generate-btn" id="genBtn">
+                            <span class="btn-text">Generate Rizz</span>
+                            <span class="btn-icon">✨</span>
+                        </button>
+                    </div>
+
+                    <!-- Other panels (placeholders for JS to hook into) -->
+                    <div class="gen-panel" id="panelFlirty"></div>
+                    <div class="gen-panel" id="panelReply"></div>
+                    <div class="gen-panel" id="panelBio"></div>
+
+                    <div class="results-area" id="resultsArea"></div>
+                </div>
+            </section>
+        </main>
+
+        <!-- === VIEW: TOOLS === -->
+        <main class="app-view" id="viewTools">
+            <div class="container" style="padding-top: 16px;">
+                <h2 class="section-title" style="margin-bottom: 6px;">AI <span class="gradient-text">Power Tools</span></h2>
+                <p class="section-sub" style="margin-bottom: 20px;">Analyze, decode, and optimize your game</p>
+                
+                <div class="tools-grid">
+                    <!-- Essential Tools -->
+                    <div class="tool-card" onclick="openTool('screenshotReply')">
+                        <div class="tool-icon-bg" style="background: rgba(168,85,247,0.1); color:#a855f7;">📸</div>
+                        <div class="tool-info">
+                            <span class="tool-name">Screenshot Reply</span>
+                            <span class="tool-desc">Upload chat & get replies</span>
+                        </div>
+                    </div>
+                    <div class="tool-card" onclick="openTool('profileRoast')">
+                        <div class="tool-icon-bg" style="background: rgba(239,68,68,0.1); color:#ef4444;">🔥</div>
+                        <div class="tool-info">
+                            <span class="tool-name">Profile Roast</span>
+                            <span class="tool-desc">Improve your bio</span>
+                        </div>
+                    </div>
+                     <div class="tool-card" onclick="openTool('redFlag')">
+                        <div class="tool-icon-bg" style="background: rgba(245,158,11,0.1); color:#f59e0b;">🚩</div>
+                        <div class="tool-info">
+                            <span class="tool-name">Red Flags</span>
+                            <span class="tool-desc">Spot toxic signals</span>
+                        </div>
+                    </div>
+                    <div class="tool-card" onclick="openTool('msgDecoder')">
+                        <div class="tool-icon-bg" style="background: rgba(59,130,246,0.1); color:#3b82f6;">🔍</div>
+                        <div class="tool-info">
+                            <span class="tool-name">Decoder</span>
+                            <span class="tool-desc">What they really mean</span>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Tools -->
+                    <div class="tool-card" onclick="openTool('saveConvo')">
+                        <span class="tool-icon">🆘</span>
+                        <span class="tool-name">Save Convo</span>
+                    </div>
+                    <div class="tool-card" onclick="openTool('antiCringe')">
+                        <span class="tool-icon">😬</span>
+                        <span class="tool-name">Cringe Check</span>
+                    </div>
+                    <div class="tool-card" onclick="openTool('toneTranslator')">
+                        <span class="tool-icon">🔄</span>
+                        <span class="tool-name">Tone Shift</span>
+                    </div>
+                    <div class="tool-card" onclick="openTool('perspectiveFlip')">
+                        <span class="tool-icon">🪞</span>
+                        <span class="tool-name">Their POV</span>
+                    </div>
+                    <div class="tool-card" onclick="openTool('ghostRecovery')">
+                        <span class="tool-icon">👻</span>
+                        <span class="tool-name">Ghost Buster</span>
+                    </div>
+                    <div class="tool-card" onclick="openTool('rizzRater')">
+                        <span class="tool-icon">⭐</span>
+                        <span class="tool-name">Rate Rizz</span>
+                    </div>
+                    <div class="tool-card" onclick="openTool('bioBeforeAfter')">
+                        <span class="tool-icon">📊</span>
+                        <span class="tool-name">Bio Fixer</span>
+                    </div>
+                    <div class="tool-card" onclick="openTool('dateScript')">
+                        <span class="tool-icon">🎬</span>
+                        <span class="tool-name">Date Script</span>
+                    </div>
+                    <div class="tool-card" onclick="openTool('trendingLines')">
+                        <span class="tool-icon">📈</span>
+                        <span class="tool-name">Trends</span>
+                    </div>
+                    <div class="tool-card" onclick="openTool('compatibility')">
+                        <span class="tool-icon">💕</span>
+                        <span class="tool-name">Match %</span>
+                    </div>
+                </div>
             </div>
+        </main>
+
+        <!-- === VIEW: CHAT === -->
+        <main class="app-view" id="viewChat">
+            <iframe src="chat.html" class="chat-frame" title="Chat Coach"></iframe>
+        </main>
+
+        <!-- === VIEW: PROFILE === -->
+        <main class="app-view" id="viewProfile">
+            <div class="container" style="padding-top: 16px;">
+                <div class="stats-section" id="statsSection" style="padding: 0; background: none;">
+                    <h2 class="section-title">Your <span class="gradient-text">Progress</span></h2>
+                    
+                    <div class="stats-grid" style="margin-top: 16px;">
+                        <div class="stat-card">
+                            <div class="stat-number" id="statGenerations">0</div>
+                            <div class="stat-label">Lines</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="statStreak">0</div>
+                            <div class="stat-label">Day Streak</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="statToday">0</div>
+                            <div class="stat-label">Today</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px;">
+                    <h3 style="font-size: 1rem; margin-bottom: 12px; color: var(--text2);">Settings</h3>
+                    
+                    <div class="setting-item" style="display:flex; justify-content:space-between; padding: 16px; background: var(--card); border-radius: 12px; margin-bottom: 10px; align-items: center;">
+                        <span>Language</span>
+                        <select id="mainLangSelect" style="background:transparent; border:none; color:var(--accent); font-weight:600; text-align:right;">
+                            <option value="hinglish">Hinglish 🇮🇳</option>
+                            <option value="english">English 🇺🇸</option>
+                            <option value="hindi">Hindi 🕉️</option>
+                            <option value="spanish">Spanish 🇪🇸</option>
+                        </select>
+                    </div>
+
+                    <div class="setting-item" style="padding: 16px; background: var(--card); border-radius: 12px; margin-bottom: 10px; cursor: pointer;" onclick="toggleSound()">
+                        Sound Effects <span id="soundStatus" style="float: right; color: var(--accent);">ON</span>
+                    </div>
+                    
+                    <div class="setting-item" style="padding: 16px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); border-radius: 12px; margin-top: 20px; cursor: pointer; color: #ef4444; text-align: center;" onclick="localStorage.clear(); location.reload();">
+                        Reset App Data
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Spacer for content to clear nav -->
+        <div style="height: 20px;"></div>
+    </div>
+
+    <!-- Bottom Navigation Dock -->
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="switchView('viewHome', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span>Home</span>
+        </div>
+        <div class="nav-item" onclick="switchView('viewTools', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            <span>Tools</span>
+        </div>
+        <div class="nav-item" onclick="switchView('viewChat', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>Chat</span>
+        </div>
+        <div class="nav-item" onclick="switchView('viewProfile', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span>Profile</span>
         </div>
     </nav>
 
-    <!-- Hero -->
-    <section class="hero" id="top">
-        <div class="hero-glow"></div>
-        <div class="hero-content">
-            <div class="hero-badge">⚡ AI-Powered Rizz Engine</div>
-            <h1>Unlimited <span class="gradient-text">Rizz</span> on Demand</h1>
-            <p class="hero-sub">Generate killer pickup lines, flirty texts, savage replies & dating bios — powered by AI. 100% free.</p>
-            <div class="hero-cta">
-                <a href="#generator" class="cta-btn primary">Start Generating</a>
-                <a href="chat.html" class="cta-btn secondary">💬 Chat Mode</a>
-            </div>
-            <div class="hero-stats">
-                <div class="stat"><span class="stat-num">500K+</span><span class="stat-label">Lines Generated</span></div>
-                <div class="stat"><span class="stat-num">100%</span><span class="stat-label">Free Forever</span></div>
-                <div class="stat"><span class="stat-num">⚡</span><span class="stat-label">Instant Results</span></div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Daily Challenge -->
-    <section class="daily-challenge" id="dailyChallenge">
-        <div class="challenge-card">
-            <div class="challenge-header">
-                <span class="challenge-badge">🔥 Daily Rizz Challenge</span>
-                <span class="challenge-date" id="challengeDate"></span>
-            </div>
-            <h3 class="challenge-prompt" id="challengePrompt"></h3>
-            <p class="challenge-desc" id="challengeDesc"></p>
-            <div class="challenge-actions">
-                <button class="gen-btn challenge-gen-btn" id="challengeGenBtn">⚡ Accept Challenge</button>
-                <div class="challenge-streak" id="challengeStreak">
-                    <span class="streak-fire">🔥</span>
-                    <span class="streak-count" id="streakCount">0</span>
-                    <span class="streak-label">day streak</span>
-                </div>
-            </div>
-            <div class="challenge-results" id="challengeResults" style="display:none"></div>
-        </div>
-    </section>
-
-    <!-- Generator -->
-    <section class="generator" id="generator">
-        <div class="gen-tabs">
-            <button class="gen-tab active" data-tab="generate">⚡ Generate</button>
-            <button class="gen-tab" data-tab="rizzscore">🎯 Rizz Score</button>
-            <button class="gen-tab" data-tab="vibecheck">💜 Vibe Check</button>
-        </div>
-
-        <!-- Generate Panel (existing) -->
-        <div class="gen-panel active" id="panelGenerate">
-            <div class="options-grid">
-                <div class="option-group">
-                    <label class="option-label">Category</label>
-                    <div class="custom-select" id="categorySelect">
-                        <div class="select-display" id="categoryDisplay">
-                            <span class="select-icon">💘</span>
-                            <span class="select-text">Pickup Lines</span>
-                            <svg class="select-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-                        </div>
-                        <div class="select-dropdown" id="categoryDropdown">
-                            <div class="select-option selected" data-value="pickup" data-icon="💘">Pickup Lines</div>
-                            <div class="select-option" data-value="reply" data-icon="💬">Witty Replies</div>
-                            <div class="select-option" data-value="bio" data-icon="✍️">Dating Bios</div>
-                            <div class="select-option" data-value="opener" data-icon="👋">Conversation Openers</div>
-                            <div class="select-option" data-value="compliment" data-icon="🌹">Compliments</div>
-                            <div class="select-option" data-value="roast" data-icon="🔥">Friendly Roasts</div>
-                            <div class="select-option" data-value="goodnight" data-icon="🌙">Good Night Texts</div>
-                            <div class="select-option" data-value="goodmorning" data-icon="☀️">Good Morning Texts</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="option-group">
-                    <label class="option-label">Style</label>
-                    <div class="custom-select" id="styleSelect">
-                        <div class="select-display" id="styleDisplay">
-                            <span class="select-icon">😎</span>
-                            <span class="select-text">Smooth</span>
-                            <svg class="select-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-                        </div>
-                        <div class="select-dropdown" id="styleDropdown">
-                            <div class="select-option selected" data-value="smooth" data-icon="😎">Smooth</div>
-                            <div class="select-option" data-value="funny" data-icon="😂">Funny</div>
-                            <div class="select-option" data-value="romantic" data-icon="❤️">Romantic</div>
-                            <div class="select-option" data-value="bold" data-icon="🔥">Bold</div>
-                            <div class="select-option" data-value="nerdy" data-icon="🤓">Nerdy</div>
-                            <div class="select-option" data-value="poetic" data-icon="🎭">Poetic</div>
-                            <div class="select-option" data-value="savage" data-icon="💀">Savage</div>
-                            <div class="select-option" data-value="sweet" data-icon="🍯">Sweet</div>
-                            <div class="select-option" data-value="spicy" data-icon="🌶️">Spicy</div>
-                            <div class="select-option" data-value="toxic" data-icon="☠️">Toxic</div>
-                            <div class="select-option" data-value="drunk" data-icon="🍷">Drunk Text</div>
-                            <div class="select-option" data-value="villain" data-icon="🖤">Villain</div>
-                            <div class="select-option" data-value="desi" data-icon="🇮🇳">Desi</div>
-                            <div class="select-option" data-value="flirtyaf" data-icon="😈">Flirty AF</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="extra-options">
-                <div class="option-group">
-                    <label class="option-label">Language</label>
-                    <div class="custom-select small" id="langSelect">
-                        <div class="select-display" id="langDisplay">
-                            <span class="select-text">Hinglish</span>
-                            <svg class="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-                        </div>
-                        <div class="select-dropdown" id="langDropdown">
-                            <div class="select-option selected" data-value="hinglish">🇮🇳 Hinglish</div>
-                            <div class="select-option" data-value="english">🇺🇸 English</div>
-                            <div class="select-option" data-value="hindi">🇮🇳 Hindi</div>
-                            <div class="select-option" data-value="spanish">🇪🇸 Spanish</div>
-                            <div class="select-option" data-value="french">🇫🇷 French</div>
-                            <div class="select-option" data-value="german">🇩🇪 German</div>
-                            <div class="select-option" data-value="italian">🇮🇹 Italian</div>
-                            <div class="select-option" data-value="portuguese">🇧🇷 Portuguese</div>
-                            <div class="select-option" data-value="japanese">🇯🇵 Japanese</div>
-                            <div class="select-option" data-value="korean">🇰🇷 Korean</div>
-                            <div class="select-option" data-value="arabic">🇸🇦 Arabic</div>
-                            <div class="select-option" data-value="russian">🇷🇺 Russian</div>
-                            <div class="select-option" data-value="turkish">🇹🇷 Turkish</div>
-                            <div class="select-option" data-value="thai">🇹🇭 Thai</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="option-group">
-                    <label class="option-label">Intensity</label>
-                    <div class="intensity-btns">
-                        <button class="int-btn" data-int="mild">Mild</button>
-                        <button class="int-btn active" data-int="bold">Bold</button>
-                        <button class="int-btn" data-int="extreme">Extreme 🔥</button>
-                    </div>
-                </div>
-            </div>
-            <div class="context-input">
-                <label class="option-label">Context <span class="optional">(optional)</span></label>
-                <input type="text" id="contextInput" placeholder="e.g., She likes anime, He's a gym bro..." maxlength="120">
-            </div>
-            <button class="gen-btn" id="generateBtn">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                <span>Generate Rizz</span>
-            </button>
-            <div class="results" id="results"></div>
-        </div>
-
-        <!-- Rizz Score Panel -->
-        <div class="gen-panel" id="panelRizzscore">
-            <div class="tool-header">
-                <h3>🎯 Rizz Score Analyzer</h3>
-                <p class="tool-desc">Paste any message and get your Rizz scientifically rated</p>
-            </div>
-            <textarea class="tool-textarea" id="rizzScoreInput" placeholder="Paste your pickup line, text, or DM here..." maxlength="500" rows="3"></textarea>
-            <button class="gen-btn" id="analyzeRizzBtn">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                <span>Analyze My Rizz</span>
-            </button>
-            <div class="rizz-score-result" id="rizzScoreResult" style="display:none">
-                <div class="score-gauge-wrap">
-                    <svg class="score-gauge" viewBox="0 0 200 200">
-                        <circle class="gauge-track" cx="100" cy="100" r="85" fill="none" stroke-width="12"/>
-                        <circle class="gauge-fill" id="gaugeFill" cx="100" cy="100" r="85" fill="none" stroke-width="12" stroke-linecap="round" transform="rotate(-90 100 100)"/>
-                    </svg>
-                    <div class="score-center">
-                        <div class="score-number" id="scoreNumber">0</div>
-                        <div class="score-label" id="scoreLabel">—</div>
-                    </div>
-                </div>
-                <div class="score-breakdown" id="scoreBreakdown"></div>
-                <div class="score-verdict" id="scoreVerdict"></div>
-            </div>
-        </div>
-
-        <!-- Vibe Check Panel -->
-        <div class="gen-panel" id="panelVibecheck">
-            <div class="tool-header">
-                <h3>💜 Vibe Check / Tone Analyzer</h3>
-                <p class="tool-desc">Paste a message you received — AI tells you what they really mean</p>
-            </div>
-            <textarea class="tool-textarea" id="vibeInput" placeholder="Paste the message you received here..." maxlength="500" rows="3"></textarea>
-            <div class="vibe-context-row">
-                <input type="text" id="vibeContext" placeholder="Context (e.g., talking for 2 weeks, first DM)" maxlength="100" class="vibe-context-input">
-            </div>
-            <button class="gen-btn" id="vibeCheckBtn">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                <span>Check the Vibe</span>
-            </button>
-            <div class="vibe-result" id="vibeResult" style="display:none">
-                <div class="vibe-meters" id="vibeMeters"></div>
-                <div class="vibe-analysis" id="vibeAnalysis"></div>
-                <div class="vibe-flags" id="vibeFlags"></div>
-                <div class="vibe-suggestion" id="vibeSuggestion"></div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Rizz Battle -->
-    <section class="battle-section" id="battle">
-        <div class="battle-inner">
-            <div class="battle-header">
-                <h2>⚔️ Rizz <span class="gradient-text">Battle</span></h2>
-                <p class="battle-sub">Two AI lines face off. You decide the winner.</p>
-                <div class="battle-stats">
-                    <span class="battle-stat" id="battleCount">0 battles</span>
-                </div>
-            </div>
-            <div class="battle-arena" id="battleArena">
-                <div class="battle-card left" id="battleLeft">
-                    <div class="battle-label">🅰️ Contender</div>
-                    <p class="battle-text" id="battleTextA">—</p>
-                    <button class="battle-vote-btn" data-side="A" id="voteA">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
-                        Vote A
-                    </button>
-                </div>
-                <div class="battle-vs">VS</div>
-                <div class="battle-card right" id="battleRight">
-                    <div class="battle-label">🅱️ Challenger</div>
-                    <p class="battle-text" id="battleTextB">—</p>
-                    <button class="battle-vote-btn" data-side="B" id="voteB">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
-                        Vote B
-                    </button>
-                </div>
-            </div>
-            <button class="gen-btn battle-new-btn" id="newBattleBtn">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                <span>New Battle</span>
-            </button>
-        </div>
-    </section>
-
-    <!-- ===== RIZZ ROULETTE ===== -->
-    <section class="roulette-section" id="rouletteSection">
-        <div class="container">
-            <div class="section-badge">🎰 Rizz Roulette</div>
-            <h2 class="section-title">Spin & <span class="gradient-text">Rizz</span></h2>
-            <p class="section-sub">Let fate decide your next move — spin the wheel!</p>
-            <div class="roulette-wrapper">
-                <canvas id="rouletteWheel" width="300" height="300"></canvas>
-                <button class="roulette-spin-btn" id="spinBtn">🎰 SPIN</button>
-            </div>
-            <div class="roulette-result" id="rouletteResult" style="display:none">
-                <div class="roulette-result-cat" id="rouletteResCat"></div>
-                <p class="roulette-result-text" id="rouletteResText"></p>
-                <div class="roulette-result-actions">
-                    <button class="result-action-btn" onclick="copyText(document.getElementById('rouletteResText').textContent)">📋 Copy</button>
-                    <button class="result-action-btn" onclick="speakText(document.getElementById('rouletteResText').textContent)">🔊 Speak</button>
-                    <button class="result-action-btn" onclick="document.getElementById('spinBtn').click()">🔄 Spin Again</button>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ===== AI TOOLS ===== -->
-    <section class="tools-section" id="tools">
-        <div class="container">
-            <div class="section-badge">🛠️ AI Rizz Tools</div>
-            <h2 class="section-title">Power <span class="gradient-text">Tools</span></h2>
-            <p class="section-sub">Advanced AI-powered tools to level up your game</p>
-            <div class="tools-grid">
-                <div class="tool-card" onclick="openTool('profileRoast')">
-                    <span class="tool-icon">🔥</span>
-                    <span class="tool-name">Profile Roast</span>
-                    <span class="tool-desc">Get your bio roasted & improved</span>
-                </div>
-                <div class="tool-card" onclick="openTool('responsePred')">
-                    <span class="tool-icon">🔮</span>
-                    <span class="tool-name">Response Predictor</span>
-                    <span class="tool-desc">Predict what they'll reply</span>
-                </div>
-                <div class="tool-card" onclick="openTool('remixer')">
-                    <span class="tool-icon">🎵</span>
-                    <span class="tool-name">Line Remixer</span>
-                    <span class="tool-desc">Remix any line in different styles</span>
-                </div>
-                <div class="tool-card" onclick="openTool('situational')">
-                    <span class="tool-icon">📍</span>
-                    <span class="tool-name">Situational Rizz</span>
-                    <span class="tool-desc">Lines for specific places & vibes</span>
-                </div>
-                <div class="tool-card" onclick="openTool('screenshotReply')">
-                    <span class="tool-icon">📸</span>
-                    <span class="tool-name">Screenshot Reply</span>
-                    <span class="tool-desc">Upload chat screenshot, get AI reply</span>
-                </div>
-                <div class="tool-card" onclick="openTool('flowBuilder')">
-                    <span class="tool-icon">🌊</span>
-                    <span class="tool-name">Convo Flow Builder</span>
-                    <span class="tool-desc">Build full conversation trees</span>
-                </div>
-                <div class="tool-card" onclick="openTool('compatibility')">
-                    <span class="tool-icon">💕</span>
-                    <span class="tool-name">Compatibility</span>
-                    <span class="tool-desc">Zodiac & personality matching</span>
-                </div>
-                <div class="tool-card" onclick="openTool('emojiDecoder')">
-                    <span class="tool-icon">🧩</span>
-                    <span class="tool-name">Emoji Decoder</span>
-                    <span class="tool-desc">Decode hidden emoji meanings</span>
-                </div>
-                <div class="tool-card" onclick="openTool('dateIdea')">
-                    <span class="tool-icon">💡</span>
-                    <span class="tool-name">Date Ideas</span>
-                    <span class="tool-desc">Creative AI-generated date plans</span>
-                </div>
-                <div class="tool-card" onclick="openTool('complimentSched')">
-                    <span class="tool-icon">⏰</span>
-                    <span class="tool-name">Compliment Scheduler</span>
-                    <span class="tool-desc">Schedule daily compliments</span>
-                </div>
-                <div class="tool-card" onclick="openTool('redFlag')">
-                    <span class="tool-icon">🚩</span>
-                    <span class="tool-name">Red Flag Detector</span>
-                    <span class="tool-desc">Analyze texts for red/green flags</span>
-                </div>
-                <div class="tool-card" onclick="openTool('saveConvo')">
-                    <span class="tool-icon">🆘</span>
-                    <span class="tool-name">Save the Convo</span>
-                    <span class="tool-desc">Emergency recovery when chat goes wrong</span>
-                </div>
-                <div class="tool-card" onclick="openTool('antiCringe')">
-                    <span class="tool-icon">😬</span>
-                    <span class="tool-name">Anti-Cringe Detector</span>
-                    <span class="tool-desc">Check if your text is cringe or fire</span>
-                </div>
-                <div class="tool-card" onclick="openTool('toneTranslator')">
-                    <span class="tool-icon">🔄</span>
-                    <span class="tool-name">Tone Translator</span>
-                    <span class="tool-desc">Convert any message to any vibe</span>
-                </div>
-                <div class="tool-card" onclick="openTool('perspectiveFlip')">
-                    <span class="tool-icon">🪞</span>
-                    <span class="tool-name">Perspective Flip</span>
-                    <span class="tool-desc">See how they'd react to your text</span>
-                </div>
-                <div class="tool-card" onclick="openTool('ghostRecovery')">
-                    <span class="tool-icon">👻</span>
-                    <span class="tool-name">Ghosting Recovery</span>
-                    <span class="tool-desc">Comeback texts after being ghosted</span>
-                </div>
-                <div class="tool-card" onclick="openTool('rizzRater')">
-                    <span class="tool-icon">⭐</span>
-                    <span class="tool-name">Rizz Rater</span>
-                    <span class="tool-desc">Get your message scored 0-100</span>
-                </div>
-                <div class="tool-card" onclick="openTool('bioBeforeAfter')">
-                    <span class="tool-icon">📊</span>
-                    <span class="tool-name">Bio Before & After</span>
-                    <span class="tool-desc">See your bio transformation side-by-side</span>
-                </div>
-                <div class="tool-card" onclick="openTool('dateScript')">
-                    <span class="tool-icon">🎬</span>
-                    <span class="tool-name">First Date Script</span>
-                    <span class="tool-desc">Full conversation guide for dates</span>
-                </div>
-                <div class="tool-card" onclick="openTool('trendingLines')">
-                    <span class="tool-icon">📈</span>
-                    <span class="tool-name">Trending Lines</span>
-                    <span class="tool-desc">Fresh lines from trends & pop culture</span>
-                </div>
-                <div class="tool-card" onclick="openTool('msgDecoder')">
-                    <span class="tool-icon">🔍</span>
-                    <span class="tool-name">Message Decoder</span>
-                    <span class="tool-desc">Decode what their message really means</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ===== STATS DASHBOARD ===== -->
-    <section class="stats-section" id="statsSection">
-        <div class="container">
-            <div class="section-badge">📊 Dashboard</div>
-            <h2 class="section-title">Your Rizz <span class="gradient-text">Stats</span></h2>
-            <p class="section-sub">Track your rizz journey</p>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-number" id="statGenerations">0</div>
-                    <div class="stat-label">Lines Generated</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="statFavorites">0</div>
-                    <div class="stat-label">Favorites Saved</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="statBattles">0</div>
-                    <div class="stat-label">Battles Played</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="statAvgScore">—</div>
-                    <div class="stat-label">Avg Rizz Score</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="statTopStyle">—</div>
-                    <div class="stat-label">Fav Style</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="statStreak">0</div>
-                    <div class="stat-label">Day Streak 🔥</div>
-                </div>
-            </div>
-            <div class="stats-chart">
-                <h3 class="stats-chart-title">Style Usage</h3>
-                <div class="stats-bars" id="statsBars"></div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Examples -->
-    <section class="examples" id="examples">
-        <h2>See What <span class="gradient-text">RizzGPT</span> Can Do</h2>
-        <div class="examples-scroll">
-            <div class="ex-card"><div class="ex-cat">💘 Pickup Line</div><p>"Are you a magician? Because whenever I look at you, everyone else disappears."</p><div class="ex-style">Smooth • Mild</div></div>
-            <div class="ex-card"><div class="ex-cat">💬 Reply</div><p>"I'd agree with you but then we'd both be wrong 😏"</p><div class="ex-style">Funny • Bold</div></div>
-            <div class="ex-card"><div class="ex-cat">✍️ Bio</div><p>"Part-time overthinker, full-time vibe. Looking for someone to split dessert with (but not really)."</p><div class="ex-style">Smooth • Bold</div></div>
-            <div class="ex-card"><div class="ex-cat">🔥 Roast</div><p>"You're like a cloud — everything brightens up when you go away."</p><div class="ex-style">Savage • Extreme</div></div>
-            <div class="ex-card"><div class="ex-cat">🌹 Compliment</div><p>"You have the kind of smile that makes people wonder what you're up to."</p><div class="ex-style">Romantic • Mild</div></div>
-        </div>
-    </section>
-
-    <!-- Reviews -->
-    <section class="reviews">
-        <h2>Loved by <span class="gradient-text">Millions</span></h2>
-        <div class="reviews-scroll">
-            <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><p>"This app literally saved my Hinge game. Got 3 dates in one week."</p><div class="review-author">— @smoothoperator</div></div>
-            <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><p>"The chat mode is insane. It reads the convo and gives perfect replies."</p><div class="review-author">— @datingking</div></div>
-            <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><p>"Bro the Hinglish mode is 🔥 finally something that sounds natural."</p><div class="review-author">— @desirizzler</div></div>
-            <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><p>"Better than ChatGPT for this. Way more creative and actually funny."</p><div class="review-author">— @textqueen</div></div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-top">
-            <div class="footer-brand">
-                <span class="logo-icon">⚡</span>
-                <span class="logo-text">RizzGPT</span>
-                <p class="footer-desc">The world's most advanced AI rizz generator. Free forever.</p>
-            </div>
-            <div class="footer-links">
-                <a href="#generator">Generator</a>
-                <a href="chat.html">Chat Mode</a>
-                <a href="#battle">Rizz Battle</a>
-                <a href="#dailyChallenge">Daily Challenge</a>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>Made with ❤️ and AI • RizzGPT © 2025</p>
-        </div>
-    </footer>
-
-    <!-- Favorites Drawer -->
-    <div class="fav-drawer" id="favDrawer">
-        <div class="fav-drawer-overlay" onclick="closeFavDrawer()"></div>
-        <div class="fav-drawer-panel">
-            <div class="fav-drawer-header">
-                <h3>❤️ Saved Lines</h3>
-                <button class="fav-drawer-close" onclick="closeFavDrawer()">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                </button>
-            </div>
-            <div class="fav-list" id="favList"></div>
-        </div>
-    </div>
-
-    <!-- History Drawer -->
-    <div class="history-drawer" id="historyDrawer">
-        <div class="history-drawer-overlay" onclick="closeHistoryDrawer()"></div>
-        <div class="history-drawer-panel">
-            <div class="history-drawer-header">
-                <h3>🕐 Recent Generations</h3>
-                <div class="history-actions">
-                    <input type="text" class="history-search" id="historySearch" placeholder="Search...">
-                    <button class="history-clear-btn" id="clearHistoryBtn" title="Clear All">🗑️</button>
-                </div>
-                <button class="history-drawer-close" onclick="closeHistoryDrawer()">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                </button>
-            </div>
-            <div class="history-list" id="historyList"></div>
-        </div>
-    </div>
-
-    <!-- Share Card Modal -->
-    <div class="share-modal" id="shareModal" style="display:none">
-        <div class="share-modal-overlay" onclick="closeShareModal()"></div>
-        <div class="share-modal-content">
-            <div class="share-modal-header">
-                <h3>📤 Share Card</h3>
-                <button class="share-modal-close" onclick="closeShareModal()">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                </button>
-            </div>
-            <canvas id="shareCanvas" width="1080" height="1080" style="display:none"></canvas>
-            <img class="share-preview" id="sharePreview" alt="Share card preview">
-            <div class="share-actions">
-                <button class="share-action-btn" id="shareDownload">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                    Download
-                </button>
-                <button class="share-action-btn primary" id="shareNative">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                    Share
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===== TOOL MODAL ===== -->
-    <div class="tool-overlay" id="toolOverlay" style="display:none" onclick="if(event.target===this)closeTool()">
+    <!-- Modal Containers -->
+    <div class="tool-overlay" id="toolOverlay" style="display:none">
         <div class="tool-modal">
-            <div class="tool-modal-header">
+            <div class="tool-header">
                 <h3 id="toolModalTitle"></h3>
                 <button class="tool-close-btn" onclick="closeTool()">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
@@ -586,15 +330,60 @@
         </div>
     </div>
 
+    <!-- Share Modal -->
+    <div class="share-modal" id="shareModal" style="display:none; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);">
+        <div class="share-modal-content">
+            <div class="share-modal-header">
+                <h3>📤 Share Rizz</h3>
+                <button class="share-modal-close" onclick="closeShareModal()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="share-preview-area" style="margin-bottom: 20px;">
+                <canvas id="shareCanvas" style="display:none"></canvas>
+                <img id="sharePreview" class="share-img-preview" alt="Share Card" style="width:100%; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+            </div>
+            <div class="share-actions" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <button id="shareNative" class="tool-gen-btn">Share Image</button>
+                <button id="shareDownload" class="tool-gen-btn" style="background:var(--bg3); border:1px solid var(--border);">Download</button>
+            </div>
+        </div>
+    </div>
+
     <input type="file" id="mainSSUpload" accept="image/*" style="display:none">
-
     <div class="confetti-wrap" id="confettiWrap"></div>
-
     <div class="toast" id="toast">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
-        <span id="toastText">Copied to clipboard!</span>
+        <span id="toastText">Copied!</span>
     </div>
 
     <script src="app.js"></script>
+    <script>
+        // Tab Switching Logic
+        function switchView(viewId, navEl) {
+            // Update Tab Content
+            document.querySelectorAll('.app-view').forEach(view => {
+                view.classList.remove('active');
+            });
+            document.getElementById(viewId).classList.add('active');
+
+            // Update Nav Icons
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            navEl.classList.add('active');
+            
+            // Header Logic (Hide on chat)
+            const header = document.getElementById('mainHeader');
+            if(viewId === 'viewChat') {
+                header.style.display = 'none';
+            } else {
+                header.style.display = 'flex';
+            }
+            
+            // Trigger animation
+            playSound('click');
+        }
+    </script>
 </body>
 </html>
