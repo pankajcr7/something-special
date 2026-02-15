@@ -239,7 +239,44 @@ const theirName=document.getElementById('theirName').value.trim()||'them';
 
 const intensityDesc={mild:'mild and subtle',bold:'confident and charming',extreme:'extremely bold and intense'};
 const intDesc=intensityDesc[intensity]||'bold';
-const langNote=lang==='hinglish'?'\nIMPORTANT: Write ALL replies in Hinglish — casual mix of Hindi and English in Roman script. Like how young Indians actually text. Example: "arre yaar tu toh full cute hai ngl"':lang&&lang!=='english'?`\nIMPORTANT: Write ALL replies in ${lang}.`:'';
+const isHinglishLang=lang==='hinglish';
+const isHindiLang=lang==='hindi';
+const langNote=isHinglishLang?`
+IMPORTANT — WRITE IN HINGLISH (Roman script Hindi-English mix). This is how REAL young Indians text on WhatsApp/Instagram:
+
+HINGLISH RULES:
+- Mix Hindi + English naturally: "arre yaar sun na, tu toh full cute hai ngl"
+- Use SHORT Hindi fillers: yaar, arre, accha, haan, na, re, oye, chal, sun, bol, matlab, bas, bhai
+- Use Hindi texting shortcuts: nhi (nahi), kya, kyu, kab, thk h, pta nhi, koi ni, sahi hai, chl, btao, krna, ruk, haan bolo
+- Drop vowels like real texts: "achha" = "acha", "theek" = "thk", "nahi" = "nhi"
+- Add Hindi reactions: "kya baat hai!", "mast", "zabardast", "bakwas", "pagal hai kya", "ekdum", "kamaal"
+- Use Bollywood casually: "sharma ji ka beta vibes", "picture abhi baaki hai", "full filmy"
+- Mix English slang + Hindi: "bro sun", "yaar ngl", "lowkey accha tha", "fr yaar", "literally pagal ho gaye"
+- Regional flavor OK: "oye hoye" (punjabi), "bindaas" (mumbai), "bawaal" (delhi)
+- Emojis Indians use: 😂 🤣 🔥 💀 👀 😏 🙈 ❤️ 😭
+
+BAD (AI/formal): "Main aapko bahut pasand karta hoon, aap bahut sundar hain."
+GOOD (Real text): "arre yaar tu toh ekdum mast hai 🔥 kya karti hai itna cute hokar"
+BAD: "Mujhe aapke saath samay bitana bahut achha lagta hai."
+GOOD: "tere saath time spend krna >>> baaki sab bakwas"
+BAD: "Kya aap mere saath dinner par chalenge?"
+GOOD: "chal na dinner pe chalte hain, bohot bore ho rha hun akele"
+BAD: "Aapki smile bahut sundar hai."
+GOOD: "teri smile dekh ke dimag kharab ho jata hai yaar 😭"
+
+EVERY reply MUST be in Hinglish. NO pure English. NO Devanagari. NO formal Hindi.
+`:isHindiLang?`
+IMPORTANT — WRITE IN HINDI (Roman script / Romanized Hindi). Like real Indians text:
+- Use Roman script (English letters), NOT Devanagari
+- Keep it casual: "sun na, kya kar rahi hai?"
+- Use shortcuts: nhi, thk h, pta nhi, koi ni, acha, chl
+- Sound like real WhatsApp chat, not textbook Hindi
+- Drop formality: NO aap/aapko, use tu/tujhe/tere
+- Add fillers: yaar, arre, accha, na, re, haan
+BAD: "Kya aap mujhe bata sakti hain?"
+GOOD: "arre bata na yaar"
+EVERY reply MUST be in Roman Hindi. NO Devanagari. NO pure English.
+`:lang&&lang!=='english'?`\nIMPORTANT: Write ALL replies in ${lang}.`:'';
 
 let chatLog=slice.map(m=>`${m.sender==='me'?'Me':theirName}: ${m.text}`).join('\n');
 
@@ -256,20 +293,28 @@ flirtyaf:'extremely flirty and aggressive',nerdy:'nerdy with clever references',
 };
 const styleNote=styleDesc[style]||style;
 
-const sysPrompt=`You generate text message replies that read EXACTLY like a real human typed them in a chat app.
+const sysPrompt=`You generate text message replies that read EXACTLY like a real human typed them in a chat app.${isHinglishLang?' You are a YOUNG INDIAN person texting on WhatsApp. You naturally mix Hindi and English.':isHindiLang?' You are a YOUNG INDIAN person texting in casual Roman Hindi.':''}
 
 RULES — non-negotiable:
-1. TYPE LIKE A REAL PERSON: mostly lowercase, skip periods sometimes, use "..." for pauses, "haha" "lol" "ngl" "tbh" "fr" "lowkey" "yk" "bruh" naturally. imperfect grammar OK.
+1. TYPE LIKE A REAL PERSON: mostly lowercase, skip periods sometimes, use "..." for pauses.${isHinglishLang?' Mix Hindi+English naturally. Use: yaar, arre, accha, chal, sun, bhai, ngl, fr, lowkey. Drop vowels (nhi, thk, acha, pta nhi). Write like WhatsApp not textbook.':isHindiLang?' Write in Roman Hindi like real Indian texting. Use shortcuts: nhi, kya, kyu, thk h, acha, chl.':' Use "haha" "lol" "ngl" "tbh" "fr" "lowkey" "yk" "bruh" naturally.'} imperfect grammar OK.
 2. KEEP IT SHORT: 5-20 words per reply. real texts are short, not essays.
-3. SOUND HUMAN, NOT AI:
-   BAD: "I must say, your smile is truly captivating."
-   GOOD: "ok but your smile is actually so cute wtf"
-   BAD: "Thank you for the compliment! You're quite attractive yourself."
-   GOOD: "haha stoppp you're making me blush"
-   BAD: "I would love to spend time with you!"
-   GOOD: "wait fr?? im down lol when"
+3. SOUND HUMAN, NOT AI:${isHinglishLang?`
+   BAD: "Mujhe aapke saath waqt bitana accha lagta hai."
+   GOOD: "tere saath time spend krna >>> baaki sab 🔥"
+   BAD: "Aapki smile bahut sundar hai."
+   GOOD: "teri smile dekh ke dimag kharab ho jata h yaar 😭"
+   BAD: "Main aapko bahut miss karta hoon."
+   GOOD: "yaar bohot miss kr rha hun tujhe ngl"
+   BAD: "Kya aap mere saath coffee peene chalenge?"
+   GOOD: "chal na coffee pe chalte h, bore ho rha hun"
+   BAD: "Bahut achha laga aapko jaankar."
+   GOOD: "yaar tujhse baat krke maza aa gya fr fr"`:isHindiLang?`
+   BAD: "Kya aap mujhe bata sakti hain?"
+   GOOD: "arre bata na"
+   BAD: "Mujhe bahut khushi hogi agar aap aayen."
+   GOOD: "aa na yaar, maza aayega"`:'\n   BAD: "I must say, your smile is truly captivating."\n   GOOD: "ok but your smile is actually so cute wtf"\n   BAD: "Thank you for the compliment! You\'re quite attractive yourself."\n   GOOD: "haha stoppp you\'re making me blush"\n   BAD: "I would love to spend time with you!"\n   GOOD: "wait fr?? im down lol when"'}
 4. READ THE FULL CONVERSATION and reply in context. Reference what was said. Don't be random.
-5. Output ONLY numbered lines (1. 2. 3. etc). Nothing else.`;
+5. Output ONLY numbered lines (1. 2. 3. etc). Nothing else.${isHinglishLang?'\n6. EVERY reply MUST be in Hinglish (Hindi+English mix in Roman script). NO pure English. NO Devanagari. If you write pure English you have FAILED.':isHindiLang?'\n6. EVERY reply MUST be in Roman Hindi. NO Devanagari. NO pure English.':''}`;
 
 const whoReplies=nextSender==='me'?'I ("Me")':theirName+' ("them")';
 const whoSpokeLast=lastSender==='me'?'I':'they';
@@ -467,7 +512,7 @@ SUGGESTED REPLIES:
 4. [a sweet/caring reply option]
 5. [a witty/clever reply option]
 
-The 5 suggested replies must be actual messages "Me" can send next. Keep them short (1-2 sentences max), natural, and match the conversation's tone and context. Make each one feel distinct in style.`;
+The 5 suggested replies must be actual messages "Me" can send next. Keep them short (1-2 sentences max), natural, and match the conversation's tone and context. Make each one feel distinct in style.${lang==='hinglish'?' Write ALL suggested replies in Hinglish (Hindi+English mix, Roman script) like how real young Indians text on WhatsApp. Use yaar/arre/accha/chal naturally. NO pure English. NO formal Hindi. NO Devanagari.':lang==='hindi'?' Write ALL suggested replies in casual Roman Hindi.':''}`;
 
 const userPrompt=`Analyze this chat conversation and give me coaching advice:
 ---
@@ -992,10 +1037,11 @@ showTyping();
 const theirName=document.getElementById('theirName').value.trim()||'them';
 const chatLog=messages.map(m=>`${m.sender==='me'?'Me':theirName}: ${m.text}`).join('\n');
 const personaNote=getPersonaPrompt();
+const hinglishAutoNote=lang==='hinglish'?`\nLANGUAGE: Reply in HINGLISH — casual Hindi+English mix in Roman script like a real young Indian on WhatsApp.\nExamples of how to text: "haan bolo", "acha thik hai", "kya kar rha hai", "pagal hai kya 😂", "chal theek h", "arre sun na", "bohot bore ho rha hun"\nNO formal Hindi. NO pure English. NO Devanagari. Mix naturally like: "arre yaar kya hua", "haha pagal", "accha sun", "tu toh 🔥 h"`:lang==='hindi'?'\nLANGUAGE: Reply in casual Roman Hindi. Use shortcuts: nhi, acha, thk h, kya, chl. NO Devanagari. NO pure English.':'';
 const sysPrompt=`You are simulating "${theirName}" in a text conversation. You ARE them, not an AI. Reply as a REAL person would text.
-${personaNote?'PERSONALITY: '+personaNote:''}
+${personaNote?'PERSONALITY: '+personaNote:''}${hinglishAutoNote}
 RULES:
-1. TYPE LIKE A REAL HUMAN: lowercase, casual, use "lol" "haha" "ngl" "tbh" naturally.
+1. TYPE LIKE A REAL HUMAN: lowercase, casual.${lang==='hinglish'?' Use Hindi fillers (yaar, arre, accha, na, haan) + English naturally mixed.':' Use "lol" "haha" "ngl" "tbh" naturally.'}
 2. KEEP IT SHORT: 3-15 words. Real texts are brief.
 3. STAY IN CHARACTER based on the personality described.
 4. React naturally to what "Me" just said. Be specific to the conversation.
@@ -1158,7 +1204,8 @@ document.body.appendChild(bar);
 try{
 const theirName=document.getElementById('theirName').value.trim()||'them';
 const chatLog=messages.slice(-4).map(m=>`${m.sender==='me'?'Me':theirName}: ${m.text}`).join('\n');
-const msgs=[{role:'system',content:`Generate 3 ultra-short quick reply options (3-8 words each) for this chat. These should be casual, natural texts. Return ONLY a JSON array: ["reply1","reply2","reply3"]. Make each distinct in tone: 1 smooth, 1 funny, 1 bold.`},{role:'user',content:chatLog}];
+const qrLangNote=lang==='hinglish'?' Write in Hinglish (Hindi+English mix, Roman script) like real Indian WhatsApp texts. Example: ["arre sach mein? 😂","chal na yaar","tu toh full mast hai"]. Use yaar/arre/accha/bhai naturally. NO pure English. NO formal Hindi.':lang==='hindi'?' Write in casual Roman Hindi like real texts. Use shortcuts.':'';
+const msgs=[{role:'system',content:`Generate 3 ultra-short quick reply options (3-8 words each) for this chat. These should be casual, natural texts.${qrLangNote} Return ONLY a JSON array: ["reply1","reply2","reply3"]. Make each distinct in tone: 1 smooth, 1 funny, 1 bold.`},{role:'user',content:chatLog}];
 const res=await callProviders(msgs);
 const arr=JSON.parse(res.match(/\[[\s\S]*?\]/)?.[0]||'[]');
 if(arr.length&&document.getElementById('quickRepliesBar')){
