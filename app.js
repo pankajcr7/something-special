@@ -79,59 +79,20 @@ document.addEventListener('click',()=>document.querySelectorAll('.custom-select.
 function initIntensity(){document.querySelectorAll('.int-btn').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('.int-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');intensity=b.dataset.int;playSound('click');});});}
 
 // ===== GENERATE =====
-async function generateRizz(){
-const btn=document.getElementById('genBtn');
-if(btn.classList.contains('loading'))return;
-btn.classList.add('loading');
-btn.querySelector('.btn-text').textContent = 'Cookin...';
-
-const ctx=''; // Context removed from main gen for simplicity, or add back if needed
+async function generateLines(){
+const btn=document.getElementById('generateBtn');if(btn.classList.contains('loading'))return;btn.classList.add('loading');
+const ctx=document.getElementById('contextInput')?.value||'';
 try{
-let lines=[];
-// Try DB first
-const dbCat=DB[category];
-if(dbCat){
-    const dbStyle=dbCat[style]||dbCat.smooth;
-    const dbInt=dbStyle?.[intensity]||dbStyle?.bold||Object.values(dbStyle)[0];
-    if(dbInt?.length) lines=[...dbInt].sort(()=>Math.random()-.5).slice(0,5);
+let lines=[];const dbCat=DB[category];
+if(dbCat){const dbStyle=dbCat[style]||dbCat.smooth;const dbInt=dbStyle?.[intensity]||dbStyle?.bold||Object.values(dbStyle)[0];if(dbInt?.length)lines=[...dbInt].sort(()=>Math.random()-.5).slice(0,5);}
+try{const ai=await callAI({category,style,lang,intensity,context:ctx,count:5});if(ai?.length)lines=ai;}catch(e){}
+displayResults(lines);addToHistory(lines,category,style);playSound('generate');launchConfetti();
+}catch(e){showToast('Failed to generate. Try again!');}btn.classList.remove('loading');
 }
-
-// Fallback/Augment with AI
-try{
-    const ai=await callAI({category,style,lang,intensity,context:ctx,count:5});
-    if(ai?.length) lines=ai; // Prefer AI if available
-}catch(e){}
-
-displayResults(lines);
-addToHistory(lines,category,style);
-playSound('generate');
-launchConfetti();
-}catch(e){showToast('Failed. Try again!');}
-btn.classList.remove('loading');
-btn.querySelector('.btn-text').textContent = 'Generate Rizz';
-}
-
 function displayResults(lines){
-const c=document.getElementById('resultsArea');
-c.innerHTML='';
-lines.forEach((line,i)=>{
-    const isFav=favorites.includes(line);
-    const d=document.createElement('div');
-    d.className='result-card';
-    d.style.animationDelay=`${i*.05}s`;
-    d.innerHTML=`
-        <div class="result-content">${escHtml(line)}</div>
-        <div class="result-actions">
-            <button class="action-btn copy-btn" onclick="copyLine(this,'${escAttr(line)}')">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            </button>
-            <button class="action-btn share-btn" onclick="openShareCard('${escAttr(line)}')">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-            </button>
-        </div>
-    `;
-    c.appendChild(d);
-});
+const c=document.getElementById('results');c.innerHTML='';
+lines.forEach((line,i)=>{const isFav=favorites.includes(line);const d=document.createElement('div');d.className='result-item';d.style.animationDelay=`${i*.08}s`;
+d.innerHTML=`<p class="result-text">${escHtml(line)}</p><div class="result-actions"><button class="result-action-btn copy-btn" onclick="copyLine(this,'${escAttr(line)}')">📋 Copy</button><button class="result-action-btn fav-toggle ${isFav?'fav-active':''}" onclick="toggleFav(this,'${escAttr(line)}')">❤️ Save</button><button class="result-action-btn share-btn" onclick="openShareCard('${escAttr(line)}')">📤 Share</button><button class="voice-btn" onclick="speakText('${escAttr(line)}')">🔊</button></div>`;c.appendChild(d);});
 trackStat('generations',lines.length);
 }
 
@@ -305,66 +266,19 @@ if(challengeData.results){const r=document.getElementById('challengeResults');r.
 }
 function calcStreak(){if(!challengeData.lastCompleted)return 0;const diff=Math.floor((new Date()-new Date(challengeData.lastCompleted))/864e5);return diff>1?0:challengeData.streak||0;}
 async function generateChallenge(){
-    const today=new Date().toDateString();
-    
-    // Check if already completed (and UI wasn't updated for some reason)
-    const btn=document.querySelector('.dc-btn');
-    if(challengeData.completedDate===today){
-        showToast('Challenge already completed today!');
-        if(btn) { btn.textContent = 'Completed ✅'; btn.disabled=true; }
-        return;
-    }
-    
-    if(btn) { btn.classList.add('loading'); btn.textContent='Cooking...'; btn.disabled=true; }
-    
-    try{
-        const ch=getDailyChallenge();
-        let lines;
-        try{
-            const msgs=[{role:'system',content:'You are RizzGPT. Generate 3 creative lines for this challenge. Match the theme. Return 3 lines, one per line. No numbers. Write in Hinglish — casual Hindi+English mix in Roman script like real young Indians text. Use yaar/arre/accha/chal naturally. NO pure English. NO formal Hindi. Example style: "arre yaar teri smile toh kamaal hai 🔥"'},{role:'user',content:`Challenge: ${ch.prompt}\n${ch.desc}\nGenerate in Hinglish — Hindi+English mix like real WhatsApp texting.`}];
-            lines=parseAIResponse(await callAIRaw(msgs),3);
-        }catch(e){
-            lines=['Challenge accepted — tera rizz loading ho rha hai yaar!','Charm level full charge ho rha hai 🔥','Ek baar aur try kr, AI powered results aayenge!'];
-        }
-        
-        // Update Data
-        let streak=challengeData.streak||0;
-        const prev=challengeData.lastCompleted?new Date(challengeData.lastCompleted):null;
-        
-        // Check if streak continues (completed yesterday)
-        const ONE_DAY = 86400000;
-        const diff = prev ? (new Date() - prev) : 0;
-        if(prev && diff < (ONE_DAY * 2)) {
-            streak++;
-        } else {
-            streak = 1;
-        }
-        
-        challengeData = {
-            completedDate: today,
-            lastCompleted: new Date().toISOString(),
-            streak: streak,
-            results: lines
-        };
-        localStorage.setItem('rizzChallenge',JSON.stringify(challengeData));
-        
-        // Update UI
-        displayChallengeResults(lines); // New function I added in index.html logic but need to ensure it's here if not
-        
-        if(btn) { btn.textContent='See Results Below 👇'; }
-        
-        // Update Streak Badges
-        const sb = document.getElementById('streakBadgeHeader');
-        if(sb) sb.textContent = `🔥 ${streak}`;
-        
-        playSound('generate');
-        launchConfetti();
-        showToast(`Challenge Done! Streak: ${streak} 🔥`);
-        
-    } catch(e) {
-        showToast('Failed. Try again!');
-        if(btn) { btn.classList.remove('loading'); btn.textContent='Generate Lines'; btn.disabled=false; }
-    }
+const today=new Date().toDateString();if(challengeData.completedDate===today){showToast('Already completed today!');return;}
+const ch=getDailyChallenge(),btn=document.getElementById('challengeGenBtn');btn.classList.add('loading');
+try{
+let lines;try{const msgs=[{role:'system',content:'You are RizzGPT. Generate 3 creative lines for this challenge. Match the theme. Return 3 lines, one per line. No numbers. Write in Hinglish — casual Hindi+English mix in Roman script like real young Indians text. Use yaar/arre/accha/chal naturally. NO pure English. NO formal Hindi. Example style: "arre yaar teri smile toh kamaal hai 🔥"'},{role:'user',content:`Challenge: ${ch.prompt}\n${ch.desc}\nGenerate in Hinglish — Hindi+English mix like real WhatsApp texting.`}];lines=parseAIResponse(await callAIRaw(msgs),3);}catch(e){lines=['Challenge accepted — tera rizz loading ho rha hai yaar!','Charm level full charge ho rha hai 🔥','Ek baar aur try kr, AI powered results aayenge!'];}
+const r=document.getElementById('challengeResults');r.style.display='block';
+r.innerHTML=lines.map(x=>`<div class="result-item"><p class="result-text">${escHtml(x)}</p><div class="result-actions"><button class="result-action-btn copy-btn" onclick="copyLine(this,'${escAttr(x)}')">📋 Copy</button><button class="result-action-btn share-btn" onclick="openShareCard('${escAttr(x)}')">📤 Share</button></div></div>`).join('');
+let streak=challengeData.streak||0;const prev=challengeData.lastCompleted?new Date(challengeData.lastCompleted):null;
+streak=prev&&Math.floor((new Date()-prev)/864e5)<=1?streak+1:1;
+challengeData={completedDate:today,lastCompleted:new Date().toISOString(),streak,results:lines};
+localStorage.setItem('rizzChallenge',JSON.stringify(challengeData));
+document.getElementById('streakCount').textContent=streak;btn.textContent='✅ Completed!';btn.style.opacity='.6';
+playSound('generate');launchConfetti();
+}catch(e){showToast('Failed. Try again!');}btn.classList.remove('loading');
 }
 
 // ===== GEN TABS =====
@@ -532,54 +446,22 @@ s.lastVisit=today;
 saveStats(s);
 }
 function renderStatsDashboard(){
-    const s=getStats();
-    
-    // Update Profile View Stats
-    const elGen = document.getElementById('statGenerations');
-    const elStreak = document.getElementById('statStreak');
-    const elToday = document.getElementById('statToday');
-    
-    if(elGen) elGen.textContent = s.generations || 0;
-    if(elStreak) elStreak.textContent = s.streak || 0;
-    
-    // Calculate Today's Count (simple implementation)
-    // In a real app we'd track this in state properly
-    const todayKey = new Date().toDateString();
-    const storedToday = localStorage.getItem('rizzTodayCountDate');
-    let todayCount = parseInt(localStorage.getItem('rizzTodayCount') || '0');
-    
-    if(storedToday !== todayKey) {
-        todayCount = 0;
-        localStorage.setItem('rizzTodayCountDate', todayKey);
-        localStorage.setItem('rizzTodayCount', '0');
-    }
-    
-    if(elToday) elToday.textContent = todayCount;
-    
-    // Update Header Badge
-    const elHeaderBadge = document.getElementById('streakBadgeHeader');
-    if(elHeaderBadge) elHeaderBadge.textContent = `🔥 ${s.streak || 0}`;
+const s=getStats();
+document.getElementById('statGenerations').textContent=s.generations||0;
+document.getElementById('statFavorites').textContent=favorites.length;
+document.getElementById('statBattles').textContent=battleStats.total||0;
+const avg=s.scores?.length?Math.round(s.scores.reduce((a,b)=>a+b,0)/s.scores.length):0;
+document.getElementById('statAvgScore').textContent=avg||'—';
+const su=s.styleUsage||{};
+const topStyle=Object.entries(su).sort((a,b)=>b[1]-a[1])[0];
+document.getElementById('statTopStyle').textContent=topStyle?cap(topStyle[0]):'—';
+document.getElementById('statStreak').textContent=s.streak||0;
+const bars=document.getElementById('statsBars');
+if(bars){
+const max=Math.max(...Object.values(su),1);
+bars.innerHTML=Object.entries(su).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([k,v])=>`<div class="stat-bar-row"><span class="stat-bar-label">${cap(k)}</span><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${(v/max*100).toFixed(0)}%"></div><span class="stat-bar-val">${v}</span></div></div>`).join('')||'<p style="color:var(--text3);font-size:.82rem">Generate some lines to see stats!</p>';
 }
-
-// Hook into trackStat to update "Today"
-const _origTrackStat = trackStat;
-trackStat = function(key, val) {
-    _origTrackStat(key, val);
-    if(key === 'generations') {
-        const todayKey = new Date().toDateString();
-        const storedToday = localStorage.getItem('rizzTodayCountDate');
-        let todayCount = parseInt(localStorage.getItem('rizzTodayCount') || '0');
-        
-        if(storedToday !== todayKey) {
-            todayCount = 0;
-            localStorage.setItem('rizzTodayCountDate', todayKey);
-        }
-        
-        todayCount += (val || 1); // val is usually count, default 1
-        localStorage.setItem('rizzTodayCount', todayCount.toString());
-        renderStatsDashboard();
-    }
-};
+}
 
 // ===== TOOL MODAL =====
 function openTool(name){
@@ -1359,67 +1241,4 @@ return`<p style="margin-bottom:4px">${l}</p>`;
 }
 
 function copyText(t){navigator.clipboard.writeText(t).then(()=>{showToast('Copied!');playSound('copy');});}
-
-// ===== GEN TABS =====
-function initTabs() {
-    document.querySelectorAll('.gen-tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-            // Update Tab UI
-            document.querySelectorAll('.gen-tab').forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            
-            // Set Category
-            category = tab.dataset.tab;
-            
-            // Animation for panel switch (optional, simplified for mobile speed)
-            playSound('click');
-        });
-    });
-
-    // Style Chips Selection
-    document.querySelectorAll('.style-chip').forEach(chip => {
-        chip.addEventListener('click', () => {
-            document.querySelectorAll('.style-chip').forEach(c => c.classList.remove('active'));
-            chip.classList.add('active');
-            style = chip.dataset.value;
-            playSound('click');
-        });
-    });
-
-    // Intensity Track Selection
-    document.querySelectorAll('.intensity-opt').forEach(opt => {
-        opt.addEventListener('click', () => {
-            document.querySelectorAll('.intensity-opt').forEach(o => o.classList.remove('active'));
-            opt.classList.add('active');
-            intensity = opt.dataset.value;
-            playSound('click');
-        });
-    });
-}
-
-// ===== INIT =====
-document.addEventListener('DOMContentLoaded', () => {
-    initTabs();
-    document.getElementById('genBtn').addEventListener('click', generateRizz);
-    
-    // Global Listeners
-    document.getElementById('toolOverlay').addEventListener('click', (e) => {
-        if (e.target.id === 'toolOverlay') closeTool();
-    });
-    
-    // Stats Update
-    renderStatsDashboard(); // Using existing function name
-    
-    // Daily Challenge Timer
-    // setInterval(updateChallengeTimer, 1000); // Assuming this function exists or will be added
-    
-    // Init other features
-    initMainScreenshot();
-    checkScheduledCompliments();
-    
-    // Use existing challenge logic
-    if(document.getElementById('challengeGenBtn')) {
-        document.getElementById('challengeGenBtn').addEventListener('click', generateChallenge);
-    }
-});
 
