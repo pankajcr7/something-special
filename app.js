@@ -463,8 +463,10 @@ playSound('click');
 switch(name){
 case 'profileRoast':
 title.textContent='🔥 Profile Roast & Review';
-body.innerHTML=`<label class="tool-label">Paste your dating profile bio</label><textarea class="tool-textarea" id="toolInput" placeholder="e.g., Just a chill guy who loves pizza and Netflix..." rows="4"></textarea><button class="tool-gen-btn" id="toolGenBtn">🔥 Roast My Profile</button><div id="toolResult"></div>`;
+body.innerHTML=`<label class="tool-label">Paste your dating profile bio</label><textarea class="tool-textarea" id="toolInput" placeholder="e.g., Just a chill guy who loves pizza and Netflix..." rows="4"></textarea><label class="tool-label" style="margin-top:10px">What vibe are you going for? (optional)</label><div class="tool-chips" id="bioVibeChips">${['Funny','Smooth','Bold','Mysterious','Nerdy','Romantic'].map((v,i)=>`<span class="tool-chip${i===0?' active':''}" data-vibe="${v}">${v}</span>`).join('')}</div><div style="display:flex;gap:8px;margin-top:10px"><button class="tool-gen-btn" id="toolGenBtn" style="flex:1">🔥 Roast My Profile</button><button class="tool-gen-btn" id="toolSuggestBtn" style="flex:1;background:linear-gradient(135deg,#6366f1,#a855f7)">✨ Suggest 5 Bios</button></div><div id="toolResult"></div>`;
+document.querySelectorAll('#bioVibeChips .tool-chip').forEach(c=>c.onclick=()=>{document.querySelectorAll('#bioVibeChips .tool-chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');});
 document.getElementById('toolGenBtn').onclick=runProfileRoast;
+document.getElementById('toolSuggestBtn').onclick=runBioSuggest;
 break;
 case 'responsePred':
 title.textContent='🔮 Response Predictor';
@@ -544,6 +546,25 @@ document.getElementById('toolResult').innerHTML=`<div class="tool-result">${form
 playSound('generate');
 }catch(e){document.getElementById('toolResult').innerHTML=`<div class="tool-result">Couldn't roast right now. Try again!</div>`;}
 btn.disabled=false;btn.textContent='🔥 Roast My Profile';
+}
+
+// ===== TOOL: BIO SUGGEST =====
+async function runBioSuggest(){
+const bio=document.getElementById('toolInput').value.trim();
+const vibeEl=document.querySelector('#bioVibeChips .tool-chip.active');
+const vibe=vibeEl?vibeEl.dataset.vibe:'Funny';
+const btn=document.getElementById('toolSuggestBtn');btn.disabled=true;btn.textContent='Generating...';
+try{
+const context=bio?`The user currently has this bio: "${bio}". Use it as inspiration to understand their personality, interests, and tone.`:`The user hasn't written a bio yet. Create bios from scratch.`;
+const msgs=[{role:'system',content:`You are a world-class dating profile bio writer. ${context} Generate exactly 5 unique, creative dating profile bios in a **${vibe}** vibe/tone. Each bio should be 1-3 lines max, catchy, memorable, and swipe-right worthy. Make each one feel distinct — vary structure, humor, and style within the ${vibe} tone. Number them 1-5. After each bio add a short tag like (Best for Tinder), (Best for Hinge), (Best for Bumble), (Works everywhere), or (Instagram ready). End with a brief tip on which bio suits which platform.`},{role:'user',content:`Generate 5 ${vibe.toLowerCase()} dating profile bios${bio?' based on: "'+bio+'"':' for someone looking for a great bio'}`}];
+const res=await callAIRaw(msgs);
+let html=`<div class="tool-result" style="animation:fadeUp .3s">`;
+html+=formatToolResult(res);
+html+=`</div>`;
+document.getElementById('toolResult').innerHTML=html;
+playSound('generate');
+}catch(e){document.getElementById('toolResult').innerHTML=`<div class="tool-result">Couldn't generate bios right now. Try again!</div>`;}
+btn.disabled=false;btn.textContent='✨ Suggest 5 Bios';
 }
 
 // ===== TOOL: RESPONSE PREDICTOR =====
