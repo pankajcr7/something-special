@@ -94,7 +94,7 @@ input.focus();
 const textarea=document.getElementById('msgInput');
 textarea.addEventListener('input',()=>{
 textarea.style.height='auto';
-textarea.style.height=Math.min(textarea.scrollHeight,100)+'px';
+textarea.style.height=Math.min(textarea.scrollHeight,120)+'px';
 });
 textarea.addEventListener('keydown',e=>{
 if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();addMessage();}
@@ -168,11 +168,13 @@ row.dataset.id=msg.id;
 const timeStr=formatTime(msg.time);
 row.innerHTML=`
 <div class="msg-bubble">${escapeHtml(msg.text)}</div>
-<div class="msg-time">${timeStr}</div>
-<div class="msg-actions">
-<button class="msg-action-btn" onclick="copyMessage('${escapeJs(msg.text)}')">Copy</button>
-<button class="msg-action-btn del" onclick="deleteMessage(${msg.id})">Delete</button>
-</div>`;
+<div class="msg-time">${timeStr}</div>`;
+
+row.addEventListener('click',(e)=>{
+if(e.target.closest('.msg-edit-bar'))return;
+if(row.classList.contains('editing'))return;
+showMsgContextMenu(msg.id,msg.text,msg.sender,e);
+});
 
 container.appendChild(row);
 
@@ -187,6 +189,116 @@ container.appendChild(marker);
 });
 
 if(messages.length>0&&hintDiv) hintDiv.style.display='none';
+}
+
+// ===== WHATSAPP-STYLE CONTEXT MENU =====
+function showMsgContextMenu(id,text,sender,e){
+closeMsgContextMenu();
+const overlay=document.createElement('div');
+overlay.className='msg-ctx-overlay';
+overlay.id='msgCtxOverlay';
+overlay.addEventListener('click',closeMsgContextMenu);
+
+const menu=document.createElement('div');
+menu.className='msg-ctx-menu';
+
+const bubbleRect=e.currentTarget.querySelector('.msg-bubble').getBoundingClientRect();
+let top=bubbleRect.top-10;
+let left=sender==='me'?bubbleRect.right-170:bubbleRect.left;
+if(top+200>window.innerHeight)top=bubbleRect.top-180;
+if(top<10)top=10;
+if(left<10)left=10;
+if(left+170>window.innerWidth)left=window.innerWidth-180;
+
+menu.style.top=top+'px';
+menu.style.left=left+'px';
+
+menu.innerHTML=`
+<button class="msg-ctx-item" data-action="copy">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+Copy
+</button>
+<button class="msg-ctx-item" data-action="edit">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+Edit
+</button>
+<div class="msg-ctx-sep"></div>
+<button class="msg-ctx-item delete-item" data-action="delete">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+Delete
+</button>`;
+
+menu.querySelectorAll('.msg-ctx-item').forEach(btn=>{
+btn.addEventListener('click',(ev)=>{
+ev.stopPropagation();
+const action=btn.dataset.action;
+closeMsgContextMenu();
+if(action==='copy'){
+navigator.clipboard.writeText(text).then(()=>showToast('Copied!'));
+}else if(action==='edit'){
+startEditMessage(id,text);
+}else if(action==='delete'){
+deleteMessage(id);
+showToast('Message deleted');
+}
+});
+});
+
+document.body.appendChild(overlay);
+document.body.appendChild(menu);
+}
+
+function closeMsgContextMenu(){
+const overlay=document.getElementById('msgCtxOverlay');
+if(overlay)overlay.remove();
+document.querySelectorAll('.msg-ctx-menu').forEach(m=>m.remove());
+}
+
+// ===== EDIT MESSAGE =====
+function startEditMessage(id,text){
+const row=document.querySelector(`.msg-row[data-id="${id}"]`);
+if(!row)return;
+row.classList.add('editing');
+const bubble=row.querySelector('.msg-bubble');
+const originalHtml=bubble.innerHTML;
+const timeEl=row.querySelector('.msg-time');
+if(timeEl)timeEl.style.display='none';
+
+bubble.innerHTML=`
+<textarea class="msg-edit-input" id="editInput_${id}">${text}</textarea>
+<div class="msg-edit-bar">
+<button class="msg-edit-cancel" onclick="cancelEdit(${id})">Cancel</button>
+<button class="msg-edit-save" onclick="saveEdit(${id})">Save</button>
+</div>`;
+
+const input=document.getElementById('editInput_'+id);
+if(input){
+input.focus();
+input.style.height='auto';
+input.style.height=Math.min(input.scrollHeight,80)+'px';
+input.addEventListener('input',()=>{
+input.style.height='auto';
+input.style.height=Math.min(input.scrollHeight,80)+'px';
+});
+}
+}
+
+function saveEdit(id){
+const input=document.getElementById('editInput_'+id);
+if(!input)return;
+const newText=input.value.trim();
+if(!newText){showToast('Message cannot be empty');return;}
+const idx=messages.findIndex(m=>m.id===id);
+if(idx!==-1){
+messages[idx].text=newText;
+renderMessages();
+saveChat();
+showToast('Message edited');
+}
+}
+
+function cancelEdit(id){
+renderMessages();
 }
 
 function hideHint(){
