@@ -899,6 +899,494 @@ function closeSSPanel(){
 document.getElementById('ssPanel').style.display='none';
 }
 
+// ===== FEATURE: VIBE METER =====
+let vibeValue=20;
+function updateVibeMeter(){
+if(messages.length<2){vibeValue=20;renderVibe();return;}
+const last5=messages.slice(-6);
+let score=40;
+last5.forEach(m=>{
+const t=m.text.toLowerCase();
+if(/haha|lol|😂|🤣|😄|❤|🥰|😍|😘|💕|🔥|cute|love|miss|beautiful|amazing|❤️/.test(t))score+=10;
+if(/lmao|omg|stoppp|you're|ur so|i like|wanna|date|hang out|come over/.test(t))score+=8;
+if(/ok|k|sure|idk|whatever|fine|cool|bye|nah|no|busy|maybe/.test(t)&&t.length<10)score-=8;
+if(/😏|😈|💀|👀|😜|🤭/.test(t))score+=5;
+if(m.sender==='them'&&t.includes('?'))score+=4;
+if(t.length>50)score+=3;
+if(t.length<5)score-=3;
+});
+const theirMsgs=last5.filter(m=>m.sender==='them').length;
+const myMsgs=last5.filter(m=>m.sender==='me').length;
+if(theirMsgs>myMsgs)score+=5;
+if(myMsgs>theirMsgs+2)score-=5;
+vibeValue=Math.max(5,Math.min(100,score));
+renderVibe();
+}
+function renderVibe(){
+const fill=document.getElementById('vibeFill');
+const label=document.getElementById('vibeLabel');
+const scoreEl=document.getElementById('vibeScore');
+if(!fill)return;
+fill.style.width=vibeValue+'%';
+scoreEl.textContent=vibeValue;
+let txt,color;
+if(vibeValue>=80){txt='🔥 On Fire';color='#ef4444';}
+else if(vibeValue>=60){txt='😏 Flirty';color='#ec4899';}
+else if(vibeValue>=40){txt='😊 Warm';color='#f59e0b';}
+else if(vibeValue>=25){txt='😐 Neutral';color='#9898b0';}
+else{txt='🥶 Cold';color='#3b82f6';}
+label.textContent=txt;label.style.color=color;scoreEl.style.color=color;
+}
+
+// ===== FEATURE: PERSONA SIMULATOR =====
+let persona='normal';
+function initPersona(){
+document.querySelectorAll('.persona-chip').forEach(c=>{
+c.addEventListener('click',()=>{
+document.querySelectorAll('.persona-chip').forEach(x=>x.classList.remove('active'));
+c.classList.add('active');
+persona=c.dataset.persona;
+showToast(`Persona: ${c.textContent.trim()}`);
+});
+});
+}
+
+function getPersonaPrompt(){
+const personas={
+normal:'',
+shy:'They are shy and introverted — short replies, lots of "haha", nervous energy, takes time to open up, uses "..." often.',
+confident:'They are super confident and direct — knows what they want, assertive, smooth talker, never seems nervous.',
+sarcastic:'They are very sarcastic — dry humor, witty comebacks, never gives a straight answer, always teasing.',
+dry:'They are a dry texter — minimal effort replies, "k", "lol", "nice", rarely asks questions. Hard to read.',
+flirty:'They are extremely flirty — drops hints constantly, playful, uses lots of emojis, always escalating.',
+hardtoget:'They play hard to get — interested but won\'t show it easily, makes you work for it, hot and cold.',
+clingy:'They are clingy — double texts, gets worried if you don\'t reply fast, very affectionate, needs reassurance.',
+intellectual:'They are intellectual — uses proper grammar, references books/philosophy, deeper conversations, thoughtful responses.'
+};
+return personas[persona]||'';
+}
+
+// ===== FEATURE: AI AUTOPILOT =====
+let autopilotOn=false;
+function initAutopilot(){
+const btn=document.getElementById('autopilotBtn');
+if(!btn)return;
+btn.addEventListener('click',()=>{
+autopilotOn=!autopilotOn;
+btn.textContent=autopilotOn?'ON':'OFF';
+btn.classList.toggle('on',autopilotOn);
+showToast(autopilotOn?'🤖 Autopilot ON — AI plays them':'Autopilot OFF');
+if(autopilotOn){
+document.querySelectorAll('.sender-btn').forEach(x=>x.classList.remove('active'));
+document.getElementById('senderMe').classList.add('active');
+currentSender='me';
+document.getElementById('msgInput').placeholder='Type your message (AI will reply as them)...';
+}
+});
+}
+
+async function autopilotReply(){
+if(!autopilotOn||generating)return;
+generating=true;
+showTyping();
+const theirName=document.getElementById('theirName').value.trim()||'them';
+const chatLog=messages.map(m=>`${m.sender==='me'?'Me':theirName}: ${m.text}`).join('\n');
+const personaNote=getPersonaPrompt();
+const sysPrompt=`You are simulating "${theirName}" in a text conversation. You ARE them, not an AI. Reply as a REAL person would text.
+${personaNote?'PERSONALITY: '+personaNote:''}
+RULES:
+1. TYPE LIKE A REAL HUMAN: lowercase, casual, use "lol" "haha" "ngl" "tbh" naturally.
+2. KEEP IT SHORT: 3-15 words. Real texts are brief.
+3. STAY IN CHARACTER based on the personality described.
+4. React naturally to what "Me" just said. Be specific to the conversation.
+5. Output ONLY the reply message. Nothing else. No quotes, no prefix.`;
+try{
+const text=await callProviders([
+{role:'system',content:sysPrompt},
+{role:'user',content:`Conversation:\n---\n${chatLog}\n---\nReply as ${theirName}:`}
+]);
+hideTyping();
+const reply=text.replace(/^["']|["']$/g,'').replace(/^(them|they|her|him|sarah|[a-z]+):\s*/i,'').trim();
+if(reply.length>2){
+messages.push({id:Date.now(),sender:'them',text:reply,time:new Date()});
+renderMessages();saveChat();scrollToBottom();
+updateVibeMeter();
+updateGoalProgress();
+generateQuickReplies();
+}
+}catch(e){hideTyping();showToast('AI reply failed');}
+generating=false;
+}
+
+// ===== FEATURE: MESSAGE REWRITE =====
+async function openRewrite(msgId){
+const msg=messages.find(m=>m.id===msgId);
+if(!msg)return;
+const popup=document.getElementById('rewritePopup');
+const orig=document.getElementById('rewriteOriginal');
+const opts=document.getElementById('rewriteOptions');
+orig.textContent=msg.text;
+opts.innerHTML='<div style="text-align:center;padding:16px;color:var(--text3);font-size:.85rem">Generating rewrites...</div>';
+popup.style.display='flex';
+try{
+const theirName=document.getElementById('theirName').value.trim()||'them';
+const chatLog=messages.map(m=>`${m.sender==='me'?'Me':theirName}: ${m.text}`).join('\n');
+const msgs=[{role:'system',content:`Rewrite the user's message in 5 different styles. Keep the same intent but make each version better. Format as JSON array: [{"style":"Smoother","text":"rewritten msg"},{"style":"Funnier","text":"msg"},{"style":"Bolder","text":"msg"},{"style":"Sweeter","text":"msg"},{"style":"Wittier","text":"msg"}]. Keep each rewrite SHORT (under 20 words), natural, and texting-style.`},{role:'user',content:`Conversation context:\n${chatLog}\n\nRewrite this message:\n"${msg.text}"`}];
+const res=await callProviders(msgs);
+const arr=JSON.parse(res.match(/\[[\s\S]*\]/)?.[0]||'[]');
+if(arr.length){
+opts.innerHTML=arr.map(r=>`<button class="rewrite-option" data-text="${(r.text||'').replace(/"/g,'&quot;')}"><span class="rewrite-option-label">${r.style||'Option'}</span><span class="rewrite-option-text">${r.text||''}</span></button>`).join('');
+opts.querySelectorAll('.rewrite-option').forEach(btn=>{
+btn.addEventListener('click',()=>{
+const newText=btn.dataset.text;
+const idx=messages.findIndex(m=>m.id===msgId);
+if(idx!==-1){messages[idx].text=newText;renderMessages();saveChat();scrollToBottom();}
+popup.style.display='none';
+showToast('Message rewritten!');
+});
+});
+}else{opts.innerHTML='<div style="text-align:center;padding:16px;color:var(--red)">Failed — try again</div>';}
+}catch(e){opts.innerHTML='<div style="text-align:center;padding:16px;color:var(--red)">Rewrite failed</div>';}
+}
+
+// ===== FEATURE: REPLY TIMING ADVISOR =====
+let timingPanel=null;
+async function showTimingAdvice(){
+if(messages.length<2){showToast('Need messages first');return;}
+const existing=document.querySelector('.timing-panel');
+if(existing){existing.remove();return;}
+const last=messages[messages.length-1];
+if(last.sender==='me'){showToast('Wait for their message first');return;}
+const panel=document.createElement('div');
+panel.className='timing-panel';
+panel.innerHTML=`<div class="timing-panel-inner"><span class="timing-icon">⏱️</span><div class="timing-info"><div class="timing-advice">Analyzing...</div><div class="timing-reason">Reading conversation patterns</div></div><button class="timing-close" onclick="this.closest('.timing-panel').remove()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>`;
+document.body.appendChild(panel);
+try{
+const theirName=document.getElementById('theirName').value.trim()||'them';
+const chatLog=messages.slice(-6).map(m=>`${m.sender==='me'?'Me':theirName}: ${m.text}`).join('\n');
+const msgs=[{role:'system',content:'You are a texting timing expert. Analyze the conversation and advise when to reply. Return ONLY JSON: {"timing":"Reply in 5-10 minutes","reason":"Short explanation why","emoji":"⏰"}'},{role:'user',content:`When should I reply?\n${chatLog}`}];
+const res=await callProviders(msgs);
+const json=JSON.parse(res.match(/\{[\s\S]*?\}/)?.[0]||'{}');
+const advice=panel.querySelector('.timing-advice');
+const reason=panel.querySelector('.timing-reason');
+const icon=panel.querySelector('.timing-icon');
+if(advice){advice.textContent=json.timing||'Reply when ready';}
+if(reason){reason.textContent=json.reason||'';}
+if(icon){icon.textContent=json.emoji||'⏱️';}
+}catch(e){
+const advice=panel.querySelector('.timing-advice');
+if(advice)advice.textContent='Could not analyze timing';
+}
+setTimeout(()=>{if(panel.parentNode)panel.remove();},15000);
+}
+
+// ===== FEATURE: CONVERSATION GOALS =====
+let currentGoal='none';
+let goalProgress=0;
+function initGoals(){
+document.querySelectorAll('.goal-chip').forEach(c=>{
+c.addEventListener('click',()=>{
+document.querySelectorAll('.goal-chip').forEach(x=>x.classList.remove('active'));
+c.classList.add('active');
+currentGoal=c.dataset.goal;
+goalProgress=0;
+const tracker=document.getElementById('goalTracker');
+if(currentGoal==='none'){
+tracker.style.display='none';
+}else{
+tracker.style.display='block';
+const goalNames={getnumber:'📱 Get Their Number',askout:'💕 Ask Them Out',keepflirty:'🔥 Keep It Flirty',deepen:'💎 Deepen Connection',friendzone:'🏃 Escape Friend Zone'};
+document.getElementById('goalText').textContent=goalNames[currentGoal]||'Goal';
+updateGoalUI();
+document.querySelector('.chat-container').style.top='118px';
+}
+showToast(`Goal: ${c.textContent.trim()}`);
+});
+});
+document.getElementById('closeGoal')?.addEventListener('click',()=>{
+currentGoal='none';goalProgress=0;
+document.getElementById('goalTracker').style.display='none';
+document.querySelector('.chat-container').style.top='90px';
+document.querySelectorAll('.goal-chip').forEach(x=>x.classList.remove('active'));
+});
+}
+function updateGoalUI(){
+document.getElementById('goalFill').style.width=goalProgress+'%';
+document.getElementById('goalPct').textContent=goalProgress+'%';
+}
+function updateGoalProgress(){
+if(currentGoal==='none'||messages.length<2)return;
+const last3=messages.slice(-3).map(m=>m.text.toLowerCase()).join(' ');
+let bump=0;
+switch(currentGoal){
+case 'getnumber':
+if(/number|digits|phone|text me|call me|whatsapp|snap/.test(last3))bump=30;
+else if(/\d{7,}/.test(last3))bump=50;
+else bump=3;break;
+case 'askout':
+if(/date|meet|hang out|grab|coffee|dinner|drinks|this weekend|tomorrow|friday|saturday/.test(last3))bump=25;
+else if(/yes|i'd love|i'm down|sounds good|when|where/.test(last3))bump=35;
+else bump=3;break;
+case 'keepflirty':
+if(/😏|😘|🔥|😈|💕|cute|hot|sexy|flirt|tease|blush/.test(last3))bump=8;
+else bump=2;break;
+case 'deepen':
+if(/feel|think|believe|dream|fear|hope|life|family|passion|vulnerable|real|honest|deep/.test(last3))bump=10;
+else bump=2;break;
+case 'friendzone':
+if(/friend|bro|buddy|pal|like a brother|like a sister/.test(last3))bump=-5;
+else if(/date|more than|feelings|attracted|special|different/.test(last3))bump=15;
+else bump=2;break;
+}
+goalProgress=Math.max(0,Math.min(100,goalProgress+bump));
+updateGoalUI();
+if(goalProgress>=100)showToast('🎉 Goal achieved!');
+}
+
+// ===== FEATURE: QUICK REPLIES =====
+let quickRepliesBar=null;
+async function generateQuickReplies(){
+if(messages.length===0)return;
+const last=messages[messages.length-1];
+if(last.sender==='me')return;
+removeQuickReplies();
+const bar=document.createElement('div');
+bar.className='quick-replies-bar';
+bar.id='quickRepliesBar';
+bar.innerHTML='<span class="quick-reply-loading">⚡ Loading quick replies...</span>';
+document.body.appendChild(bar);
+try{
+const theirName=document.getElementById('theirName').value.trim()||'them';
+const chatLog=messages.slice(-4).map(m=>`${m.sender==='me'?'Me':theirName}: ${m.text}`).join('\n');
+const msgs=[{role:'system',content:`Generate 3 ultra-short quick reply options (3-8 words each) for this chat. These should be casual, natural texts. Return ONLY a JSON array: ["reply1","reply2","reply3"]. Make each distinct in tone: 1 smooth, 1 funny, 1 bold.`},{role:'user',content:chatLog}];
+const res=await callProviders(msgs);
+const arr=JSON.parse(res.match(/\[[\s\S]*?\]/)?.[0]||'[]');
+if(arr.length&&document.getElementById('quickRepliesBar')){
+bar.innerHTML=arr.map(r=>`<button class="quick-reply-chip">${r.replace(/</g,'&lt;')}</button>`).join('');
+bar.querySelectorAll('.quick-reply-chip').forEach(btn=>{
+btn.addEventListener('click',()=>{
+messages.push({id:Date.now(),sender:'me',text:btn.textContent,time:new Date()});
+renderMessages();saveChat();scrollToBottom();
+removeQuickReplies();updateVibeMeter();updateGoalProgress();
+if(autopilotOn)setTimeout(autopilotReply,800);
+});
+});
+}
+}catch(e){removeQuickReplies();}
+}
+function removeQuickReplies(){
+const el=document.getElementById('quickRepliesBar');
+if(el)el.remove();
+}
+
+// ===== FEATURE: MULTI-CHAT MANAGER =====
+let currentChatId='default';
+let allChats={};
+function initMultiChat(){
+loadAllChats();
+document.getElementById('chatSwitcherBtn')?.addEventListener('click',openChatSwitcher);
+document.getElementById('closeChatSwitcher')?.addEventListener('click',closeChatSwitcher);
+document.getElementById('newChatBtn')?.addEventListener('click',createNewChat);
+}
+function loadAllChats(){
+const stored=localStorage.getItem('rizzMultiChats');
+if(stored){try{allChats=JSON.parse(stored);}catch(e){allChats={};}}
+if(!allChats.default){allChats.default={name:'Chat Simulator',messages:[],avatar:'S'};}
+const savedId=localStorage.getItem('rizzCurrentChatId')||'default';
+currentChatId=allChats[savedId]?savedId:'default';
+messages=allChats[currentChatId].messages||[];
+const n=allChats[currentChatId].name||'Chat Simulator';
+document.getElementById('navName').textContent=n;
+document.getElementById('navAvatar').textContent=n.charAt(0).toUpperCase();
+}
+function saveAllChats(){
+allChats[currentChatId].messages=messages;
+allChats[currentChatId].name=document.getElementById('navName').textContent||'Chat';
+localStorage.setItem('rizzMultiChats',JSON.stringify(allChats));
+localStorage.setItem('rizzCurrentChatId',currentChatId);
+}
+function openChatSwitcher(){
+const list=document.getElementById('chatSwitcherList');
+list.innerHTML='';
+Object.keys(allChats).forEach(id=>{
+const c=allChats[id];
+const lastMsg=c.messages?.length?c.messages[c.messages.length-1].text:'No messages yet';
+const isActive=id===currentChatId;
+const div=document.createElement('div');
+div.className=`chat-item${isActive?' active':''}`;
+div.innerHTML=`<div class="chat-item-avatar">${(c.name||'C').charAt(0).toUpperCase()}</div><div class="chat-item-info"><div class="chat-item-name">${c.name||'Chat'}</div><div class="chat-item-preview">${lastMsg.length>40?lastMsg.slice(0,40)+'...':lastMsg}</div></div><div class="chat-item-meta"><span class="chat-item-count">${c.messages?.length||0} msgs</span>${id!=='default'?`<button class="chat-item-del" data-id="${id}">🗑️</button>`:''}</div>`;
+div.addEventListener('click',(e)=>{
+if(e.target.closest('.chat-item-del'))return;
+switchToChat(id);
+closeChatSwitcher();
+});
+list.appendChild(div);
+});
+list.querySelectorAll('.chat-item-del').forEach(btn=>{
+btn.addEventListener('click',(e)=>{
+e.stopPropagation();
+const id=btn.dataset.id;
+delete allChats[id];
+if(currentChatId===id){switchToChat('default');}
+saveAllChats();
+openChatSwitcher();
+showToast('Chat deleted');
+});
+});
+document.getElementById('chatSwitcherOverlay').style.display='flex';
+}
+function closeChatSwitcher(){
+document.getElementById('chatSwitcherOverlay').style.display='none';
+}
+function switchToChat(id){
+saveAllChats();
+currentChatId=id;
+const c=allChats[id];
+messages=c.messages||[];
+const n=c.name||'Chat Simulator';
+document.getElementById('navName').textContent=n;
+document.getElementById('navAvatar').textContent=n.charAt(0).toUpperCase();
+document.getElementById('theirName').value=n==='Chat Simulator'?'':n;
+renderMessages();
+if(messages.length===0){const hint=document.querySelector('.chat-hint');if(hint)hint.style.display='';}
+scrollToBottom();
+localStorage.setItem('rizzCurrentChatId',id);
+updateVibeMeter();
+showToast(`Switched to ${n}`);
+}
+function createNewChat(){
+const id='chat_'+Date.now();
+const name=prompt('Chat name (e.g., Sarah - Tinder):')||'New Chat';
+allChats[id]={name,messages:[],avatar:name.charAt(0)};
+saveAllChats();
+switchToChat(id);
+closeChatSwitcher();
+}
+
+// ===== FEATURE: SENTIMENT TIMELINE =====
+function drawSentimentTimeline(){
+const panel=document.getElementById('sentimentPanel');
+const canvas=document.getElementById('sentimentCanvas');
+if(!canvas||messages.length<2){
+if(panel.style.display!=='none')showToast('Need more messages for timeline');
+return;
+}
+panel.style.display='block';
+const ctx=canvas.getContext('2d');
+const W=canvas.width=canvas.offsetWidth*2;
+const H=canvas.height=240;
+ctx.clearRect(0,0,W,H);
+const points=[];
+messages.forEach((m,i)=>{
+let score=50;
+const t=m.text.toLowerCase();
+if(/❤|🥰|😍|😘|💕|love|miss|beautiful|amazing|cute|sweet/.test(t))score=85;
+else if(/haha|lol|😂|🤣|funny|😄|lmao/.test(t))score=75;
+else if(/😏|🔥|😈|flirt|hot|damn|wow/.test(t))score=80;
+else if(/sure|ok|k|fine|whatever|idk|busy|bye|nah/.test(t)&&t.length<12)score=25;
+else if(/\?/.test(t)&&t.length>10)score=60;
+else if(t.length>30)score=55;
+else if(t.length<5)score=30;
+else score=50;
+points.push({x:(i/(messages.length-1))*W,y:H-((score/100)*H*0.8)-H*0.1,score,sender:m.sender});
+});
+const grad=ctx.createLinearGradient(0,0,0,H);
+grad.addColorStop(0,'rgba(34,197,94,0.15)');
+grad.addColorStop(0.5,'rgba(168,85,247,0.05)');
+grad.addColorStop(1,'rgba(239,68,68,0.15)');
+ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+[0.25,0.5,0.75].forEach(p=>{
+ctx.beginPath();ctx.strokeStyle='rgba(255,255,255,0.05)';ctx.lineWidth=1;
+ctx.moveTo(0,H*p);ctx.lineTo(W,H*p);ctx.stroke();
+});
+if(points.length>1){
+ctx.beginPath();ctx.strokeStyle='rgba(168,85,247,0.6)';ctx.lineWidth=3;ctx.lineJoin='round';ctx.lineCap='round';
+ctx.moveTo(points[0].x,points[0].y);
+for(let i=1;i<points.length;i++){
+const xc=(points[i-1].x+points[i].x)/2;
+const yc=(points[i-1].y+points[i].y)/2;
+ctx.quadraticCurveTo(points[i-1].x,points[i-1].y,xc,yc);
+}
+ctx.lineTo(points[points.length-1].x,points[points.length-1].y);
+ctx.stroke();
+const fillGrad=ctx.createLinearGradient(0,0,0,H);
+fillGrad.addColorStop(0,'rgba(168,85,247,0.2)');
+fillGrad.addColorStop(1,'rgba(168,85,247,0)');
+ctx.lineTo(points[points.length-1].x,H);ctx.lineTo(points[0].x,H);ctx.closePath();
+ctx.fillStyle=fillGrad;ctx.fill();
+}
+points.forEach(p=>{
+const c=p.score>=70?'#22c55e':p.score>=45?'#f59e0b':'#ef4444';
+ctx.beginPath();ctx.arc(p.x,p.y,5,0,Math.PI*2);ctx.fillStyle=c;ctx.fill();
+ctx.beginPath();ctx.arc(p.x,p.y,8,0,Math.PI*2);ctx.fillStyle=c.replace(')',',0.2)').replace('rgb','rgba');ctx.fill();
+});
+ctx.font='bold 18px Inter,sans-serif';ctx.textAlign='left';
+ctx.fillStyle='rgba(34,197,94,0.5)';ctx.fillText('🔥 Hot',8,24);
+ctx.fillStyle='rgba(239,68,68,0.5)';ctx.fillText('🥶 Cold',8,H-8);
+}
+
+// ===== HOOK INTO EXISTING FUNCTIONS =====
+const _origAddMessageDirect=addMessageDirect;
+addMessageDirect=function(sender,text){
+_origAddMessageDirect(sender,text);
+updateVibeMeter();
+updateGoalProgress();
+if(sender==='me'&&autopilotOn){setTimeout(autopilotReply,800);}
+if(sender==='them'){generateQuickReplies();}
+else{removeQuickReplies();}
+saveAllChats();
+};
+
+const _origRenderMessages=renderMessages;
+renderMessages=function(){
+_origRenderMessages();
+const container=document.getElementById('chatMessages');
+container.querySelectorAll('.msg-row.me').forEach(row=>{
+const id=parseInt(row.dataset.id);
+const actions=row.querySelector('.msg-actions');
+if(actions&&!actions.querySelector('.rewrite')){
+const btn=document.createElement('button');
+btn.className='msg-action-btn rewrite';
+btn.textContent='Rewrite';
+btn.onclick=()=>openRewrite(id);
+actions.insertBefore(btn,actions.querySelector('.del'));
+}
+});
+};
+
+const _origSaveChat=saveChat;
+saveChat=function(){
+_origSaveChat();
+saveAllChats();
+};
+
+// ===== INIT ALL NEW FEATURES =====
+function initNewFeatures(){
+initPersona();
+initAutopilot();
+initGoals();
+initMultiChat();
+updateVibeMeter();
+document.getElementById('closeSentiment')?.addEventListener('click',()=>{
+document.getElementById('sentimentPanel').style.display='none';
+});
+document.getElementById('sentimentBtn')?.addEventListener('click',()=>{
+drawSentimentTimeline();
+const settingsPanel=document.getElementById('settingsPanel');
+if(settingsPanel)settingsPanel.classList.remove('open');
+});
+document.getElementById('closeRewrite')?.addEventListener('click',()=>{
+document.getElementById('rewritePopup').style.display='none';
+});
+document.getElementById('quickReplyBtn')?.addEventListener('click',generateQuickReplies);
+document.getElementById('timingBtn')?.addEventListener('click',showTimingAdvice);
+renderMessages();
+}
+
+if(document.readyState==='loading'){
+document.addEventListener('DOMContentLoaded',()=>setTimeout(initNewFeatures,100));
+}else{setTimeout(initNewFeatures,100);}
+
 // ===== CONVERSATION SCENARIOS =====
 const SCENARIOS=[
 {emoji:'💬',title:'First DM to Crush',desc:'They posted a story and you want to slide in smooth.',messages:[{sender:'them',text:'*posted a sunset photo on their story*'}],context:'You\'re DMing your crush for the first time after they posted a story.'},
