@@ -458,7 +458,16 @@ TIPS:
 - [specific actionable tip 2]
 - [specific actionable tip 3]
 
-NEXT MOVE: [one sentence — what should they do/say next]`;
+NEXT MOVE: [one sentence — what should they do/say next]
+
+SUGGESTED REPLIES:
+1. [a smooth, confident reply they could send right now]
+2. [a funny/playful reply option]
+3. [a bold/flirty reply option]
+4. [a sweet/caring reply option]
+5. [a witty/clever reply option]
+
+The 5 suggested replies must be actual messages "Me" can send next. Keep them short (1-2 sentences max), natural, and match the conversation's tone and context. Make each one feel distinct in style.`;
 
 const userPrompt=`Analyze this chat conversation and give me coaching advice:
 ---
@@ -522,6 +531,20 @@ if(nextMatch){
 html+=`<div class="coach-section"><div class="coach-section-title">🎯 Next Move</div><div class="coach-vibe" style="border-color:rgba(34,197,94,.2);background:rgba(34,197,94,.06)">${nextMatch[1].trim().replace(/</g,'&lt;')}</div></div>`;
 }
 
+const suggestedMatch=text.match(/SUGGESTED REPLIES:\s*([\s\S]+?)$/i);
+if(suggestedMatch){
+const replies=suggestedMatch[1].trim().split('\n').map(l=>l.replace(/^\d+[.)\-:\s]+/,'').replace(/^"/,'').replace(/"$/,'').trim()).filter(l=>l.length>3);
+if(replies.length>0){
+html+=`<div class="coach-section"><div class="coach-section-title">💬 Suggested Replies</div><div class="coach-replies">`;
+replies.forEach((r,i)=>{
+const vibes=['smooth','playful','bold','sweet','witty'];
+const emojis=['😎','😄','🔥','💕','🧠'];
+html+=`<button class="coach-reply-btn" data-reply="${r.replace(/"/g,'&quot;')}" onclick="useCoachReply(this)"><span class="coach-reply-vibe">${emojis[i]||'💬'} ${vibes[i]||'reply'}</span><span class="coach-reply-text">${r.replace(/</g,'&lt;')}</span></button>`;
+});
+html+=`</div></div>`;
+}
+}
+
 if(!html) html=`<div class="coach-vibe">${text.replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>`;
 
 body.innerHTML=html;
@@ -529,6 +552,17 @@ body.innerHTML=html;
 
 function closeCoach(){
 document.getElementById('coachPanel').style.display='none';
+}
+
+function useCoachReply(btn){
+const reply=btn.dataset.reply;
+if(!reply) return;
+messages.push({id:Date.now(),sender:'me',text:reply,time:new Date()});
+renderMessages();
+saveChat();
+scrollToBottom();
+closeCoach();
+showToast('Reply added!');
 }
 
 async function exportChatAsImage(){

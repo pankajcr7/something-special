@@ -71,6 +71,12 @@ html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--t
 .coach-flag.green{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);color:var(--green)}
 .coach-flag.red{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:var(--red)}
 .coach-flag.yellow{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);color:var(--yellow)}
+.coach-replies{display:flex;flex-direction:column;gap:6px}
+.coach-reply-btn{display:flex;flex-direction:column;gap:4px;width:100%;padding:12px 14px;border-radius:var(--r);background:rgba(168,85,247,.06);border:1px solid rgba(168,85,247,.15);cursor:pointer;text-align:left;transition:all .15s;font-family:var(--font)}
+.coach-reply-btn:hover{background:rgba(168,85,247,.12);border-color:rgba(168,85,247,.3);transform:translateY(-1px)}
+.coach-reply-btn:active{transform:scale(.98);background:rgba(168,85,247,.18)}
+.coach-reply-vibe{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--accent);opacity:.8}
+.coach-reply-text{font-size:.88rem;line-height:1.45;color:var(--text)}
 
 /* ===== CHAT AREA ===== */
 .chat-container{position:fixed;top:58px;left:0;right:0;bottom:108px;overflow:hidden;display:flex;flex-direction:column;max-width:600px;margin:0 auto}
