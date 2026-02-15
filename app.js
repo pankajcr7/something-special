@@ -529,6 +529,67 @@ title.textContent='🚩 Red Flag Detector';
 body.innerHTML=`<label class="tool-label">Paste their message or profile text</label><textarea class="tool-textarea" id="toolInput" placeholder="Paste a message, bio, or conversation snippet..." rows="5"></textarea><button class="tool-gen-btn" id="toolGenBtn">🚩 Analyze Flags</button><div id="toolResult"></div>`;
 document.getElementById('toolGenBtn').onclick=runRedFlagDetector;
 break;
+case 'saveConvo':
+title.textContent='🆘 Save the Convo';
+body.innerHTML=`<label class="tool-label">Paste the conversation (or last few messages)</label><textarea class="tool-textarea" id="toolInput" placeholder="e.g.,\nMe: hey you looked nice today\nThem: um ok thanks\nMe: so do you wanna hang out\nThem: idk maybe" rows="5"></textarea><label class="tool-label">What went wrong?</label><div class="tool-chips" id="saveChips">${['It got awkward','They seem annoyed','I said something dumb','Left on read','They lost interest','I overshared'].map((v,i)=>`<span class="tool-chip${i===0?' active':''}" data-val="${v}">${v}</span>`).join('')}</div><button class="tool-gen-btn" id="toolGenBtn" style="background:linear-gradient(135deg,#ef4444,#f59e0b)">🆘 Save My Convo</button><div id="toolResult"></div>`;
+document.querySelectorAll('#saveChips .tool-chip').forEach(c=>c.onclick=()=>{document.querySelectorAll('#saveChips .tool-chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');});
+document.getElementById('toolGenBtn').onclick=runSaveConvo;
+break;
+case 'antiCringe':
+title.textContent='😬 Anti-Cringe Detector';
+body.innerHTML=`<label class="tool-label">What are you about to send?</label><textarea class="tool-textarea" id="toolInput" placeholder="e.g., hey beautiful, I've been thinking about you all day and I just want you to know you're the most amazing person I've ever met..." rows="4"></textarea><label class="tool-label">Context (optional)</label><input class="tool-input" id="toolInput2" placeholder="e.g., first date, just met, talking for 2 weeks"><button class="tool-gen-btn" id="toolGenBtn">😬 Cringe Check</button><div id="toolResult"></div>`;
+document.getElementById('toolGenBtn').onclick=runAntiCringe;
+break;
+case 'toneTranslator':
+title.textContent='🔄 Tone Translator';
+body.innerHTML=`<label class="tool-label">Your message</label><textarea class="tool-textarea" id="toolInput" placeholder="e.g., Hey, I had a good time last night. Want to do it again sometime?" rows="3"></textarea><label class="tool-label">Translate to</label><div class="tool-chips" id="toneChips">${['Flirty','Smooth','Funny','Bold','Romantic','Savage','Mysterious','Sweet','Casual','Formal','Poetic','Spicy'].map((v,i)=>`<span class="tool-chip${i===0?' active':''}" data-tone="${v}">${v}</span>`).join('')}</div><button class="tool-gen-btn" id="toolGenBtn">🔄 Translate Tone</button><div id="toolResult"></div>`;
+document.querySelectorAll('#toneChips .tool-chip').forEach(c=>c.onclick=()=>c.classList.toggle('active'));
+document.getElementById('toolGenBtn').onclick=runToneTranslator;
+break;
+case 'perspectiveFlip':
+title.textContent='🪞 Perspective Flip';
+body.innerHTML=`<label class="tool-label">What are you about to send?</label><textarea class="tool-textarea" id="toolInput" placeholder="e.g., so are we going on that date or what? 😏" rows="3"></textarea><label class="tool-label">Their personality (optional)</label><input class="tool-input" id="toolInput2" placeholder="e.g., shy introvert, confident girl, sarcastic guy"><button class="tool-gen-btn" id="toolGenBtn">🪞 Flip Perspective</button><div id="toolResult"></div>`;
+document.getElementById('toolGenBtn').onclick=runPerspectiveFlip;
+break;
+case 'ghostRecovery':
+title.textContent='👻 Ghosting Recovery Kit';
+body.innerHTML=`<label class="tool-label">Paste your last messages before being ghosted</label><textarea class="tool-textarea" id="toolInput" placeholder="e.g.,\nMe: hey how was your day?\nMe: hello?\nMe: guess you're busy" rows="4"></textarea><label class="tool-label">How long ghosted?</label><div class="tool-chips" id="ghostChips">${['1-2 days','3-5 days','1 week','2+ weeks','1+ month'].map((v,i)=>`<span class="tool-chip${i===0?' active':''}" data-val="${v}">${v}</span>`).join('')}</div><label class="tool-label">Your goal</label><div class="tool-chips" id="ghostGoalChips">${['Get them back','Stay cool','Move on with dignity','Make them regret it','Friendly check-in'].map((v,i)=>`<span class="tool-chip${i===0?' active':''}" data-val="${v}">${v}</span>`).join('')}</div><button class="tool-gen-btn" id="toolGenBtn" style="background:linear-gradient(135deg,#6366f1,#a855f7)">👻 Generate Comeback</button><div id="toolResult"></div>`;
+document.querySelectorAll('#ghostChips .tool-chip').forEach(c=>c.onclick=()=>{document.querySelectorAll('#ghostChips .tool-chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');});
+document.querySelectorAll('#ghostGoalChips .tool-chip').forEach(c=>c.onclick=()=>{document.querySelectorAll('#ghostGoalChips .tool-chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');});
+document.getElementById('toolGenBtn').onclick=runGhostRecovery;
+break;
+case 'rizzRater':
+title.textContent='⭐ Rizz Rater';
+body.innerHTML=`<label class="tool-label">Paste your message or pickup line</label><textarea class="tool-textarea" id="toolInput" placeholder="e.g., If beauty were a crime, you'd be serving a life sentence" rows="3"></textarea><label class="tool-label">Context</label><div class="tool-chips" id="rateContextChips">${['Tinder DM','Instagram DM','IRL approach','Text message','First message','Reply to their story'].map((v,i)=>`<span class="tool-chip${i===0?' active':''}" data-val="${v}">${v}</span>`).join('')}</div><button class="tool-gen-btn" id="toolGenBtn">⭐ Rate My Rizz</button><div id="toolResult"></div>`;
+document.querySelectorAll('#rateContextChips .tool-chip').forEach(c=>c.onclick=()=>{document.querySelectorAll('#rateContextChips .tool-chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');});
+document.getElementById('toolGenBtn').onclick=runRizzRater;
+break;
+case 'bioBeforeAfter':
+title.textContent='📊 Bio Before & After';
+body.innerHTML=`<label class="tool-label">Paste your current bio</label><textarea class="tool-textarea" id="toolInput" placeholder="e.g., Just a chill guy who likes music and food. Looking for someone cool." rows="4"></textarea><label class="tool-label">Platform</label><div class="tool-chips" id="bioPlatChips">${['Tinder','Bumble','Hinge','Instagram','Twitter/X','LinkedIn Dating'].map((v,i)=>`<span class="tool-chip${i===0?' active':''}" data-val="${v}">${v}</span>`).join('')}</div><button class="tool-gen-btn" id="toolGenBtn">📊 Transform Bio</button><div id="toolResult"></div>`;
+document.querySelectorAll('#bioPlatChips .tool-chip').forEach(c=>c.onclick=()=>{document.querySelectorAll('#bioPlatChips .tool-chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');});
+document.getElementById('toolGenBtn').onclick=runBioBeforeAfter;
+break;
+case 'dateScript':
+title.textContent='🎬 First Date Script';
+body.innerHTML=`<label class="tool-label">Date type</label><div class="tool-chips" id="dateTypeChips">${['Coffee Date','Dinner Date','Walk/Park Date','Bar/Drinks','Activity Date','Virtual Date'].map((v,i)=>`<span class="tool-chip${i===0?' active':''}" data-val="${v}">${v}</span>`).join('')}</div><label class="tool-label">Your personality</label><div class="tool-chips" id="datePersonChips">${['Introverted','Extroverted','Funny','Romantic','Nerdy','Adventurous'].map((v,i)=>`<span class="tool-chip${i===0?' active':''}" data-val="${v}">${v}</span>`).join('')}</div><label class="tool-label">Their interests (optional)</label><input class="tool-input" id="toolInput" placeholder="e.g., music, travel, cooking, fitness"><button class="tool-gen-btn" id="toolGenBtn">🎬 Generate Script</button><div id="toolResult"></div>`;
+document.querySelectorAll('#dateTypeChips .tool-chip').forEach(c=>c.onclick=()=>{document.querySelectorAll('#dateTypeChips .tool-chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');});
+document.querySelectorAll('#datePersonChips .tool-chip').forEach(c=>c.onclick=()=>{document.querySelectorAll('#datePersonChips .tool-chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');});
+document.getElementById('toolGenBtn').onclick=runDateScript;
+break;
+case 'trendingLines':
+title.textContent='📈 Trending Lines';
+body.innerHTML=`<label class="tool-label">Category</label><div class="tool-chips" id="trendCatChips">${['Pop Culture','Memes','Movies/TV','Music','Sports','Tech/Gaming','Bollywood','Anime','Holiday/Seasonal'].map((v,i)=>`<span class="tool-chip${i===0?' active':''}" data-val="${v}">${v}</span>`).join('')}</div><label class="tool-label">Style</label><div class="tool-chips" id="trendStyleChips">${['Smooth','Funny','Flirty','Bold','Nerdy'].map((v,i)=>`<span class="tool-chip${i===0?' active':''}" data-val="${v}">${v}</span>`).join('')}</div><button class="tool-gen-btn" id="toolGenBtn">📈 Get Trending Lines</button><div id="toolResult"></div>`;
+document.querySelectorAll('#trendCatChips .tool-chip').forEach(c=>c.onclick=()=>{document.querySelectorAll('#trendCatChips .tool-chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');});
+document.querySelectorAll('#trendStyleChips .tool-chip').forEach(c=>c.onclick=()=>{document.querySelectorAll('#trendStyleChips .tool-chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');});
+document.getElementById('toolGenBtn').onclick=runTrendingLines;
+break;
+case 'msgDecoder':
+title.textContent='🔍 Message Decoder';
+body.innerHTML=`<label class="tool-label">Paste their confusing message</label><textarea class="tool-textarea" id="toolInput" placeholder="e.g., yeah sure we can hang out sometime lol" rows="3"></textarea><label class="tool-label">Your relationship</label><div class="tool-chips" id="decoderChips">${['Just met','Talking stage','Dating','Ex','Friend zone','Situationship'].map((v,i)=>`<span class="tool-chip${i===0?' active':''}" data-val="${v}">${v}</span>`).join('')}</div><button class="tool-gen-btn" id="toolGenBtn">🔍 Decode Message</button><div id="toolResult"></div>`;
+document.querySelectorAll('#decoderChips .tool-chip').forEach(c=>c.onclick=()=>{document.querySelectorAll('#decoderChips .tool-chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');});
+document.getElementById('toolGenBtn').onclick=runMsgDecoder;
+break;
 }
 overlay.style.display='flex';
 }
@@ -796,6 +857,365 @@ document.getElementById('toolResult').innerHTML=html;
 playSound('generate');
 }catch(e){document.getElementById('toolResult').innerHTML=`<div class="tool-result">Analysis failed. Try again!</div>`;}
 btn.disabled=false;btn.textContent='🚩 Analyze Flags';
+}
+
+// ===== TOOL: SAVE THE CONVO =====
+async function runSaveConvo(){
+const convo=document.getElementById('toolInput').value.trim();
+if(!convo){showToast('Paste the conversation first!');return;}
+const problem=document.querySelector('#saveChips .tool-chip.active')?.dataset.val||'It got awkward';
+const btn=document.getElementById('toolGenBtn');btn.disabled=true;btn.textContent='Saving...';
+try{
+const msgs=[{role:'system',content:`You are an emergency conversation recovery expert. The user's conversation went wrong because: "${problem}". Analyze what went wrong and provide EXACTLY this format:
+
+**🔎 What Went Wrong:**
+[1-2 sentences analyzing the issue]
+
+**🆘 Recovery Messages (pick one to send):**
+1. [smooth recovery message]
+2. [funny/light recovery message]
+3. [honest/vulnerable recovery message]
+4. [bold confident recovery message]
+5. [casual cool recovery message]
+
+**⏰ Timing Advice:**
+[When to send it — immediately, wait a few hours, etc.]
+
+**🎯 Strategy:**
+[2-3 sentences on how to steer the convo back on track after sending]
+
+Keep recovery messages short (1-2 sentences), natural, and NOT desperate. They should feel like a smooth redirect, not an apology tour.`},{role:'user',content:`Save this conversation. Problem: ${problem}\n---\n${convo}`}];
+const res=await callAIRaw(msgs);
+document.getElementById('toolResult').innerHTML=`<div class="tool-result">${formatToolResult(res)}</div>`;
+playSound('generate');
+}catch(e){document.getElementById('toolResult').innerHTML=`<div class="tool-result">Couldn't save this one. Try again!</div>`;}
+btn.disabled=false;btn.textContent='🆘 Save My Convo';
+}
+
+// ===== TOOL: ANTI-CRINGE DETECTOR =====
+async function runAntiCringe(){
+const text=document.getElementById('toolInput').value.trim();
+if(!text){showToast('Type what you want to send!');return;}
+const context=document.getElementById('toolInput2')?.value||'';
+const btn=document.getElementById('toolGenBtn');btn.disabled=true;btn.textContent='Analyzing...';
+try{
+const msgs=[{role:'system',content:`You are the Anti-Cringe Detector. Analyze the message someone is about to send and return ONLY valid JSON in this exact format:
+{"score":75,"verdict":"fire","meter":"🔥🔥🔥🔥","analysis":"Why this message works or doesn't work in 2-3 sentences.","cringeFactors":["factor 1 if any"],"fireFactors":["what makes it good"],"improvedVersion":"A better version of their message if needed","shouldSend":true,"confidence":"high"}
+
+Score: 0-100 (0=maximum cringe, 100=maximum fire)
+Verdict: one of "cringe", "mid", "decent", "solid", "fire"
+Meter: use 💀 for cringe, 😐 for mid, 👍 for decent, 🔥 for fire (1-5 icons matching score)
+shouldSend: boolean
+confidence: "low", "medium", "high"
+${context?'Context: '+context:''}`},{role:'user',content:`Cringe check this message:\n"${text}"`}];
+const res=await callAIRaw(msgs);
+const json=JSON.parse(res.match(/\{[\s\S]*\}/)?.[0]||'{}');
+const score=json.score||50;
+const color=score>=80?'#22c55e':score>=60?'#f59e0b':score>=40?'#f97316':'#ef4444';
+let html='<div class="tool-result">';
+html+=`<div style="text-align:center;margin-bottom:16px"><div style="font-size:2.5rem;margin-bottom:4px">${json.meter||'😐😐😐'}</div><div style="font-size:2rem;font-weight:900;color:${color}">${score}/100</div><div style="font-size:1.1rem;font-weight:700;text-transform:uppercase;color:${color};letter-spacing:1px">${json.verdict||'mid'}</div></div>`;
+html+=`<div style="width:100%;height:8px;background:rgba(255,255,255,.1);border-radius:99px;margin-bottom:16px;overflow:hidden"><div style="width:${score}%;height:100%;background:${color};border-radius:99px;transition:width .5s"></div></div>`;
+html+=`<p style="margin-bottom:12px">${json.analysis||''}</p>`;
+if(json.cringeFactors?.length&&json.cringeFactors[0]){html+='<h4 style="color:#ef4444">💀 Cringe Factors</h4>';json.cringeFactors.forEach(f=>{html+=`<p style="margin-bottom:4px">• ${f}</p>`;});}
+if(json.fireFactors?.length&&json.fireFactors[0]){html+='<h4 style="color:#22c55e;margin-top:10px">🔥 Fire Factors</h4>';json.fireFactors.forEach(f=>{html+=`<p style="margin-bottom:4px">• ${f}</p>`;});}
+if(json.improvedVersion){html+=`<h4 style="margin-top:12px">✨ Improved Version</h4><div style="padding:12px;background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.2);border-radius:10px;margin-top:6px;cursor:pointer" onclick="copyText('${json.improvedVersion.replace(/'/g,"\\'")}')">${json.improvedVersion} <span style="font-size:.7rem;color:var(--text3)">tap to copy</span></div>`;}
+html+=`<div style="text-align:center;margin-top:14px;padding:10px;border-radius:10px;background:${json.shouldSend?'rgba(34,197,94,.08)':'rgba(239,68,68,.08)'};border:1px solid ${json.shouldSend?'rgba(34,197,94,.2)':'rgba(239,68,68,.2)'}"><strong>${json.shouldSend?'✅ SEND IT':'❌ DON\'T SEND'}</strong> <span style="color:var(--text2);font-size:.85rem">(${json.confidence||'medium'} confidence)</span></div>`;
+html+='</div>';
+document.getElementById('toolResult').innerHTML=html;
+playSound('generate');
+}catch(e){document.getElementById('toolResult').innerHTML=`<div class="tool-result">Analysis failed. Try again!</div>`;}
+btn.disabled=false;btn.textContent='😬 Cringe Check';
+}
+
+// ===== TOOL: TONE TRANSLATOR =====
+async function runToneTranslator(){
+const text=document.getElementById('toolInput').value.trim();
+if(!text){showToast('Type your message first!');return;}
+const activeTones=[...document.querySelectorAll('#toneChips .tool-chip.active')].map(c=>c.dataset.tone);
+if(!activeTones.length){showToast('Pick at least one tone!');return;}
+const btn=document.getElementById('toolGenBtn');btn.disabled=true;btn.textContent='Translating...';
+try{
+const msgs=[{role:'system',content:`You are a Tone Translator. Take the user's message and rewrite it in each requested tone/style. For each tone, provide:
+- The translated message (1-2 sentences, natural and sendable)
+- A brief note on why this tone works
+
+Format each as:
+**[TONE EMOJI] [Tone Name]:**
+"[translated message]"
+_Why it works: [brief note]_
+
+Tones to translate to: ${activeTones.join(', ')}
+
+Keep translations short, punchy, and actually sendable. Not generic — tailor to the original message's intent.`},{role:'user',content:`Translate this message:\n"${text}"`}];
+const res=await callAIRaw(msgs);
+document.getElementById('toolResult').innerHTML=`<div class="tool-result">${formatToolResult(res)}</div>`;
+playSound('generate');
+}catch(e){document.getElementById('toolResult').innerHTML=`<div class="tool-result">Translation failed. Try again!</div>`;}
+btn.disabled=false;btn.textContent='🔄 Translate Tone';
+}
+
+// ===== TOOL: PERSPECTIVE FLIP =====
+async function runPerspectiveFlip(){
+const text=document.getElementById('toolInput').value.trim();
+if(!text){showToast('Type your message first!');return;}
+const personality=document.getElementById('toolInput2')?.value||'';
+const btn=document.getElementById('toolGenBtn');btn.disabled=true;btn.textContent='Flipping...';
+try{
+const msgs=[{role:'system',content:`You are a Perspective Flip expert. You simulate how the RECEIVER would react to a message. ${personality?'Their personality: '+personality+'.':'Assume a typical person in the dating/talking stage.'} Return ONLY valid JSON:
+{"firstImpression":"Their instant gut reaction in 1 sentence","emotionalReaction":"How it makes them feel (1-2 sentences)","whatTheyThink":"Their internal monologue/thoughts (2-3 sentences, write in first person as them)","interestLevel":7,"interestChange":"up","replyLikelihood":80,"likelyReplies":["most likely reply 1","likely reply 2","possible reply 3"],"redFlags":["any part of the message that might put them off"],"greenFlags":["parts that would impress them"],"verdict":"Overall impression in 1-2 sentences","tip":"One specific tip to improve this message"}
+
+interestLevel: 1-10
+interestChange: "up", "down", or "neutral"
+replyLikelihood: 0-100%`},{role:'user',content:`How would they react to this message?\n"${text}"`}];
+const res=await callAIRaw(msgs);
+const json=JSON.parse(res.match(/\{[\s\S]*\}/)?.[0]||'{}');
+const interest=json.interestLevel||5;
+const iColor=interest>=7?'#22c55e':interest>=5?'#f59e0b':'#ef4444';
+const arrow=json.interestChange==='up'?'📈':json.interestChange==='down'?'📉':'➡️';
+let html='<div class="tool-result">';
+html+=`<div style="text-align:center;margin-bottom:14px"><div style="font-size:.75rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Interest Level</div><div style="font-size:2.2rem;font-weight:900;color:${iColor}">${interest}/10 ${arrow}</div><div style="font-size:.85rem;color:var(--text2)">${json.replyLikelihood||50}% chance of reply</div></div>`;
+html+=`<h4>💭 First Impression</h4><p style="margin-bottom:10px">${json.firstImpression||''}</p>`;
+html+=`<h4>😊 How It Makes Them Feel</h4><p style="margin-bottom:10px">${json.emotionalReaction||''}</p>`;
+html+=`<h4>🧠 Their Internal Monologue</h4><div style="padding:12px;background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.15);border-radius:10px;margin-bottom:10px;font-style:italic">"${json.whatTheyThink||''}"</div>`;
+if(json.likelyReplies?.length){html+='<h4>💬 How They\'d Likely Reply</h4>';json.likelyReplies.forEach((r,i)=>{html+=`<div style="padding:8px 12px;background:rgba(255,255,255,.03);border-radius:10px;margin-bottom:4px;font-size:.88rem"><strong>${i+1}.</strong> "${r}"</div>`;});}
+if(json.greenFlags?.length&&json.greenFlags[0]){html+='<h4 style="color:#22c55e;margin-top:10px">✅ What They\'d Like</h4>';json.greenFlags.forEach(f=>{html+=`<p style="margin-bottom:3px">• ${f}</p>`;});}
+if(json.redFlags?.length&&json.redFlags[0]){html+='<h4 style="color:#ef4444;margin-top:10px">⚠️ What Might Put Them Off</h4>';json.redFlags.forEach(f=>{html+=`<p style="margin-bottom:3px">• ${f}</p>`;});}
+html+=`<div style="margin-top:12px;padding:10px;background:rgba(168,85,247,.06);border:1px solid rgba(168,85,247,.15);border-radius:10px"><strong>🎯 Verdict:</strong> ${json.verdict||''}</div>`;
+if(json.tip){html+=`<div style="margin-top:8px;padding:10px;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.15);border-radius:10px"><strong>💡 Tip:</strong> ${json.tip}</div>`;}
+html+='</div>';
+document.getElementById('toolResult').innerHTML=html;
+playSound('generate');
+}catch(e){document.getElementById('toolResult').innerHTML=`<div class="tool-result">Couldn't flip perspective. Try again!</div>`;}
+btn.disabled=false;btn.textContent='🪞 Flip Perspective';
+}
+
+// ===== TOOL: GHOSTING RECOVERY KIT =====
+async function runGhostRecovery(){
+const convo=document.getElementById('toolInput').value.trim();
+if(!convo){showToast('Paste your last messages!');return;}
+const duration=document.querySelector('#ghostChips .tool-chip.active')?.dataset.val||'1-2 days';
+const goal=document.querySelector('#ghostGoalChips .tool-chip.active')?.dataset.val||'Get them back';
+const btn=document.getElementById('toolGenBtn');btn.disabled=true;btn.textContent='Crafting comeback...';
+try{
+const msgs=[{role:'system',content:`You are a Ghosting Recovery specialist. The user has been ghosted for ${duration}. Their goal: ${goal}. Analyze the conversation and provide a comeback strategy.
+
+Format EXACTLY like this:
+
+**👻 Ghost Analysis:**
+[Why they probably ghosted — 2-3 sentences, be honest but not harsh]
+
+**📊 Recovery Chances:**
+[X]% — [brief reason]
+
+**💬 Comeback Messages (ranked best to worst):**
+1. 🏆 [BEST — the smoothest, most effective comeback message]
+2. 😎 [COOL — casual and unbothered]
+3. 😂 [FUNNY — humor-based reengagement]
+4. 💪 [BOLD — confident and direct]
+5. 🎯 [HAIL MARY — risky but could work]
+
+**⏰ When to Send:**
+[Specific timing advice]
+
+**📋 Game Plan:**
+- [Step 1 after they reply]
+- [Step 2]
+- [What to do if they don't reply]
+
+**🚫 What NOT to Do:**
+- [Common mistake 1]
+- [Common mistake 2]
+
+Keep comeback messages SHORT (1 sentence), natural, and NOT desperate. They should make the other person curious or smile.`},{role:'user',content:`I've been ghosted for ${duration}. Goal: ${goal}.\nLast messages:\n---\n${convo}`}];
+const res=await callAIRaw(msgs);
+document.getElementById('toolResult').innerHTML=`<div class="tool-result">${formatToolResult(res)}</div>`;
+playSound('generate');
+}catch(e){document.getElementById('toolResult').innerHTML=`<div class="tool-result">Recovery failed. Try again!</div>`;}
+btn.disabled=false;btn.textContent='👻 Generate Comeback';
+}
+
+// ===== TOOL: RIZZ RATER =====
+async function runRizzRater(){
+const text=document.getElementById('toolInput').value.trim();
+if(!text){showToast('Paste your message first!');return;}
+const context=document.querySelector('#rateContextChips .tool-chip.active')?.dataset.val||'Text message';
+const btn=document.getElementById('toolGenBtn');btn.disabled=true;btn.textContent='Rating...';
+try{
+const msgs=[{role:'system',content:`You are the Rizz Rater — the ultimate judge of smooth talk. Rate the user's message/line for a "${context}" context. Return ONLY valid JSON:
+{"rizzScore":85,"grade":"S","title":"Smooth Operator","breakdown":{"confidence":8,"creativity":9,"humor":7,"smoothness":9,"effectiveness":8},"reaction":"How the receiver would likely react (1 sentence)","strengths":["strength 1","strength 2"],"weaknesses":["weakness if any"],"improvedVersion":"A version that would score higher","funComment":"A funny 1-liner comment about their rizz level"}
+
+rizzScore: 0-100
+grade: "F", "D", "C", "B", "A", "S", "S+" (like gaming ranks)
+breakdown scores: each 1-10
+title: a fun title like "Smooth Operator", "Cringe Lord", "Rizz God", "Average Andy", "Flirt Machine" etc.`},{role:'user',content:`Rate this rizz (context: ${context}):\n"${text}"`}];
+const res=await callAIRaw(msgs);
+const json=JSON.parse(res.match(/\{[\s\S]*\}/)?.[0]||'{}');
+const score=json.rizzScore||50;
+const gradeColors={'S+':'#fbbf24','S':'#f59e0b','A':'#22c55e','B':'#3b82f6','C':'#f59e0b','D':'#f97316','F':'#ef4444'};
+const gc=gradeColors[json.grade]||'#a855f7';
+const bd=json.breakdown||{};
+let html='<div class="tool-result">';
+html+=`<div style="text-align:center;margin-bottom:16px"><div style="font-size:3rem;font-weight:900;color:${gc};line-height:1">${json.grade||'B'}</div><div style="font-size:1.8rem;font-weight:800;margin-top:4px">${score}/100</div><div style="font-size:.9rem;color:var(--accent);font-weight:600;margin-top:2px">${json.title||'Rated'}</div></div>`;
+html+=`<div style="width:100%;height:10px;background:rgba(255,255,255,.1);border-radius:99px;margin-bottom:16px;overflow:hidden"><div style="width:${score}%;height:100%;background:linear-gradient(90deg,#ef4444,#f59e0b,#22c55e);border-radius:99px"></div></div>`;
+const stats=[['Confidence',bd.confidence],['Creativity',bd.creativity],['Humor',bd.humor],['Smoothness',bd.smoothness],['Effectiveness',bd.effectiveness]];
+html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px">';
+stats.forEach(([name,val])=>{if(val){const v=val*10;const c=v>=70?'#22c55e':v>=50?'#f59e0b':'#ef4444';html+=`<div style="padding:8px;background:rgba(255,255,255,.03);border-radius:8px"><div style="font-size:.7rem;color:var(--text3);margin-bottom:4px">${name}</div><div style="display:flex;align-items:center;gap:6px"><div style="flex:1;height:4px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden"><div style="width:${v}%;height:100%;background:${c};border-radius:99px"></div></div><span style="font-size:.75rem;font-weight:700;color:${c}">${val}/10</span></div></div>`;}});
+html+='</div>';
+if(json.funComment){html+=`<div style="text-align:center;padding:10px;background:rgba(168,85,247,.08);border-radius:10px;margin-bottom:12px;font-style:italic;color:var(--accent)">"${json.funComment}"</div>`;}
+html+=`<p style="margin-bottom:10px"><strong>🎯 Reaction:</strong> ${json.reaction||''}</p>`;
+if(json.strengths?.length){html+='<h4 style="color:#22c55e">💪 Strengths</h4>';json.strengths.forEach(s=>{html+=`<p style="margin-bottom:3px">• ${s}</p>`;});}
+if(json.weaknesses?.length&&json.weaknesses[0]){html+='<h4 style="color:#f59e0b;margin-top:8px">⚡ Could Improve</h4>';json.weaknesses.forEach(w=>{html+=`<p style="margin-bottom:3px">• ${w}</p>`;});}
+if(json.improvedVersion){html+=`<h4 style="margin-top:10px">🚀 Upgraded Version</h4><div style="padding:12px;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.15);border-radius:10px;margin-top:6px;cursor:pointer" onclick="copyText('${json.improvedVersion.replace(/'/g,"\\'")}')">${json.improvedVersion} <span style="font-size:.7rem;color:var(--text3)">tap to copy</span></div>`;}
+html+='</div>';
+document.getElementById('toolResult').innerHTML=html;
+playSound('generate');
+}catch(e){document.getElementById('toolResult').innerHTML=`<div class="tool-result">Rating failed. Try again!</div>`;}
+btn.disabled=false;btn.textContent='⭐ Rate My Rizz';
+}
+
+// ===== TOOL: BIO BEFORE & AFTER =====
+async function runBioBeforeAfter(){
+const bio=document.getElementById('toolInput').value.trim();
+if(!bio){showToast('Paste your current bio!');return;}
+const platform=document.querySelector('#bioPlatChips .tool-chip.active')?.dataset.val||'Tinder';
+const btn=document.getElementById('toolGenBtn');btn.disabled=true;btn.textContent='Transforming...';
+try{
+const msgs=[{role:'system',content:`You are a dating profile transformation expert. Take the user's current bio and create a dramatically improved version optimized for ${platform}. Return ONLY valid JSON:
+{"currentScore":4,"improvedScore":9,"problems":["problem 1 with current bio","problem 2"],"improved":"The dramatically improved bio text","changes":[{"what":"What was changed","why":"Why it's better"}],"platformTips":["tip specific to ${platform}"],"alternateVersions":[{"style":"Funny","bio":"alternate funny version"},{"style":"Bold","bio":"alternate bold version"},{"style":"Mysterious","bio":"alternate mysterious version"}]}
+
+currentScore and improvedScore: 1-10
+Make the improved bio feel authentic, not generic. Keep the person's personality but make it 10x more attractive.`},{role:'user',content:`Transform this ${platform} bio:\n"${bio}"`}];
+const res=await callAIRaw(msgs);
+const json=JSON.parse(res.match(/\{[\s\S]*\}/)?.[0]||'{}');
+const cs=json.currentScore||4;const is=json.improvedScore||8;
+let html='<div class="tool-result">';
+html+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px"><div style="padding:14px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);border-radius:12px"><div style="font-size:.7rem;color:#ef4444;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">❌ Before (${cs}/10)</div><div style="font-size:.88rem;line-height:1.5;color:var(--text2)">${bio.replace(/</g,'&lt;')}</div></div><div style="padding:14px;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.15);border-radius:12px"><div style="font-size:.7rem;color:#22c55e;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">✅ After (${is}/10)</div><div style="font-size:.88rem;line-height:1.5;cursor:pointer" onclick="copyText(this.innerText)">${json.improved||''} <span style="font-size:.65rem;color:var(--text3)">tap to copy</span></div></div></div>`;
+if(json.problems?.length){html+='<h4 style="color:#ef4444">🔍 What Was Wrong</h4>';json.problems.forEach(p=>{html+=`<p style="margin-bottom:3px">• ${p}</p>`;});}
+if(json.changes?.length){html+='<h4 style="margin-top:10px">🔧 What Changed</h4>';json.changes.forEach(c=>{html+=`<div style="padding:8px;background:rgba(255,255,255,.02);border-radius:8px;margin-bottom:4px;font-size:.85rem"><strong>${c.what}:</strong> ${c.why}</div>`;});}
+if(json.alternateVersions?.length){html+='<h4 style="margin-top:12px">🎨 Alternate Versions</h4>';json.alternateVersions.forEach(v=>{html+=`<div style="padding:10px;background:rgba(168,85,247,.06);border:1px solid rgba(168,85,247,.12);border-radius:10px;margin-bottom:6px;cursor:pointer" onclick="copyText(this.querySelector('.alt-bio-text').innerText)"><div style="font-size:.7rem;font-weight:700;color:var(--accent);margin-bottom:4px">${v.style}</div><div class="alt-bio-text" style="font-size:.88rem">${v.bio}</div><span style="font-size:.65rem;color:var(--text3)">tap to copy</span></div>`;});}
+if(json.platformTips?.length){html+=`<h4 style="margin-top:10px">📱 ${platform} Tips</h4>`;json.platformTips.forEach(t=>{html+=`<p style="margin-bottom:3px">• ${t}</p>`;});}
+html+='</div>';
+document.getElementById('toolResult').innerHTML=html;
+playSound('generate');
+}catch(e){document.getElementById('toolResult').innerHTML=`<div class="tool-result">Transformation failed. Try again!</div>`;}
+btn.disabled=false;btn.textContent='📊 Transform Bio';
+}
+
+// ===== TOOL: FIRST DATE SCRIPT =====
+async function runDateScript(){
+const interests=document.getElementById('toolInput').value.trim();
+const dateType=document.querySelector('#dateTypeChips .tool-chip.active')?.dataset.val||'Coffee Date';
+const personality=document.querySelector('#datePersonChips .tool-chip.active')?.dataset.val||'Introverted';
+const btn=document.getElementById('toolGenBtn');btn.disabled=true;btn.textContent='Writing script...';
+try{
+const msgs=[{role:'system',content:`You are a First Date Script writer. Create a full conversation guide for a ${dateType} where the user is ${personality}. ${interests?'Their date is interested in: '+interests+'.':''}
+
+Format EXACTLY like this:
+
+**🎬 Opening (First 5 minutes)**
+- What to say when you arrive: "[exact line]"
+- Icebreaker: "[fun opener question]"
+- Body language tip: [specific tip]
+
+**🗣️ Getting-to-Know Phase (10-20 min)**
+- Topic 1: [topic] → "[example question]"
+- Topic 2: [topic] → "[example question]"
+- Topic 3: [topic] → "[example question]"
+- Transition line: "[smooth transition between topics]"
+
+**😂 Fun & Flirty Phase (20-30 min)**
+- Playful tease: "[example]"
+- Compliment to drop: "[specific, genuine compliment]"
+- Fun question: "[unique question that sparks chemistry]"
+- Callback humor: "[reference something they said earlier]"
+
+**💫 Going Deeper (30-40 min)**
+- Meaningful question: "[deeper question]"
+- Vulnerability moment: "[something personal to share]"
+- Connection builder: "[activity or topic that bonds]"
+
+**🚪 The Close (Last 5 min)**
+- How to suggest a second date: "[exact line]"
+- Smooth goodbye: "[parting line]"
+- Follow-up text (send 1-2 hours later): "[exact text to send]"
+
+**🚫 Topics to AVOID:**
+- [topic 1]
+- [topic 2]
+
+**💡 Pro Tips:**
+- [tip 1]
+- [tip 2]
+- [tip 3]
+
+Make all example lines feel NATURAL and match a ${personality} personality. Not scripted or robotic.`},{role:'user',content:`Create a first date script for: ${dateType}, personality: ${personality}${interests?', their interests: '+interests:''}`}];
+const res=await callAIRaw(msgs);
+document.getElementById('toolResult').innerHTML=`<div class="tool-result">${formatToolResult(res)}</div>`;
+playSound('generate');
+}catch(e){document.getElementById('toolResult').innerHTML=`<div class="tool-result">Script generation failed. Try again!</div>`;}
+btn.disabled=false;btn.textContent='🎬 Generate Script';
+}
+
+// ===== TOOL: TRENDING LINES =====
+async function runTrendingLines(){
+const category=document.querySelector('#trendCatChips .tool-chip.active')?.dataset.val||'Pop Culture';
+const style=document.querySelector('#trendStyleChips .tool-chip.active')?.dataset.val||'Smooth';
+const btn=document.getElementById('toolGenBtn');btn.disabled=true;btn.textContent='Finding trends...';
+try{
+const msgs=[{role:'system',content:`You are a Trending Pickup Lines generator. Create 10 pickup lines/rizz lines inspired by ${category} in a ${style} style. These should reference current trends, popular shows, movies, memes, songs, or cultural moments from 2024-2025.
+
+Format:
+1. "[line]" — _inspired by [reference]_
+2. "[line]" — _inspired by [reference]_
+...
+
+After the 10 lines, add:
+
+**🔥 Best for:** [which situation these work best in]
+**📱 Platform tip:** [which dating app/social media these work best on]
+**⚠️ Know your audience:** [brief tip on when to use/avoid these]
+
+Make lines CLEVER, not just references. They should work even if the person doesn't get the reference, but be extra impressive if they do.`},{role:'user',content:`Generate 10 trending ${style.toLowerCase()} pickup lines from ${category}`}];
+const res=await callAIRaw(msgs);
+document.getElementById('toolResult').innerHTML=`<div class="tool-result">${formatToolResult(res)}</div>`;
+playSound('generate');
+}catch(e){document.getElementById('toolResult').innerHTML=`<div class="tool-result">Couldn't fetch trending lines. Try again!</div>`;}
+btn.disabled=false;btn.textContent='📈 Get Trending Lines';
+}
+
+// ===== TOOL: MESSAGE DECODER =====
+async function runMsgDecoder(){
+const text=document.getElementById('toolInput').value.trim();
+if(!text){showToast('Paste their message!');return;}
+const relationship=document.querySelector('#decoderChips .tool-chip.active')?.dataset.val||'Just met';
+const btn=document.getElementById('toolGenBtn');btn.disabled=true;btn.textContent='Decoding...';
+try{
+const msgs=[{role:'system',content:`You are a Message Decoder — an expert at reading between the lines in dating/texting. Analyze the message in the context of "${relationship}" stage. Return ONLY valid JSON:
+{"surfaceMeaning":"What the message literally says (1 sentence)","hiddenMeaning":"What they ACTUALLY mean (2-3 sentences, be specific)","interestLevel":7,"interestLabel":"Interested","tone":"playful","emotionalState":"How they're feeling when sending this","intentions":["what they want from this convo"],"subtext":["hidden signal 1","hidden signal 2","hidden signal 3"],"keywords":[{"word":"the specific word/phrase","meaning":"what it signals"}],"bestReplies":["great reply option 1","great reply option 2","great reply option 3"],"worstReplies":["what NOT to say 1","what NOT to say 2"],"verdict":"Overall decode summary in 2-3 sentences"}
+
+interestLevel: 1-10
+interestLabel: "Not interested", "Lukewarm", "Curious", "Interested", "Very interested", "Down bad"
+tone: one of "cold", "neutral", "friendly", "playful", "flirty", "interested", "distant", "confused", "testing you"
+Be brutally honest. Don't sugarcoat if the signs are bad.`},{role:'user',content:`Decode this message (relationship: ${relationship}):\n"${text}"`}];
+const res=await callAIRaw(msgs);
+const json=JSON.parse(res.match(/\{[\s\S]*\}/)?.[0]||'{}');
+const interest=json.interestLevel||5;
+const iColor=interest>=7?'#22c55e':interest>=5?'#f59e0b':'#ef4444';
+let html='<div class="tool-result">';
+html+=`<div style="text-align:center;margin-bottom:14px"><div style="font-size:.7rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px">Interest Level</div><div style="font-size:2rem;font-weight:900;color:${iColor}">${interest}/10</div><div style="font-size:.9rem;font-weight:600;color:${iColor}">${json.interestLabel||'Unknown'}</div><div style="margin-top:6px;display:inline-block;padding:4px 12px;background:rgba(168,85,247,.1);border-radius:99px;font-size:.78rem;color:var(--accent)">Tone: ${json.tone||'neutral'}</div></div>`;
+html+=`<h4>📝 What They Said</h4><p style="margin-bottom:10px;color:var(--text2)">${json.surfaceMeaning||''}</p>`;
+html+=`<h4>🧠 What They Actually Mean</h4><div style="padding:12px;background:rgba(168,85,247,.06);border:1px solid rgba(168,85,247,.12);border-radius:10px;margin-bottom:12px">${json.hiddenMeaning||''}</div>`;
+html+=`<h4>😊 Their Emotional State</h4><p style="margin-bottom:10px">${json.emotionalState||''}</p>`;
+if(json.subtext?.length){html+='<h4>🔎 Hidden Signals</h4>';json.subtext.forEach(s=>{html+=`<div style="padding:6px 10px;background:rgba(255,255,255,.03);border-radius:8px;margin-bottom:3px;font-size:.85rem">🔹 ${s}</div>`;});}
+if(json.keywords?.length){html+='<h4 style="margin-top:10px">🔑 Keyword Breakdown</h4>';json.keywords.forEach(k=>{html+=`<div style="padding:6px 10px;background:rgba(99,102,241,.06);border-radius:8px;margin-bottom:3px;font-size:.85rem"><strong>"${k.word}"</strong> → ${k.meaning}</div>`;});}
+if(json.bestReplies?.length){html+='<h4 style="color:#22c55e;margin-top:10px">✅ Best Replies</h4>';json.bestReplies.forEach((r,i)=>{html+=`<div style="padding:8px 12px;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.12);border-radius:10px;margin-bottom:4px;font-size:.88rem;cursor:pointer" onclick="copyText('${r.replace(/'/g,"\\'")}')">${i+1}. "${r}" <span style="font-size:.65rem;color:var(--text3)">tap to copy</span></div>`;});}
+if(json.worstReplies?.length){html+='<h4 style="color:#ef4444;margin-top:10px">❌ What NOT to Reply</h4>';json.worstReplies.forEach(r=>{html+=`<p style="margin-bottom:3px;color:var(--text2)">• "${r}"</p>`;});}
+html+=`<div style="margin-top:12px;padding:12px;background:rgba(168,85,247,.06);border:1px solid rgba(168,85,247,.15);border-radius:10px"><strong>🎯 Verdict:</strong> ${json.verdict||''}</div>`;
+html+='</div>';
+document.getElementById('toolResult').innerHTML=html;
+playSound('generate');
+}catch(e){document.getElementById('toolResult').innerHTML=`<div class="tool-result">Decoding failed. Try again!</div>`;}
+btn.disabled=false;btn.textContent='🔍 Decode Message';
 }
 
 // ===== FORMAT TOOL RESULT =====
