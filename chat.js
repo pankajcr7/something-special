@@ -1613,6 +1613,456 @@ const _origBuildSysPrompt=typeof buildSystemPrompt==='function'?buildSystemPromp
 const _origDOMLoaded=document.readyState;
 if(document.readyState==='loading'){
 document.addEventListener('DOMContentLoaded',initScenarios);
+document.addEventListener('DOMContentLoaded',initPowerTools);
 }else{
 initScenarios();
+initPowerTools();
+}
+
+// ===== POWER TOOLS =====
+function initPowerTools(){
+const btn=document.getElementById('powerToolsBtn');
+const panel=document.getElementById('powerToolsPanel');
+const closeBtn=document.getElementById('closePowerTools');
+const backBtn=document.getElementById('ptBack');
+if(!btn||!panel)return;
+
+btn.addEventListener('click',()=>{panel.style.display='flex';});
+closeBtn.addEventListener('click',closePowerTools);
+backBtn.addEventListener('click',ptShowGrid);
+
+document.querySelectorAll('.pt-card').forEach(c=>{
+c.addEventListener('click',()=>ptOpenTool(c.dataset.tool));
+});
+}
+
+function closePowerTools(){
+document.getElementById('powerToolsPanel').style.display='none';
+ptShowGrid();
+}
+
+function ptShowGrid(){
+document.getElementById('ptGrid').style.display='grid';
+document.getElementById('ptToolView').style.display='none';
+document.getElementById('ptToolResult').innerHTML='';
+}
+
+function ptGetChatContext(){
+if(!messages||!messages.length)return'';
+return messages.map(m=>`${m.sender==='me'?'Me':'Them'}: ${m.text}`).join('\n');
+}
+
+function ptGetLastTheirMsg(){
+for(let i=messages.length-1;i>=0;i--){
+if(messages[i].sender==='them')return messages[i].text;
+}
+return'';
+}
+
+function ptGetLastMyMsg(){
+for(let i=messages.length-1;i>=0;i--){
+if(messages[i].sender==='me')return messages[i].text;
+}
+return'';
+}
+
+function ptFormatResult(text){
+return text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+.replace(/\n/g,'<br>')
+.replace(/^(\d+[.)])\s/gm,'<strong>$1</strong> ');
+}
+
+function ptOpenTool(tool){
+document.getElementById('ptGrid').style.display='none';
+const view=document.getElementById('ptToolView');
+view.style.display='block';
+const header=document.getElementById('ptToolHeader');
+const inputs=document.getElementById('ptToolInputs');
+const genBtn=document.getElementById('ptGenBtn');
+const result=document.getElementById('ptToolResult');
+result.innerHTML='';
+genBtn.disabled=false;
+
+const chatCtx=ptGetChatContext();
+const lastTheir=ptGetLastTheirMsg();
+const lastMy=ptGetLastMyMsg();
+
+const tools={
+lineMixer:{
+icon:'🎵',name:'Line Mixer',btn:'🎵 Remix It',
+html:`<div class="pt-label">Message to remix</div>
+<textarea class="pt-textarea" id="ptInput1" placeholder="Enter a line to remix...">${escapeHtml(lastMy||lastTheir)}</textarea>
+<div class="pt-label">Remix styles (pick multiple)</div>
+<div class="pt-chips" id="ptChips1">
+<button class="pt-chip active" data-val="Smooth">Smooth</button>
+<button class="pt-chip" data-val="Funny">Funny</button>
+<button class="pt-chip active" data-val="Flirty">Flirty</button>
+<button class="pt-chip" data-val="Bold">Bold</button>
+<button class="pt-chip" data-val="Savage">Savage</button>
+<button class="pt-chip" data-val="Poetic">Poetic</button>
+<button class="pt-chip" data-val="Nerdy">Nerdy</button>
+<button class="pt-chip" data-val="Desi">Desi</button>
+</div>`,
+run:ptRunLineMixer
+},
+responsePredictor:{
+icon:'🔮',name:'Response Predictor',btn:'🔮 Predict Response',
+html:`<div class="pt-label">Message you sent (or want to send)</div>
+<textarea class="pt-textarea" id="ptInput1" placeholder="What did you send?">${escapeHtml(lastMy)}</textarea>
+<div class="pt-label">Their personality (optional)</div>
+<input class="pt-input" id="ptInput2" placeholder="e.g. shy introvert, sarcastic, bubbly..." />
+${chatCtx?'<div class="pt-prefill-hint" onclick="document.getElementById(\'ptInput1\').value=ptGetLastMyMsg()">↻ Use last message from chat</div>':''}`,
+run:ptRunResponsePredictor
+},
+toneTranslator:{
+icon:'🔄',name:'Tone Translator',btn:'🔄 Translate Tone',
+html:`<div class="pt-label">Your message</div>
+<textarea class="pt-textarea" id="ptInput1" placeholder="Type your message...">${escapeHtml(lastMy||lastTheir)}</textarea>
+<div class="pt-label">Translate to (pick multiple)</div>
+<div class="pt-chips" id="ptChips1">
+<button class="pt-chip active" data-val="Flirty">Flirty</button>
+<button class="pt-chip" data-val="Funny">Funny</button>
+<button class="pt-chip active" data-val="Confident">Confident</button>
+<button class="pt-chip" data-val="Sweet">Sweet</button>
+<button class="pt-chip" data-val="Savage">Savage</button>
+<button class="pt-chip" data-val="Mysterious">Mysterious</button>
+<button class="pt-chip" data-val="Casual">Casual</button>
+<button class="pt-chip" data-val="Romantic">Romantic</button>
+</div>`,
+run:ptRunToneTranslator
+},
+antiCringe:{
+icon:'😬',name:'Anti-Cringe Detector',btn:'😬 Cringe Check',
+html:`<div class="pt-label">Message you want to send</div>
+<textarea class="pt-textarea" id="ptInput1" placeholder="Type what you're about to send...">${escapeHtml(lastMy)}</textarea>
+<div class="pt-label">Context (optional)</div>
+<input class="pt-input" id="ptInput2" placeholder="e.g. first message, been talking for a week..." />`,
+run:ptRunAntiCringe
+},
+perspectiveFlip:{
+icon:'🪞',name:'Perspective Flip',btn:'🪞 Flip Perspective',
+html:`<div class="pt-label">Message to analyze</div>
+<textarea class="pt-textarea" id="ptInput1" placeholder="What are you about to send?">${escapeHtml(lastMy)}</textarea>
+<div class="pt-label">Their personality (optional)</div>
+<input class="pt-input" id="ptInput2" placeholder="e.g. introverted, confident, shy..." />`,
+run:ptRunPerspectiveFlip
+},
+rizzRater:{
+icon:'⭐',name:'Rizz Rater',btn:'⭐ Rate My Rizz',
+html:`<div class="pt-label">Your message/line</div>
+<textarea class="pt-textarea" id="ptInput1" placeholder="Paste your message...">${escapeHtml(lastMy)}</textarea>
+<div class="pt-label">Context</div>
+<div class="pt-chips" id="ptChips1">
+<button class="pt-chip active" data-val="Text message">Text</button>
+<button class="pt-chip" data-val="DM slide">DM</button>
+<button class="pt-chip" data-val="In person">IRL</button>
+<button class="pt-chip" data-val="Dating app">App</button>
+<button class="pt-chip" data-val="Comment">Comment</button>
+</div>`,
+run:ptRunRizzRater
+},
+redFlag:{
+icon:'🚩',name:'Red Flag Detector',btn:'🚩 Analyze Flags',
+html:`<div class="pt-label">Their message or profile text</div>
+<textarea class="pt-textarea" id="ptInput1" placeholder="Paste their message or bio...">${escapeHtml(lastTheir)}</textarea>
+${chatCtx?'<div class="pt-prefill-hint" onclick="document.getElementById(\'ptInput1\').value=ptGetChatContext()">↻ Load full conversation</div>':''}`,
+run:ptRunRedFlag
+},
+ghostRecovery:{
+icon:'👻',name:'Ghost Recovery',btn:'👻 Generate Comeback',
+html:`<div class="pt-label">Your last messages before ghosting</div>
+<textarea class="pt-textarea" id="ptInput1" placeholder="Paste last messages...">${escapeHtml(chatCtx)}</textarea>
+<div class="pt-label">How long ghosted?</div>
+<div class="pt-chips" id="ptChips1">
+<button class="pt-chip active" data-val="Few hours">Few hours</button>
+<button class="pt-chip" data-val="1-2 days">1-2 days</button>
+<button class="pt-chip" data-val="3-5 days">3-5 days</button>
+<button class="pt-chip" data-val="1+ week">1+ week</button>
+<button class="pt-chip" data-val="1+ month">1+ month</button>
+</div>
+<div class="pt-label">Your goal</div>
+<div class="pt-chips" id="ptChips2">
+<button class="pt-chip active" data-val="Get them back">Get them back</button>
+<button class="pt-chip" data-val="Just check in">Check in</button>
+<button class="pt-chip" data-val="Move on with dignity">Move on</button>
+</div>`,
+run:ptRunGhostRecovery
+},
+msgDecoder:{
+icon:'🧠',name:'Message Decoder',btn:'🧠 Decode Message',
+html:`<div class="pt-label">Their confusing message</div>
+<textarea class="pt-textarea" id="ptInput1" placeholder="Paste the message that confuses you...">${escapeHtml(lastTheir)}</textarea>
+<div class="pt-label">Relationship stage</div>
+<div class="pt-chips" id="ptChips1">
+<button class="pt-chip active" data-val="Just started talking">New</button>
+<button class="pt-chip" data-val="Been talking a while">Talking</button>
+<button class="pt-chip" data-val="Dating">Dating</button>
+<button class="pt-chip" data-val="In a relationship">Relationship</button>
+<button class="pt-chip" data-val="It's complicated">Complicated</button>
+</div>`,
+run:ptRunMsgDecoder
+},
+saveConvo:{
+icon:'🆘',name:'Save the Convo',btn:'🆘 Save My Convo',
+html:`<div class="pt-label">The conversation</div>
+<textarea class="pt-textarea" id="ptInput1" placeholder="Paste the conversation...">${escapeHtml(chatCtx)}</textarea>
+<div class="pt-label">What went wrong?</div>
+<div class="pt-chips" id="ptChips1">
+<button class="pt-chip active" data-val="It got awkward">Awkward</button>
+<button class="pt-chip" data-val="I said something dumb">Said something dumb</button>
+<button class="pt-chip" data-val="They seem uninterested">Uninterested</button>
+<button class="pt-chip" data-val="Left on read">Left on read</button>
+<button class="pt-chip" data-val="Got friendzoned">Friendzoned</button>
+</div>`,
+run:ptRunSaveConvo
+}
+};
+
+const t=tools[tool];
+if(!t)return;
+
+header.innerHTML=`<span>${t.icon}</span> ${t.name}`;
+inputs.innerHTML=t.html;
+genBtn.textContent=t.btn;
+genBtn.onclick=t.run;
+
+view.querySelectorAll('.pt-chips').forEach(container=>{
+container.querySelectorAll('.pt-chip').forEach(chip=>{
+chip.addEventListener('click',()=>{
+const isMulti=container.closest('.pt-tool-inputs')&&(tool==='lineMixer'||tool==='toneTranslator'||tool==='ghostRecovery');
+if(isMulti){
+chip.classList.toggle('active');
+}else{
+container.querySelectorAll('.pt-chip').forEach(c=>c.classList.remove('active'));
+chip.classList.add('active');
+}
+});
+});
+});
+}
+
+async function ptRunLineMixer(){
+const line=document.getElementById('ptInput1').value.trim();
+if(!line){showToast('Enter a line to remix!');return;}
+const styles=[...document.querySelectorAll('#ptChips1 .pt-chip.active')].map(c=>c.dataset.val);
+if(!styles.length){showToast('Select at least one style!');return;}
+const btn=document.getElementById('ptGenBtn');btn.disabled=true;btn.textContent='Remixing...';
+try{
+const msgs=[{role:'system',content:`You remix pickup lines/messages into different styles. Take the given line and rewrite it in each of these styles: ${styles.join(', ')}. Keep the core idea but transform the delivery. Make each version feel natural and sendable. Label each with the style name and emoji.`},{role:'user',content:`Remix this line: "${line}"`}];
+const res=await callProviders(msgs);
+document.getElementById('ptToolResult').innerHTML=`<div class="pt-result-card">${ptFormatResult(res)}</div>`;
+}catch(e){document.getElementById('ptToolResult').innerHTML=`<div class="pt-result-card">Remix failed. Try again!</div>`;}
+btn.disabled=false;btn.textContent='🎵 Remix It';
+}
+
+async function ptRunResponsePredictor(){
+const msg=document.getElementById('ptInput1').value.trim();
+if(!msg){showToast('Enter what you sent!');return;}
+const personality=document.getElementById('ptInput2')?.value||'';
+const chatCtx=ptGetChatContext();
+const btn=document.getElementById('ptGenBtn');btn.disabled=true;btn.textContent='Predicting...';
+try{
+const msgs=[{role:'system',content:`You predict how someone will reply to a text message. ${personality?'Their personality: '+personality+'.':''} ${chatCtx?'Here is the conversation context:\n'+chatCtx+'\n':''} Give 5 possible responses ranging from best case to worst case. For each, give a probability %, the predicted reply, and what to reply back. Format clearly with numbered predictions.`},{role:'user',content:`Predict responses to: "${msg}"`}];
+const res=await callProviders(msgs);
+document.getElementById('ptToolResult').innerHTML=`<div class="pt-result-card">${ptFormatResult(res)}</div>`;
+}catch(e){document.getElementById('ptToolResult').innerHTML=`<div class="pt-result-card">Prediction failed. Try again!</div>`;}
+btn.disabled=false;btn.textContent='🔮 Predict Response';
+}
+
+async function ptRunToneTranslator(){
+const text=document.getElementById('ptInput1').value.trim();
+if(!text){showToast('Type your message first!');return;}
+const tones=[...document.querySelectorAll('#ptChips1 .pt-chip.active')].map(c=>c.dataset.val);
+if(!tones.length){showToast('Pick at least one tone!');return;}
+const btn=document.getElementById('ptGenBtn');btn.disabled=true;btn.textContent='Translating...';
+try{
+const msgs=[{role:'system',content:`You are a Tone Translator. Take the user's message and rewrite it in each requested tone/style. For each tone, provide the translated message (1-2 sentences, natural and sendable) and a brief note on why this tone works. Tones: ${tones.join(', ')}. Keep translations short, punchy, and actually sendable.`},{role:'user',content:`Translate this message:\n"${text}"`}];
+const res=await callProviders(msgs);
+document.getElementById('ptToolResult').innerHTML=`<div class="pt-result-card">${ptFormatResult(res)}</div>`;
+}catch(e){document.getElementById('ptToolResult').innerHTML=`<div class="pt-result-card">Translation failed. Try again!</div>`;}
+btn.disabled=false;btn.textContent='🔄 Translate Tone';
+}
+
+async function ptRunAntiCringe(){
+const text=document.getElementById('ptInput1').value.trim();
+if(!text){showToast('Type what you want to send!');return;}
+const context=document.getElementById('ptInput2')?.value||'';
+const btn=document.getElementById('ptGenBtn');btn.disabled=true;btn.textContent='Analyzing...';
+try{
+const msgs=[{role:'system',content:`You are the Anti-Cringe Detector. Analyze the message someone is about to send and return ONLY valid JSON:
+{"score":75,"verdict":"fire","meter":"🔥🔥🔥🔥","analysis":"Why this works or doesn't in 2-3 sentences.","cringeFactors":["factor 1"],"fireFactors":["what makes it good"],"improvedVersion":"A better version if needed","shouldSend":true,"confidence":"high"}
+Score: 0-100 (0=max cringe, 100=max fire). Verdict: cringe/mid/decent/solid/fire. Meter: 💀 for cringe, 🔥 for fire (1-5 icons). ${context?'Context: '+context:''}`},{role:'user',content:`Cringe check:\n"${text}"`}];
+const res=await callProviders(msgs);
+const json=JSON.parse(res.match(/\{[\s\S]*\}/)?.[0]||'{}');
+const score=json.score||50;
+const color=score>=80?'#22c55e':score>=60?'#f59e0b':score>=40?'#f97316':'#ef4444';
+let html=`<div class="pt-result-card">`;
+html+=`<div style="text-align:center;margin-bottom:14px"><div style="font-size:2.2rem;margin-bottom:4px">${json.meter||'😐😐😐'}</div><div style="font-size:1.8rem;font-weight:900;color:${color}">${score}/100</div><div style="font-size:1rem;font-weight:700;text-transform:uppercase;color:${color}">${json.verdict||'mid'}</div></div>`;
+html+=`<div style="width:100%;height:8px;background:rgba(255,255,255,.1);border-radius:99px;margin-bottom:14px;overflow:hidden"><div style="width:${score}%;height:100%;background:${color};border-radius:99px;transition:width .5s"></div></div>`;
+html+=`<p style="margin-bottom:10px">${json.analysis||''}</p>`;
+if(json.cringeFactors?.length&&json.cringeFactors[0]){html+='<h4 style="color:#ef4444">💀 Cringe Factors</h4>';json.cringeFactors.forEach(f=>{html+=`<p>• ${f}</p>`;});}
+if(json.fireFactors?.length&&json.fireFactors[0]){html+='<h4 style="color:#22c55e;margin-top:8px">🔥 Fire Factors</h4>';json.fireFactors.forEach(f=>{html+=`<p>• ${f}</p>`;});}
+if(json.improvedVersion){html+=`<h4 style="margin-top:10px">✨ Improved Version</h4><div style="padding:10px;background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.2);border-radius:10px;margin-top:6px;cursor:pointer" onclick="navigator.clipboard.writeText(this.innerText.replace(' tap to copy',''));showToast('Copied!')">${json.improvedVersion} <span style="font-size:.68rem;color:var(--text3)">tap to copy</span></div>`;}
+html+=`<div style="text-align:center;margin-top:12px;padding:10px;border-radius:10px;background:${json.shouldSend?'rgba(34,197,94,.08)':'rgba(239,68,68,.08)'};border:1px solid ${json.shouldSend?'rgba(34,197,94,.2)':'rgba(239,68,68,.2)'}"><strong>${json.shouldSend?'✅ SEND IT':'❌ DON\'T SEND'}</strong> <span style="color:var(--text2);font-size:.82rem">(${json.confidence||'medium'} confidence)</span></div>`;
+html+='</div>';
+document.getElementById('ptToolResult').innerHTML=html;
+}catch(e){document.getElementById('ptToolResult').innerHTML=`<div class="pt-result-card">Analysis failed. Try again!</div>`;}
+btn.disabled=false;btn.textContent='😬 Cringe Check';
+}
+
+async function ptRunPerspectiveFlip(){
+const text=document.getElementById('ptInput1').value.trim();
+if(!text){showToast('Type your message first!');return;}
+const personality=document.getElementById('ptInput2')?.value||'';
+const btn=document.getElementById('ptGenBtn');btn.disabled=true;btn.textContent='Flipping...';
+try{
+const msgs=[{role:'system',content:`You are a Perspective Flip expert. Simulate how the RECEIVER would react to a message. ${personality?'Their personality: '+personality+'.':'Assume typical person in dating/talking stage.'} Return ONLY valid JSON:
+{"firstImpression":"gut reaction 1 sentence","emotionalReaction":"how it makes them feel","whatTheyThink":"internal monologue in first person 2-3 sentences","interestLevel":7,"interestChange":"up","replyLikelihood":80,"likelyReplies":["reply 1","reply 2","reply 3"],"redFlags":["what might put them off"],"greenFlags":["what would impress"],"verdict":"Overall 1-2 sentences","tip":"One tip to improve"}
+interestLevel: 1-10, interestChange: up/down/neutral, replyLikelihood: 0-100%`},{role:'user',content:`How would they react to:\n"${text}"`}];
+const res=await callProviders(msgs);
+const json=JSON.parse(res.match(/\{[\s\S]*\}/)?.[0]||'{}');
+const interest=json.interestLevel||5;
+const iColor=interest>=7?'#22c55e':interest>=5?'#f59e0b':'#ef4444';
+const arrow=json.interestChange==='up'?'📈':json.interestChange==='down'?'📉':'➡️';
+let html='<div class="pt-result-card">';
+html+=`<div style="text-align:center;margin-bottom:12px"><div style="font-size:.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Interest Level</div><div style="font-size:2rem;font-weight:900;color:${iColor}">${interest}/10 ${arrow}</div><div style="font-size:.82rem;color:var(--text2)">${json.replyLikelihood||50}% chance of reply</div></div>`;
+html+=`<h4>💭 First Impression</h4><p style="margin-bottom:8px">${json.firstImpression||''}</p>`;
+html+=`<h4>😊 How It Makes Them Feel</h4><p style="margin-bottom:8px">${json.emotionalReaction||''}</p>`;
+html+=`<h4>🧠 Their Internal Monologue</h4><div style="padding:10px;background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.15);border-radius:10px;margin-bottom:8px;font-style:italic">"${json.whatTheyThink||''}"</div>`;
+if(json.likelyReplies?.length){html+='<h4>💬 Likely Replies</h4>';json.likelyReplies.forEach((r,i)=>{html+=`<div style="padding:6px 10px;background:rgba(255,255,255,.03);border-radius:8px;margin-bottom:4px;font-size:.85rem"><strong>${i+1}.</strong> "${r}"</div>`;});}
+if(json.greenFlags?.length&&json.greenFlags[0]){html+='<h4 style="color:#22c55e;margin-top:8px">✅ What They\'d Like</h4>';json.greenFlags.forEach(f=>{html+=`<p>• ${f}</p>`;});}
+if(json.redFlags?.length&&json.redFlags[0]){html+='<h4 style="color:#ef4444;margin-top:8px">⚠️ Might Put Them Off</h4>';json.redFlags.forEach(f=>{html+=`<p>• ${f}</p>`;});}
+html+=`<div style="margin-top:10px;padding:10px;background:rgba(168,85,247,.06);border:1px solid rgba(168,85,247,.15);border-radius:10px"><strong>🎯 Verdict:</strong> ${json.verdict||''}</div>`;
+if(json.tip){html+=`<div style="margin-top:6px;padding:10px;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.15);border-radius:10px"><strong>💡 Tip:</strong> ${json.tip}</div>`;}
+html+='</div>';
+document.getElementById('ptToolResult').innerHTML=html;
+}catch(e){document.getElementById('ptToolResult').innerHTML=`<div class="pt-result-card">Couldn't flip perspective. Try again!</div>`;}
+btn.disabled=false;btn.textContent='🪞 Flip Perspective';
+}
+
+async function ptRunRizzRater(){
+const text=document.getElementById('ptInput1').value.trim();
+if(!text){showToast('Paste your message first!');return;}
+const context=document.querySelector('#ptChips1 .pt-chip.active')?.dataset.val||'Text message';
+const btn=document.getElementById('ptGenBtn');btn.disabled=true;btn.textContent='Rating...';
+try{
+const msgs=[{role:'system',content:`You are the Rizz Rater. Rate the message for a "${context}" context. Return ONLY valid JSON:
+{"rizzScore":85,"grade":"S","title":"Smooth Operator","breakdown":{"confidence":8,"creativity":9,"humor":7,"smoothness":9,"effectiveness":8},"reaction":"How receiver would react","strengths":["str1","str2"],"weaknesses":["weakness"],"improvedVersion":"Higher scoring version","funComment":"funny 1-liner about their rizz"}
+rizzScore: 0-100, grade: F/D/C/B/A/S/S+, breakdown: each 1-10`},{role:'user',content:`Rate this rizz (${context}):\n"${text}"`}];
+const res=await callProviders(msgs);
+const json=JSON.parse(res.match(/\{[\s\S]*\}/)?.[0]||'{}');
+const score=json.rizzScore||50;
+const gradeColors={'S+':'#fbbf24','S':'#f59e0b','A':'#22c55e','B':'#3b82f6','C':'#f59e0b','D':'#f97316','F':'#ef4444'};
+const gc=gradeColors[json.grade]||'#a855f7';
+const bd=json.breakdown||{};
+let html='<div class="pt-result-card">';
+html+=`<div style="text-align:center;margin-bottom:14px"><div style="font-size:2.5rem;font-weight:900;color:${gc};line-height:1">${json.grade||'B'}</div><div style="font-size:1.6rem;font-weight:800;margin-top:4px">${score}/100</div><div style="font-size:.85rem;color:var(--accent);font-weight:600;margin-top:2px">${json.title||'Rated'}</div></div>`;
+html+=`<div style="width:100%;height:8px;background:rgba(255,255,255,.1);border-radius:99px;margin-bottom:14px;overflow:hidden"><div style="width:${score}%;height:100%;background:linear-gradient(90deg,#ef4444,#f59e0b,#22c55e);border-radius:99px"></div></div>`;
+const stats=[['Confidence',bd.confidence],['Creativity',bd.creativity],['Humor',bd.humor],['Smoothness',bd.smoothness],['Effectiveness',bd.effectiveness]];
+html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">';
+stats.forEach(([name,val])=>{if(val){const v=val*10;const c=v>=70?'#22c55e':v>=50?'#f59e0b':'#ef4444';html+=`<div style="padding:6px;background:rgba(255,255,255,.03);border-radius:8px"><div style="font-size:.68rem;color:var(--text3);margin-bottom:3px">${name}</div><div style="display:flex;align-items:center;gap:4px"><div style="flex:1;height:4px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden"><div style="width:${v}%;height:100%;background:${c};border-radius:99px"></div></div><span style="font-size:.72rem;font-weight:700;color:${c}">${val}/10</span></div></div>`;}});
+html+='</div>';
+if(json.funComment){html+=`<div style="text-align:center;padding:8px;background:rgba(168,85,247,.08);border-radius:10px;margin-bottom:10px;font-style:italic;color:var(--accent);font-size:.85rem">"${json.funComment}"</div>`;}
+html+=`<p style="margin-bottom:8px"><strong>🎯 Reaction:</strong> ${json.reaction||''}</p>`;
+if(json.strengths?.length){html+='<h4 style="color:#22c55e">💪 Strengths</h4>';json.strengths.forEach(s=>{html+=`<p>• ${s}</p>`;});}
+if(json.weaknesses?.length&&json.weaknesses[0]){html+='<h4 style="color:#f59e0b;margin-top:6px">⚡ Could Improve</h4>';json.weaknesses.forEach(w=>{html+=`<p>• ${w}</p>`;});}
+if(json.improvedVersion){html+=`<h4 style="margin-top:8px">🚀 Upgraded Version</h4><div style="padding:10px;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.15);border-radius:10px;margin-top:4px;cursor:pointer" onclick="navigator.clipboard.writeText(this.innerText.replace(' tap to copy',''));showToast('Copied!')">${json.improvedVersion} <span style="font-size:.68rem;color:var(--text3)">tap to copy</span></div>`;}
+html+='</div>';
+document.getElementById('ptToolResult').innerHTML=html;
+}catch(e){document.getElementById('ptToolResult').innerHTML=`<div class="pt-result-card">Rating failed. Try again!</div>`;}
+btn.disabled=false;btn.textContent='⭐ Rate My Rizz';
+}
+
+async function ptRunRedFlag(){
+const text=document.getElementById('ptInput1').value.trim();
+if(!text){showToast('Paste their message/profile!');return;}
+const btn=document.getElementById('ptGenBtn');btn.disabled=true;btn.textContent='Analyzing...';
+try{
+const msgs=[{role:'system',content:'You are a dating red flag / green flag detector. Analyze the text and return ONLY valid JSON: {"redFlags":[{"flag":"desc","severity":"high/medium"}],"yellowFlags":[{"flag":"desc"}],"greenFlags":[{"flag":"desc"}],"overallScore":7,"verdict":"Overall 2-3 sentences","advice":"What to do next"}'},{role:'user',content:`Analyze for flags:\n"${text}"`}];
+const res=await callProviders(msgs);
+const json=JSON.parse(res.match(/\{[\s\S]*\}/)?.[0]||'{}');
+let html='<div class="pt-result-card">';
+html+=`<div style="text-align:center;font-size:1.8rem;font-weight:800;margin-bottom:10px">${json.overallScore||5}/10</div>`;
+if(json.redFlags?.length){html+='<h4 style="color:#ef4444">🚩 Red Flags</h4>';json.redFlags.forEach(f=>{html+=`<div style="padding:6px 10px;background:rgba(239,68,68,.06);border-radius:8px;margin-bottom:4px;font-size:.85rem">${f.flag} ${f.severity==='high'?'⚠️':''}</div>`;});}
+if(json.yellowFlags?.length){html+='<h4 style="color:#f59e0b;margin-top:10px">⚠️ Yellow Flags</h4>';json.yellowFlags.forEach(f=>{html+=`<div style="padding:6px 10px;background:rgba(245,158,11,.06);border-radius:8px;margin-bottom:4px;font-size:.85rem">${f.flag}</div>`;});}
+if(json.greenFlags?.length){html+='<h4 style="color:#22c55e;margin-top:10px">✅ Green Flags</h4>';json.greenFlags.forEach(f=>{html+=`<div style="padding:6px 10px;background:rgba(34,197,94,.06);border-radius:8px;margin-bottom:4px;font-size:.85rem">${f.flag}</div>`;});}
+html+=`<p style="margin-top:12px"><strong>Verdict:</strong> ${json.verdict||''}</p>`;
+html+=`<p style="margin-top:6px"><strong>Advice:</strong> ${json.advice||''}</p></div>`;
+document.getElementById('ptToolResult').innerHTML=html;
+}catch(e){document.getElementById('ptToolResult').innerHTML=`<div class="pt-result-card">Analysis failed. Try again!</div>`;}
+btn.disabled=false;btn.textContent='🚩 Analyze Flags';
+}
+
+async function ptRunGhostRecovery(){
+const convo=document.getElementById('ptInput1').value.trim();
+if(!convo){showToast('Paste your last messages!');return;}
+const duration=document.querySelector('#ptChips1 .pt-chip.active')?.dataset.val||'1-2 days';
+const goal=document.querySelector('#ptChips2 .pt-chip.active')?.dataset.val||'Get them back';
+const btn=document.getElementById('ptGenBtn');btn.disabled=true;btn.textContent='Crafting comeback...';
+try{
+const msgs=[{role:'system',content:`You are a Ghosting Recovery specialist. The user has been ghosted for ${duration}. Goal: ${goal}. Analyze the conversation and provide:
+
+**👻 Ghost Analysis:** Why they probably ghosted (2-3 sentences)
+**📊 Recovery Chances:** X% — brief reason
+**💬 Comeback Messages (ranked):**
+1. 🏆 BEST — smoothest comeback
+2. 😎 COOL — casual and unbothered
+3. 😂 FUNNY — humor-based
+4. 💪 BOLD — confident and direct
+5. 🎯 HAIL MARY — risky but could work
+**⏰ When to Send:** timing advice
+**📋 Game Plan:** steps after they reply + if they don't
+**🚫 What NOT to Do:** common mistakes
+
+Keep comeback messages SHORT (1 sentence), natural, NOT desperate.`},{role:'user',content:`Ghosted for ${duration}. Goal: ${goal}.\nMessages:\n${convo}`}];
+const res=await callProviders(msgs);
+document.getElementById('ptToolResult').innerHTML=`<div class="pt-result-card">${ptFormatResult(res)}</div>`;
+}catch(e){document.getElementById('ptToolResult').innerHTML=`<div class="pt-result-card">Recovery failed. Try again!</div>`;}
+btn.disabled=false;btn.textContent='👻 Generate Comeback';
+}
+
+async function ptRunMsgDecoder(){
+const text=document.getElementById('ptInput1').value.trim();
+if(!text){showToast('Paste their message!');return;}
+const stage=document.querySelector('#ptChips1 .pt-chip.active')?.dataset.val||'Just started talking';
+const btn=document.getElementById('ptGenBtn');btn.disabled=true;btn.textContent='Decoding...';
+try{
+const msgs=[{role:'system',content:`You are a Message Decoder expert. The user received a confusing message. Relationship stage: ${stage}. Decode the hidden meaning. Provide:
+1. **Surface Meaning** — what it literally says
+2. **Hidden Meaning** — what they REALLY mean
+3. **Emotional State** — how they were feeling when they sent it
+4. **Interest Level** — 1-10 with explanation
+5. **What They Want** — what response they're hoping for
+6. **Best Reply Options** — 3 different reply suggestions
+7. **What NOT to Reply** — what would kill the vibe
+Be specific and insightful, not generic.`},{role:'user',content:`Decode this message (stage: ${stage}):\n"${text}"`}];
+const res=await callProviders(msgs);
+document.getElementById('ptToolResult').innerHTML=`<div class="pt-result-card">${ptFormatResult(res)}</div>`;
+}catch(e){document.getElementById('ptToolResult').innerHTML=`<div class="pt-result-card">Decoding failed. Try again!</div>`;}
+btn.disabled=false;btn.textContent='🧠 Decode Message';
+}
+
+async function ptRunSaveConvo(){
+const convo=document.getElementById('ptInput1').value.trim();
+if(!convo){showToast('Paste the conversation first!');return;}
+const problem=document.querySelector('#ptChips1 .pt-chip.active')?.dataset.val||'It got awkward';
+const btn=document.getElementById('ptGenBtn');btn.disabled=true;btn.textContent='Saving...';
+try{
+const msgs=[{role:'system',content:`You are an emergency conversation recovery expert. The conversation went wrong because: "${problem}". Provide:
+
+**🔎 What Went Wrong:** 1-2 sentences
+**🆘 Recovery Messages (pick one):**
+1. Smooth recovery
+2. Funny/light recovery
+3. Honest/vulnerable recovery
+4. Bold confident recovery
+5. Casual cool recovery
+**⏰ Timing Advice:** when to send
+**🎯 Strategy:** 2-3 sentences on steering back on track
+
+Keep recovery messages short (1-2 sentences), natural, NOT desperate.`},{role:'user',content:`Save this convo. Problem: ${problem}\n---\n${convo}`}];
+const res=await callProviders(msgs);
+document.getElementById('ptToolResult').innerHTML=`<div class="pt-result-card">${ptFormatResult(res)}</div>`;
+}catch(e){document.getElementById('ptToolResult').innerHTML=`<div class="pt-result-card">Couldn't save this one. Try again!</div>`;}
+btn.disabled=false;btn.textContent='🆘 Save My Convo';
 }

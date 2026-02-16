@@ -383,5 +383,47 @@ html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--t
 /* ===== MSG REWRITE INDICATOR ===== */
 .msg-action-btn.rewrite{color:var(--accent)}
 
+/* ===== POWER TOOLS BUTTON ===== */
+.power-tools-btn{width:38px;height:38px;border-radius:50%;border:1px solid rgba(99,102,241,.25);background:rgba(99,102,241,.08);color:var(--accent2);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .15s}
+.power-tools-btn:active{transform:scale(.92);background:rgba(99,102,241,.18)}
+
+/* ===== POWER TOOLS PANEL ===== */
+.power-tools-panel{position:fixed;top:0;left:0;right:0;bottom:0;max-width:600px;margin:0 auto;background:var(--bg);z-index:110;overflow-y:auto;animation:fadeIn .2s ease;display:flex;flex-direction:column}
+@media(min-width:601px){.power-tools-panel{left:50%;right:auto;width:600px;transform:translateX(-50%);border-left:1px solid var(--border);border-right:1px solid var(--border)}}
+.pt-header{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:1}
+.pt-title{font-size:.92rem;font-weight:700;color:var(--accent2);display:flex;align-items:center;gap:6px}
+.pt-close{background:none;border:none;color:var(--text2);cursor:pointer;padding:8px;border-radius:8px}
+.pt-close:active{color:var(--text);background:rgba(255,255,255,.06)}
+.pt-body{padding:14px;flex:1;overflow-y:auto;padding-bottom:40px}
+.pt-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pt-card{display:flex;flex-direction:column;align-items:center;gap:6px;padding:18px 10px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);cursor:pointer;transition:all .15s;text-align:center;font-family:var(--font)}
+.pt-card:active{transform:scale(.96);background:rgba(255,255,255,.06)}
+.pt-card-icon{font-size:1.6rem}
+.pt-card-name{font-size:.82rem;font-weight:700;color:var(--text)}
+.pt-card-desc{font-size:.68rem;color:var(--text3);line-height:1.3}
+.pt-tool-view{animation:fadeUp .2s}
+.pt-back{background:none;border:none;color:var(--accent2);font-family:var(--font);font-size:.82rem;font-weight:600;cursor:pointer;padding:6px 0;margin-bottom:12px}
+.pt-back:active{opacity:.7}
+.pt-tool-header{font-size:1.1rem;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.pt-tool-inputs{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.pt-input,.pt-textarea{width:100%;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:var(--font);font-size:.88rem;outline:none;transition:border-color .15s}
+.pt-input:focus,.pt-textarea:focus{border-color:rgba(99,102,241,.4)}
+.pt-textarea{resize:none;min-height:80px;line-height:1.5}
+.pt-chips{display:flex;flex-wrap:wrap;gap:6px}
+.pt-chip{padding:6px 14px;border-radius:var(--r3);font-size:.78rem;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s;font-family:var(--font)}
+.pt-chip.active{background:rgba(99,102,241,.12);border-color:rgba(99,102,241,.3);color:var(--accent2)}
+.pt-chip:active{transform:scale(.95)}
+.pt-gen-btn{width:100%;padding:12px;border:none;border-radius:var(--r);background:linear-gradient(135deg,#6366f1,#a855f7);color:#fff;font-family:var(--font);font-size:.88rem;font-weight:700;cursor:pointer;transition:all .15s}
+.pt-gen-btn:active{transform:scale(.98);filter:brightness(1.1)}
+.pt-gen-btn:disabled{opacity:.5;pointer-events:none}
+.pt-tool-result{margin-top:16px}
+.pt-tool-result .pt-result-card{padding:14px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);font-size:.85rem;line-height:1.65;color:var(--text);word-break:break-word}
+.pt-tool-result .pt-result-card h4{font-size:.82rem;font-weight:700;margin-bottom:6px;color:var(--accent)}
+.pt-tool-result .pt-result-card p{margin-bottom:6px}
+.pt-tool-result .pt-result-card strong{color:var(--text)}
+.pt-label{font-size:.75rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+.pt-prefill-hint{font-size:.72rem;color:var(--accent2);cursor:pointer;text-align:right}
+.pt-prefill-hint:active{opacity:.7}
+
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
