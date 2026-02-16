@@ -155,6 +155,15 @@
                     <option value="russian">Russian</option>
                     <option value="turkish">Turkish</option>
                     <option value="thai">Thai</option>
+                    <option disabled>── Cultural Rizz ──</option>
+                    <option value="spanglish">🇲🇽 Spanglish</option>
+                    <option value="genz">🧬 Gen-Z Slang</option>
+                    <option value="british">🇬🇧 British Banter</option>
+                    <option value="kdrama">🇰🇷 K-Drama Style</option>
+                    <option value="anime">🇯🇵 Anime Style</option>
+                    <option value="aave">🔥 AAVE / Urban</option>
+                    <option value="aussie">🇦🇺 Aussie Slang</option>
+                    <option value="southern">🤠 Southern Charm</option>
                 </select>
             </div>
             <div class="setting-row">
@@ -199,6 +208,13 @@
                 <button class="pt-card" data-tool="ghostRecovery"><span class="pt-card-icon">👻</span><span class="pt-card-name">Ghost Recovery</span><span class="pt-card-desc">Comeback from ghosting</span></button>
                 <button class="pt-card" data-tool="msgDecoder"><span class="pt-card-icon">🧠</span><span class="pt-card-name">Message Decoder</span><span class="pt-card-desc">Decode hidden meaning</span></button>
                 <button class="pt-card" data-tool="saveConvo"><span class="pt-card-icon">🆘</span><span class="pt-card-name">Save the Convo</span><span class="pt-card-desc">Recover awkward chats</span></button>
+                <button class="pt-card" data-tool="doubleText"><span class="pt-card-icon">📱</span><span class="pt-card-name">Double Text</span><span class="pt-card-desc">Should you text again?</span></button>
+                <button class="pt-card" data-tool="openerGen"><span class="pt-card-icon">🎯</span><span class="pt-card-name">Opener Generator</span><span class="pt-card-desc">Personalized first messages</span></button>
+                <button class="pt-card" data-tool="styleMirror"><span class="pt-card-icon">🪞</span><span class="pt-card-name">Style Mirror</span><span class="pt-card-desc">Match their texting energy</span></button>
+                <button class="pt-card" data-tool="strategyPlanner"><span class="pt-card-icon">🗺️</span><span class="pt-card-name">Strategy Planner</span><span class="pt-card-desc">Plan next 3-7 messages</span></button>
+                <button class="pt-card" data-tool="debateMode"><span class="pt-card-icon">⚖️</span><span class="pt-card-name">AI Debate</span><span class="pt-card-desc">Send it or don't?</span></button>
+                <button class="pt-card" data-tool="attachmentDetector"><span class="pt-card-icon">🔮</span><span class="pt-card-name">Attachment Detector</span><span class="pt-card-desc">Their attachment style</span></button>
+                <button class="pt-card" data-tool="flirtTracker"><span class="pt-card-icon">📈</span><span class="pt-card-name">Flirt Tracker</span><span class="pt-card-desc">Track flirt progression</span></button>
             </div>
             <div class="pt-tool-view" id="ptToolView" style="display:none;">
                 <button class="pt-back" id="ptBack">← Back to tools</button>
@@ -332,6 +348,12 @@
                 <button class="power-tools-btn" id="powerToolsBtn" title="Power Tools">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
                 </button>
+                <button class="wingman-btn" id="wingmanBtn" title="AI Wingman Live">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+                <button class="templates-btn" id="templatesBtn" title="Convo Templates">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                </button>
             </div>
         </div>
     </div>
@@ -339,6 +361,28 @@
     <div class="toast" id="toast">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
         <span id="toastText">Copied!</span>
+    </div>
+
+    <div class="wingman-panel" id="wingmanPanel" style="display:none;">
+        <div class="wingman-header">
+            <span class="wingman-title">👁️ Wingman Live</span>
+            <button class="wingman-close" id="closeWingman">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div class="wingman-body" id="wingmanBody"></div>
+    </div>
+
+    <div class="templates-panel" id="templatesPanel" style="display:none;">
+        <div class="tpl-header">
+            <span class="tpl-title">📋 Convo Templates</span>
+            <button class="tpl-close" id="closeTemplates">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div class="tpl-body">
+            <div class="tpl-grid" id="templateGrid"></div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>

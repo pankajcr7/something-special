@@ -140,6 +140,7 @@ renderMessages();
 saveChat();
 scrollToBottom();
 hideHint();
+if(wingmanActive&&sender==='them')setTimeout(runWingmanAnalysis,300);
 }
 
 function deleteMessage(id){
@@ -223,6 +224,23 @@ Copy
 Edit
 </button>
 <div class="msg-ctx-sep"></div>
+<button class="msg-ctx-item ai-action" data-action="decode">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+🧠 Decode
+</button>
+<button class="msg-ctx-item ai-action" data-action="rate">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+⭐ Rate Rizz
+</button>
+<button class="msg-ctx-item ai-action" data-action="flip">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+🪞 Flip View
+</button>
+<button class="msg-ctx-item ai-action" data-action="debate">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+⚖️ Debate
+</button>
+<div class="msg-ctx-sep"></div>
 <button class="msg-ctx-item delete-item" data-action="delete">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
 Delete
@@ -240,6 +258,14 @@ startEditMessage(id,text);
 }else if(action==='delete'){
 deleteMessage(id);
 showToast('Message deleted');
+}else if(action==='decode'){
+quickActionAI('decode',text,sender);
+}else if(action==='rate'){
+quickActionAI('rate',text,sender);
+}else if(action==='flip'){
+quickActionAI('flip',text,sender);
+}else if(action==='debate'){
+quickActionAI('debate',text,sender);
 }
 });
 });
@@ -388,6 +414,70 @@ IMPORTANT — WRITE IN HINDI (Roman script / Romanized Hindi). Like real Indians
 BAD: "Kya aap mujhe bata sakti hain?"
 GOOD: "arre bata na yaar"
 EVERY reply MUST be in Roman Hindi. NO Devanagari. NO pure English.
+`:lang==='spanglish'?`
+IMPORTANT — WRITE IN SPANGLISH (English-Spanish mix). Like Mexican-Americans text:
+- Mix English + Spanish naturally: "omg eso fue so cute wey"
+- Use common Spanish: "mija", "guapo/guapa", "ay dios mio", "no mames", "chido", "neta", "órale"
+- Lotina/Latino culture references OK
+- Keep it casual, warm, passionate
+BAD: "Me gustas mucho, eres muy bonita."
+GOOD: "no pero neta you're lowkey so fine wey 😭"
+`:lang==='genz'?`
+IMPORTANT — WRITE IN PEAK GEN-Z SLANG. Chronically online texting:
+- Use: "no cap", "fr fr", "its giving", "slay", "ate that", "delulu", "situationship", "ick", "the way I—", "bestie", "living rent free", "main character energy", "lowkey/highkey", "period", "understood the assignment", "unhinged", "brainrot", "skibidi", "rizz", "gyatt", "bussin"
+- Reference TikTok, memes, internet culture
+- Type chaotically: random caps, "HELP", "STOP", "im screaming", "bye", "deceased"
+- Keysmash when excited: "asjdhfk", "LMAOOO"
+BAD: "I think you're very attractive."
+GOOD: "the way you just exist and its giving main character energy like HELP 😭"
+`:lang==='british'?`
+IMPORTANT — WRITE IN BRITISH BANTER STYLE:
+- Use: "innit", "proper", "well fit", "cheeky", "muppet", "brilliant", "mate", "reckon", "dead", "mental", "gutted", "sorted", "cheers", "taking the piss", "buzzing", "fit", "absolute unit"
+- Dry humor, self-deprecating, deadpan wit
+- British spelling: colour, favourite, realise
+- Understate everything: "not bad" = amazing, "bit rubbish" = terrible
+BAD: "You're so beautiful, I really like you!"
+GOOD: "right so youre proper fit and im trying to be dead casual about it but im failing innit"
+`:lang==='kdrama'?`
+IMPORTANT — WRITE IN K-DRAMA ROMANTIC STYLE:
+- Dramatic, romantic, intense emotions
+- Use Korean terms: "oppa", "unnie", "aigoo", "daebak", "fighting!", "aish", "omo", "gwenchana", "saranghae", "bogoshipo"
+- Reference K-drama tropes: rain scenes, wrist grabs, indirect kisses, piggyback rides
+- Mix cute with dramatic: intense confessions followed by shy deflection
+- Use Romanized Korean naturally
+BAD: "I missed you today."
+GOOD: "yah... bogoshipo 😤 all day I was like a K-drama lead staring out the window thinking about you"
+`:lang==='anime'?`
+IMPORTANT — WRITE IN ANIME/WEEB STYLE:
+- Use Japanese terms: "baka", "kawaii", "sugoi", "nani", "senpai", "ara ara", "yamete", "uwu", "OwO", "desu", "moshi moshi"
+- Reference anime tropes: tsundere, protagonist energy, power of friendship
+- Dramatic internal monologue style
+- Mix cringe and cute: "i-its not like I like you or anything... baka! 😤"
+- Emoticons: (╥_╥), (≧▽≦), OwO, UwU, ╰(*°▽°*)╯
+BAD: "I think you're cute."
+GOOD: "n-nani?! 😳 my heart went doki doki... its not like i think youre kawaii or anything b-baka! (≧▽≦)"
+`:lang==='aave'?`
+IMPORTANT — WRITE IN AAVE / URBAN STYLE:
+- Natural AAVE: "finna", "ion", "ong", "no fr", "bet", "twin", "gang", "say less", "fasho", "deadass", "aight", "rn", "wya", "hml", "otw"
+- Confident, smooth, unbothered energy
+- Keep it real, direct, authentic
+BAD: "I would like to take you out sometime."
+GOOD: "aye so when you finna let me take you out tho 👀"
+`:lang==='aussie'?`
+IMPORTANT — WRITE IN AUSTRALIAN SLANG:
+- Use: "arvo", "brekkie", "maccas", "reckon", "heaps", "keen", "stoked", "legend", "mate", "no worries", "sweet as", "bloody", "crikey", "deadset", "chunder", "bogan"
+- Shorten everything: afternoon=arvo, breakfast=brekkie, definitely=defo
+- Laid-back, chill, friendly energy
+BAD: "Would you like to get breakfast tomorrow?"
+GOOD: "keen for brekkie tomorrow? i know this sick spot, deadset best avo toast"
+`:lang==='southern'?`
+IMPORTANT — WRITE IN SOUTHERN CHARM STYLE:
+- Use: "y'all", "fixin' to", "bless your heart", "well I'll be", "sugar", "darlin'", "honey", "reckon", "might could", "over yonder", "all y'all", "ain't"
+- Sweet, warm, gentlemanly/ladylike charm
+- Slow burn flirting, wholesome but bold
+- Country references OK
+BAD: "You look nice today."
+GOOD: "well darlin you lookin sweeter than sweet tea on a summer day, bless your heart 🤠"
 `:lang&&lang!=='english'?`\nIMPORTANT: Write ALL replies in ${lang}.`:'';
 
 let chatLog=slice.map(m=>`${m.sender==='me'?'Me':theirName}: ${m.text}`).join('\n');
@@ -1614,9 +1704,13 @@ const _origDOMLoaded=document.readyState;
 if(document.readyState==='loading'){
 document.addEventListener('DOMContentLoaded',initScenarios);
 document.addEventListener('DOMContentLoaded',initPowerTools);
+document.addEventListener('DOMContentLoaded',initWingman);
+document.addEventListener('DOMContentLoaded',initTemplates);
 }else{
 initScenarios();
 initPowerTools();
+initWingman();
+initTemplates();
 }
 
 // ===== POWER TOOLS =====
@@ -1815,6 +1909,81 @@ html:`<div class="pt-label">The conversation</div>
 <button class="pt-chip" data-val="Got friendzoned">Friendzoned</button>
 </div>`,
 run:ptRunSaveConvo
+},
+doubleText:{
+icon:'📱',name:'Double Text Strategy',btn:'📱 Get Strategy',
+html:`<div class="pt-label">Your last message (no reply yet)</div>
+<textarea class="pt-textarea" id="ptInput1" placeholder="What did you send?">${escapeHtml(lastMy)}</textarea>
+<div class="pt-label">How long since you sent it?</div>
+<div class="pt-chips" id="ptChips1">
+<button class="pt-chip active" data-val="Few hours">Few hours</button>
+<button class="pt-chip" data-val="12 hours">12 hours</button>
+<button class="pt-chip" data-val="1 day">1 day</button>
+<button class="pt-chip" data-val="2-3 days">2-3 days</button>
+<button class="pt-chip" data-val="1 week+">1 week+</button>
+</div>`,
+run:ptRunDoubleText
+},
+openerGen:{
+icon:'🎯',name:'Opener Generator',btn:'🎯 Generate Openers',
+html:`<div class="pt-label">Their bio / interests / about</div>
+<textarea class="pt-textarea" id="ptInput1" placeholder="Paste their dating app bio or describe their interests..."></textarea>
+<div class="pt-label">Platform</div>
+<div class="pt-chips" id="ptChips1">
+<button class="pt-chip active" data-val="Tinder">Tinder</button>
+<button class="pt-chip" data-val="Bumble">Bumble</button>
+<button class="pt-chip" data-val="Hinge">Hinge</button>
+<button class="pt-chip" data-val="Instagram DM">Instagram</button>
+<button class="pt-chip" data-val="Twitter DM">Twitter</button>
+<button class="pt-chip" data-val="In Person">IRL</button>
+</div>`,
+run:ptRunOpenerGen
+},
+styleMirror:{
+icon:'🪞',name:'Style Mirror',btn:'🪞 Analyze Style',
+html:`<div class="pt-label">Conversation to analyze their style</div>
+<textarea class="pt-textarea" id="ptInput1" placeholder="Paste conversation...">${escapeHtml(chatCtx)}</textarea>
+${chatCtx?'<div class="pt-prefill-hint" onclick="document.getElementById(\'ptInput1\').value=ptGetChatContext()">↻ Load full conversation</div>':''}`,
+run:ptRunStyleMirror
+},
+strategyPlanner:{
+icon:'🗺️',name:'Strategy Planner',btn:'🗺️ Plan Strategy',
+html:`<div class="pt-label">Your goal</div>
+<div class="pt-chips" id="ptChips1">
+<button class="pt-chip active" data-val="Get a date">Get a date</button>
+<button class="pt-chip" data-val="Get their number">Get number</button>
+<button class="pt-chip" data-val="Escalate flirting">Escalate</button>
+<button class="pt-chip" data-val="Recover the conversation">Recover</button>
+<button class="pt-chip" data-val="Make them fall for me">Make them fall</button>
+<button class="pt-chip" data-val="Keep it casual">Stay casual</button>
+</div>
+<div class="pt-label">Plan ahead (turns)</div>
+<div class="pt-chips" id="ptChips2">
+<button class="pt-chip active" data-val="3">3 moves</button>
+<button class="pt-chip" data-val="5">5 moves</button>
+<button class="pt-chip" data-val="7">7 moves</button>
+</div>`,
+run:ptRunStrategyPlanner
+},
+debateMode:{
+icon:'⚖️',name:'AI Debate',btn:'⚖️ Debate It',
+html:`<div class="pt-label">Message you want to send</div>
+<textarea class="pt-textarea" id="ptInput1" placeholder="Type what you're thinking of sending...">${escapeHtml(lastMy)}</textarea>`,
+run:ptRunDebateMode
+},
+attachmentDetector:{
+icon:'🔮',name:'Attachment Detector',btn:'🔮 Detect Style',
+html:`<div class="pt-label">Conversation to analyze</div>
+<textarea class="pt-textarea" id="ptInput1" placeholder="Paste conversation...">${escapeHtml(chatCtx)}</textarea>
+${chatCtx?'<div class="pt-prefill-hint" onclick="document.getElementById(\'ptInput1\').value=ptGetChatContext()">↻ Load full conversation</div>':''}`,
+run:ptRunAttachmentDetector
+},
+flirtTracker:{
+icon:'📈',name:'Flirt Tracker',btn:'📈 Track Progress',
+html:`<div class="pt-label">Conversation to track</div>
+<textarea class="pt-textarea" id="ptInput1" placeholder="Paste conversation...">${escapeHtml(chatCtx)}</textarea>
+${chatCtx?'<div class="pt-prefill-hint" onclick="document.getElementById(\'ptInput1\').value=ptGetChatContext()">↻ Load full conversation</div>':''}`,
+run:ptRunFlirtTracker
 }
 };
 
@@ -1829,7 +1998,7 @@ genBtn.onclick=t.run;
 view.querySelectorAll('.pt-chips').forEach(container=>{
 container.querySelectorAll('.pt-chip').forEach(chip=>{
 chip.addEventListener('click',()=>{
-const isMulti=container.closest('.pt-tool-inputs')&&(tool==='lineMixer'||tool==='toneTranslator'||tool==='ghostRecovery');
+const isMulti=container.closest('.pt-tool-inputs')&&(tool==='lineMixer'||tool==='toneTranslator'||tool==='ghostRecovery'||tool==='strategyPlanner');
 if(isMulti){
 chip.classList.toggle('active');
 }else{
@@ -2065,4 +2234,473 @@ const res=await callProviders(msgs);
 document.getElementById('ptToolResult').innerHTML=`<div class="pt-result-card">${ptFormatResult(res)}</div>`;
 }catch(e){document.getElementById('ptToolResult').innerHTML=`<div class="pt-result-card">Couldn't save this one. Try again!</div>`;}
 btn.disabled=false;btn.textContent='🆘 Save My Convo';
+}
+
+// ===== QUICK ACTION AI (from context menu) =====
+async function quickActionAI(action,text,sender){
+const panel=document.getElementById('powerToolsPanel');
+panel.style.display='flex';
+document.getElementById('ptGrid').style.display='none';
+const view=document.getElementById('ptToolView');
+view.style.display='block';
+const header=document.getElementById('ptToolHeader');
+const inputs=document.getElementById('ptToolInputs');
+const genBtn=document.getElementById('ptGenBtn');
+const result=document.getElementById('ptToolResult');
+inputs.innerHTML='';
+genBtn.style.display='none';
+
+const labels={decode:'🧠 Decoding Message...',rate:'⭐ Rating Rizz...',flip:'🪞 Flipping Perspective...',debate:'⚖️ AI Debate...'};
+header.innerHTML=labels[action]||'Analyzing...';
+result.innerHTML='<div class="pt-result-card" style="text-align:center;color:var(--text3)">Analyzing with AI...</div>';
+
+const chatCtx=ptGetChatContext();
+try{
+let msgs=[];
+if(action==='decode'){
+msgs=[{role:'system',content:`You are a Message Decoder. Decode the hidden meaning behind this message in a dating/texting context. Provide:
+1. **Surface Meaning** — what it literally says
+2. **Hidden Meaning** — what they REALLY mean
+3. **Emotional State** — how they felt sending it
+4. **Interest Level** — 1-10
+5. **Best Reply Options** — 3 suggestions
+Be specific, not generic.${chatCtx?'\nConversation context:\n'+chatCtx:''}`},{role:'user',content:`Decode: "${text}"`}];
+}else if(action==='rate'){
+msgs=[{role:'system',content:`You are the Rizz Rater. Rate this message. Return ONLY valid JSON:
+{"rizzScore":85,"grade":"S","title":"Smooth Operator","breakdown":{"confidence":8,"creativity":9,"humor":7,"smoothness":9,"effectiveness":8},"reaction":"How receiver reacts","strengths":["str1"],"weaknesses":["weakness"],"improvedVersion":"Better version","funComment":"funny comment"}`},{role:'user',content:`Rate: "${text}"`}];
+}else if(action==='flip'){
+msgs=[{role:'system',content:`You simulate how the RECEIVER reacts to a message. Return ONLY valid JSON:
+{"firstImpression":"gut reaction","emotionalReaction":"how it makes them feel","whatTheyThink":"internal monologue in first person","interestLevel":7,"replyLikelihood":80,"likelyReplies":["reply1","reply2","reply3"],"verdict":"Overall","tip":"improvement tip"}${chatCtx?'\nConversation context:\n'+chatCtx:''}`},{role:'user',content:`How would they react to: "${text}"`}];
+}else if(action==='debate'){
+msgs=[{role:'system',content:`You are the AI Debate Coach. Analyze this message from BOTH sides. Format:
+
+**✅ WHY IT COULD WORK:**
+- [reason 1]
+- [reason 2]
+- [reason 3]
+
+**❌ WHY IT COULD BACKFIRE:**
+- [reason 1]
+- [reason 2]
+- [reason 3]
+
+**📊 Success Probability:** X%
+
+**🎯 Final Verdict:** [send / don't send / modify first]
+
+**✨ If you modify:** [improved version]
+
+Be honest and specific.${chatCtx?'\nConversation:\n'+chatCtx:''}`},{role:'user',content:`Debate this message: "${text}"`}];
+}
+const res=await callProviders(msgs);
+if(action==='rate'){
+try{
+const json=JSON.parse(res.match(/\{[\s\S]*\}/)?.[0]||'{}');
+const score=json.rizzScore||50;
+const gc={'S+':'#fbbf24','S':'#f59e0b','A':'#22c55e','B':'#3b82f6','C':'#f59e0b','D':'#f97316','F':'#ef4444'}[json.grade]||'#a855f7';
+let h=`<div class="pt-result-card"><div style="text-align:center;margin-bottom:12px"><div style="font-size:2.2rem;font-weight:900;color:${gc}">${json.grade||'B'}</div><div style="font-size:1.4rem;font-weight:800">${score}/100</div><div style="font-size:.82rem;color:var(--accent);font-weight:600">${json.title||''}</div></div>`;
+h+=`<p><strong>🎯 Reaction:</strong> ${json.reaction||''}</p>`;
+if(json.funComment)h+=`<p style="font-style:italic;color:var(--accent);margin-top:6px">"${json.funComment}"</p>`;
+if(json.improvedVersion)h+=`<h4 style="margin-top:10px">🚀 Upgraded</h4><div style="padding:8px;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.15);border-radius:10px;margin-top:4px;cursor:pointer" onclick="navigator.clipboard.writeText(this.innerText);showToast('Copied!')">${json.improvedVersion}</div>`;
+h+='</div>';
+result.innerHTML=h;
+}catch(e2){result.innerHTML=`<div class="pt-result-card">${ptFormatResult(res)}</div>`;}
+}else if(action==='flip'){
+try{
+const json=JSON.parse(res.match(/\{[\s\S]*\}/)?.[0]||'{}');
+const interest=json.interestLevel||5;
+const iColor=interest>=7?'#22c55e':interest>=5?'#f59e0b':'#ef4444';
+let h=`<div class="pt-result-card"><div style="text-align:center;margin-bottom:10px"><div style="font-size:1.8rem;font-weight:900;color:${iColor}">${interest}/10</div><div style="font-size:.8rem;color:var(--text2)">${json.replyLikelihood||50}% reply chance</div></div>`;
+h+=`<h4>💭 First Impression</h4><p>${json.firstImpression||''}</p>`;
+h+=`<h4>🧠 Their Thoughts</h4><div style="padding:8px;background:rgba(99,102,241,.06);border-radius:8px;font-style:italic;margin-bottom:6px">"${json.whatTheyThink||''}"</div>`;
+if(json.likelyReplies?.length){h+='<h4>💬 Likely Replies</h4>';json.likelyReplies.forEach((r,i)=>{h+=`<div style="padding:4px 8px;background:rgba(255,255,255,.03);border-radius:8px;margin-bottom:3px;font-size:.84rem">${i+1}. "${r}"</div>`;});}
+if(json.tip)h+=`<div style="margin-top:8px;padding:8px;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.15);border-radius:8px"><strong>💡</strong> ${json.tip}</div>`;
+h+='</div>';
+result.innerHTML=h;
+}catch(e2){result.innerHTML=`<div class="pt-result-card">${ptFormatResult(res)}</div>`;}
+}else{
+result.innerHTML=`<div class="pt-result-card">${ptFormatResult(res)}</div>`;
+}
+header.innerHTML=labels[action].replace('...','');
+}catch(e){result.innerHTML='<div class="pt-result-card">Failed. Try again!</div>';}
+}
+
+// ===== POWER TOOL: Double Text Strategy =====
+async function ptRunDoubleText(){
+const chatCtx=ptGetChatContext();
+const lastMsg=ptGetLastMyMsg();
+if(!lastMsg&&!document.getElementById('ptInput1').value.trim()){showToast('Need your last message!');return;}
+const text=document.getElementById('ptInput1').value.trim()||lastMsg;
+const waitTime=document.querySelector('#ptChips1 .pt-chip.active')?.dataset.val||'Few hours';
+const btn=document.getElementById('ptGenBtn');btn.disabled=true;btn.textContent='Strategizing...';
+try{
+const msgs=[{role:'system',content:`You are a Double Text Strategy expert. The user sent a message and hasn't gotten a reply for ${waitTime}. Analyze the situation.
+
+Format:
+**📊 Should You Double Text?** [YES / NO / WAIT]
+**🧠 Why They Haven't Replied:** [2-3 possible reasons]
+**⏰ Ideal Timing:** [when exactly to send the follow-up]
+**💬 Double Text Options (if yes):**
+1. 🎯 **Value Add** — [message that adds something new/interesting]
+2. 😂 **Humor Play** — [funny follow-up that doesn't seem desperate]
+3. 😎 **Unbothered** — [casual message like you don't care]
+4. ❓ **Question Hook** — [question that demands a reply]
+5. 🔥 **Bold Move** — [confident/direct message]
+**🚫 What NOT to Send:** [examples of desperate double texts to avoid]
+**📋 If They Still Don't Reply:** [next steps]
+
+Keep messages SHORT (1 sentence), natural, NOT needy.${chatCtx?'\nFull conversation:\n'+chatCtx:''}`},{role:'user',content:`I sent: "${text}" and haven't heard back for ${waitTime}. Should I double text?`}];
+const res=await callProviders(msgs);
+document.getElementById('ptToolResult').innerHTML=`<div class="pt-result-card">${ptFormatResult(res)}</div>`;
+}catch(e){document.getElementById('ptToolResult').innerHTML='<div class="pt-result-card">Strategy failed. Try again!</div>';}
+btn.disabled=false;btn.textContent='📱 Get Strategy';
+}
+
+// ===== POWER TOOL: Opener Generator by Profile =====
+async function ptRunOpenerGen(){
+const bio=document.getElementById('ptInput1').value.trim();
+if(!bio){showToast('Enter their bio/interests!');return;}
+const platform=document.querySelector('#ptChips1 .pt-chip.active')?.dataset.val||'Tinder';
+const btn=document.getElementById('ptGenBtn');btn.disabled=true;btn.textContent='Generating openers...';
+try{
+const msgs=[{role:'system',content:`You generate personalized conversation openers for dating apps. The opener MUST reference something specific from their profile — NOT generic. Platform: ${platform}.
+
+Generate 7 openers in different styles:
+1. 🎯 **Profile Reference** — directly mentions something from their bio
+2. 😂 **Funny** — humor based on their interests
+3. 🤔 **Thought-Provoking** — interesting question related to their bio
+4. 😏 **Smooth** — charming and confident
+5. 🔥 **Bold** — direct and attention-grabbing
+6. 🎮 **Creative** — unique/unexpected approach
+7. 💬 **Story Hook** — starts a mini story they'd want to continue
+
+Each opener should be 1-2 sentences MAX. Make them irresistible to reply to.`},{role:'user',content:`Generate openers for this profile:\n"${bio}"`}];
+const res=await callProviders(msgs);
+document.getElementById('ptToolResult').innerHTML=`<div class="pt-result-card">${ptFormatResult(res)}</div>`;
+}catch(e){document.getElementById('ptToolResult').innerHTML='<div class="pt-result-card">Generation failed. Try again!</div>';}
+btn.disabled=false;btn.textContent='🎯 Generate Openers';
+}
+
+// ===== POWER TOOL: Texting Style Mirror =====
+async function ptRunStyleMirror(){
+const chatCtx=ptGetChatContext();
+if(!chatCtx&&!document.getElementById('ptInput1').value.trim()){showToast('Need conversation to analyze!');return;}
+const text=document.getElementById('ptInput1').value.trim()||chatCtx;
+const btn=document.getElementById('ptGenBtn');btn.disabled=true;btn.textContent='Analyzing patterns...';
+try{
+const msgs=[{role:'system',content:`You are a Texting Style Analyzer. Analyze THEIR texting patterns from this conversation and generate replies that mirror their energy. Provide:
+
+**📊 Their Texting DNA:**
+- **Message Length:** [short/medium/long + average word count]
+- **Emoji Usage:** [none/minimal/moderate/heavy + their favorites]
+- **Tone:** [casual/formal/playful/dry/enthusiastic]
+- **Response Pattern:** [quick/slow/matched timing]
+- **Capitalization:** [none/some/proper]
+- **Punctuation Style:** [none/minimal/proper/excessive]
+- **Slang Level:** [none/some/heavy + examples they use]
+- **Energy Level:** [low/medium/high/chaotic]
+
+**🎭 Their Personality Read:**
+[2-3 sentences about what their texting style reveals about them]
+
+**🪞 Mirror Replies (matched to their energy):**
+Generate 5 reply suggestions that PERFECTLY match their texting style — same energy, same length, same vibe. If they text short, keep it short. If they use emojis, use similar ones.
+1. [reply]
+2. [reply]
+3. [reply]
+4. [reply]
+5. [reply]
+
+**⚡ Energy Match Tips:**
+- [specific tip on matching their vibe]
+- [what to avoid that would feel off]`},{role:'user',content:`Analyze their texting style:\n${text}`}];
+const res=await callProviders(msgs);
+document.getElementById('ptToolResult').innerHTML=`<div class="pt-result-card">${ptFormatResult(res)}</div>`;
+}catch(e){document.getElementById('ptToolResult').innerHTML='<div class="pt-result-card">Analysis failed. Try again!</div>';}
+btn.disabled=false;btn.textContent='🪞 Analyze Style';
+}
+
+// ===== POWER TOOL: Multi-Turn Strategy Planner =====
+async function ptRunStrategyPlanner(){
+const chatCtx=ptGetChatContext();
+const goal=document.querySelector('#ptChips1 .pt-chip.active')?.dataset.val||'Get a date';
+const turns=document.querySelector('#ptChips2 .pt-chip.active')?.dataset.val||'3';
+const btn=document.getElementById('ptGenBtn');btn.disabled=true;btn.textContent='Planning strategy...';
+try{
+const msgs=[{role:'system',content:`You are a Multi-Turn Conversation Strategist. Plan the next ${turns} messages as a complete strategy to achieve the goal: "${goal}".
+
+Format as a visual flow:
+**🎯 Goal:** ${goal}
+**📋 Strategy Overview:** [1-2 sentence summary of the approach]
+
+**Step 1 — YOUR MOVE:**
+💬 Send: "[exact message to send]"
+🧠 Why: [why this message works]
+⏰ When: [timing — immediately, wait X hours, etc.]
+
+**Step 1 — PREDICTED RESPONSE:**
+💭 They'll likely say: "[predicted reply]"
+📊 Confidence: [high/medium/low]
+
+**Step 2 — YOUR MOVE:**
+💬 Send: "[next message]"
+🧠 Why: [strategy behind it]
+
+**Step 2 — PREDICTED RESPONSE:**
+💭 They'll likely say: "[predicted reply]"
+
+[Continue for ${turns} steps...]
+
+**🏆 Expected Outcome:** [what this strategy achieves]
+**🔄 Plan B:** [if they don't respond as predicted]
+**🚫 Avoid:** [common mistakes that would derail the plan]
+
+Make messages short (1-2 sentences), natural, and realistic.${chatCtx?'\nCurrent conversation:\n'+chatCtx:''}`},{role:'user',content:`Plan ${turns} moves to: ${goal}`}];
+const res=await callProviders(msgs);
+document.getElementById('ptToolResult').innerHTML=`<div class="pt-result-card">${ptFormatResult(res)}</div>`;
+}catch(e){document.getElementById('ptToolResult').innerHTML='<div class="pt-result-card">Planning failed. Try again!</div>';}
+btn.disabled=false;btn.textContent='🗺️ Plan Strategy';
+}
+
+// ===== POWER TOOL: AI Debate Mode =====
+async function ptRunDebateMode(){
+const text=document.getElementById('ptInput1').value.trim();
+if(!text){showToast('Enter the message to debate!');return;}
+const chatCtx=ptGetChatContext();
+const btn=document.getElementById('ptGenBtn');btn.disabled=true;btn.textContent='Debating...';
+try{
+const msgs=[{role:'system',content:`You are the AI Debate Coach. Play devil's advocate and analyze this message from BOTH sides.
+
+**✅ PROSECUTION (Why to SEND):**
+1. [strong reason with explanation]
+2. [strong reason with explanation]
+3. [strong reason with explanation]
+
+**❌ DEFENSE (Why NOT to send):**
+1. [strong counter-argument]
+2. [strong counter-argument]
+3. [strong counter-argument]
+
+**📊 Risk Assessment:**
+- Success Probability: X%
+- Backfire Probability: X%
+- Neutral Probability: X%
+
+**👨‍⚖️ VERDICT:** [SEND / DON'T SEND / MODIFY]
+
+**✨ If modified:** [improved version that keeps the good parts and fixes the risks]
+
+**🎯 Closing Argument:** [final 2-sentence recommendation]
+
+Be brutally honest, specific, and constructive.${chatCtx?'\nConversation context:\n'+chatCtx:''}`},{role:'user',content:`Debate whether to send: "${text}"`}];
+const res=await callProviders(msgs);
+document.getElementById('ptToolResult').innerHTML=`<div class="pt-result-card">${ptFormatResult(res)}</div>`;
+}catch(e){document.getElementById('ptToolResult').innerHTML='<div class="pt-result-card">Debate failed. Try again!</div>';}
+btn.disabled=false;btn.textContent='⚖️ Debate It';
+}
+
+// ===== POWER TOOL: Attachment Style Detector =====
+async function ptRunAttachmentDetector(){
+const chatCtx=ptGetChatContext();
+const text=document.getElementById('ptInput1').value.trim()||chatCtx;
+if(!text){showToast('Need conversation to analyze!');return;}
+const btn=document.getElementById('ptGenBtn');btn.disabled=true;btn.textContent='Detecting...';
+try{
+const msgs=[{role:'system',content:`You are an Attachment Style Detector. Analyze the conversation to detect THEIR attachment style. Return ONLY valid JSON:
+{"style":"anxious","confidence":85,"traits":["trait 1","trait 2","trait 3","trait 4"],"evidence":["specific message/behavior that shows this","another example"],"theirNeeds":["what they need from you","another need"],"doThis":["effective strategy 1","strategy 2","strategy 3"],"avoidThis":["what would trigger them","another trigger"],"bestReplyStyle":"Description of how to text them for best results","sampleReplies":["example reply that works for this style","another example","third example"],"compatibilityTip":"Tip based on typical dynamics with this attachment style"}
+
+Styles: "secure", "anxious", "avoidant", "fearful-avoidant" (disorganized)
+Be specific with evidence from the actual conversation.`},{role:'user',content:`Detect their attachment style from this conversation:\n${text}`}];
+const res=await callProviders(msgs);
+const json=JSON.parse(res.match(/\{[\s\S]*\}/)?.[0]||'{}');
+const styleColors={secure:'#22c55e',anxious:'#f59e0b',avoidant:'#6366f1','fearful-avoidant':'#ef4444'};
+const styleEmojis={secure:'🟢',anxious:'🟡',avoidant:'🔵','fearful-avoidant':'🔴'};
+const sc=styleColors[json.style]||'#a855f7';
+const se=styleEmojis[json.style]||'🔮';
+let html='<div class="pt-result-card">';
+html+=`<div style="text-align:center;margin-bottom:14px"><div style="font-size:2rem;margin-bottom:4px">${se}</div><div style="font-size:1.4rem;font-weight:900;color:${sc};text-transform:capitalize">${json.style||'Unknown'}</div><div style="font-size:.8rem;color:var(--text2)">${json.confidence||50}% confidence</div></div>`;
+if(json.traits?.length){html+='<h4>🧬 Key Traits</h4>';json.traits.forEach(t=>{html+=`<p>• ${t}</p>`;});}
+if(json.evidence?.length){html+='<h4 style="margin-top:8px">🔍 Evidence</h4>';json.evidence.forEach(e=>{html+=`<div style="padding:6px 8px;background:rgba(255,255,255,.03);border-radius:8px;margin-bottom:3px;font-size:.84rem;font-style:italic">"${e}"</div>`;});}
+if(json.doThis?.length){html+='<h4 style="color:#22c55e;margin-top:8px">✅ Do This</h4>';json.doThis.forEach(d=>{html+=`<p>• ${d}</p>`;});}
+if(json.avoidThis?.length){html+='<h4 style="color:#ef4444;margin-top:8px">🚫 Avoid This</h4>';json.avoidThis.forEach(a=>{html+=`<p>• ${a}</p>`;});}
+if(json.bestReplyStyle){html+=`<h4 style="margin-top:8px">💬 How to Text Them</h4><p>${json.bestReplyStyle}</p>`;}
+if(json.sampleReplies?.length){html+='<h4 style="margin-top:8px">📝 Example Replies That Work</h4>';json.sampleReplies.forEach((r,i)=>{html+=`<div style="padding:6px 10px;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.12);border-radius:8px;margin-bottom:4px;cursor:pointer;font-size:.85rem" onclick="navigator.clipboard.writeText(this.innerText);showToast('Copied!')">${i+1}. ${r}</div>`;});}
+if(json.compatibilityTip){html+=`<div style="margin-top:10px;padding:10px;background:rgba(168,85,247,.06);border:1px solid rgba(168,85,247,.15);border-radius:10px"><strong>💕 Compatibility Tip:</strong> ${json.compatibilityTip}</div>`;}
+html+='</div>';
+document.getElementById('ptToolResult').innerHTML=html;
+}catch(e){document.getElementById('ptToolResult').innerHTML='<div class="pt-result-card">Detection failed. Try again!</div>';}
+btn.disabled=false;btn.textContent='🔮 Detect Style';
+}
+
+// ===== POWER TOOL: Flirt Progression Tracker =====
+async function ptRunFlirtTracker(){
+const chatCtx=ptGetChatContext();
+const text=document.getElementById('ptInput1').value.trim()||chatCtx;
+if(!text){showToast('Need conversation to analyze!');return;}
+const btn=document.getElementById('ptGenBtn');btn.disabled=true;btn.textContent='Tracking...';
+try{
+const msgs=[{role:'system',content:`You are a Flirt Progression Tracker. Analyze the conversation and map where it stands on the flirt progression scale. Return ONLY valid JSON:
+{"currentStage":3,"stageName":"Light Flirting","stages":[{"num":1,"name":"Small Talk","status":"completed","summary":"Brief description"},{"num":2,"name":"Getting Comfortable","status":"completed","summary":"Brief"},{"num":3,"name":"Light Flirting","status":"current","summary":"Where they are now"},{"num":4,"name":"Deep Connection","status":"upcoming","summary":"What this looks like"},{"num":5,"name":"Serious Flirting","status":"upcoming","summary":"description"},{"num":6,"name":"Making Plans","status":"locked","summary":"Getting to a date"},{"num":7,"name":"Relationship Talk","status":"locked","summary":"DTR territory"}],"progressPercent":42,"momentum":"rising","momentumReason":"Why the momentum is rising/falling/steady","nextMove":"Specific action to progress to next stage","escalationLines":["exact message to escalate 1","message 2","message 3"],"warnings":["things that could stall progress"],"timeline":"Estimated timeline to next stage"}`},{role:'user',content:`Track flirt progression:\n${text}`}];
+const res=await callProviders(msgs);
+const json=JSON.parse(res.match(/\{[\s\S]*\}/)?.[0]||'{}');
+const pct=json.progressPercent||0;
+const momColor=json.momentum==='rising'?'#22c55e':json.momentum==='falling'?'#ef4444':'#f59e0b';
+const momArrow=json.momentum==='rising'?'📈':json.momentum==='falling'?'📉':'➡️';
+let html='<div class="pt-result-card">';
+html+=`<div style="text-align:center;margin-bottom:14px"><div style="font-size:.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px">Flirt Progress</div><div style="font-size:2rem;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent">${pct}%</div><div style="font-size:.9rem;font-weight:700;color:var(--accent)">${json.stageName||'Unknown'}</div><div style="font-size:.8rem;color:${momColor};margin-top:4px">${momArrow} Momentum: ${json.momentum||'steady'}</div></div>`;
+html+=`<div style="width:100%;height:8px;background:rgba(255,255,255,.1);border-radius:99px;margin-bottom:14px;overflow:hidden"><div style="width:${pct}%;height:100%;background:var(--grad);border-radius:99px;transition:width .5s"></div></div>`;
+if(json.stages?.length){html+='<h4>📊 Stage Map</h4>';json.stages.forEach(s=>{const icon=s.status==='completed'?'✅':s.status==='current'?'🔵':s.status==='upcoming'?'⚪':'🔒';const opacity=s.status==='locked'?'0.5':'1';html+=`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;opacity:${opacity};font-size:.84rem"><span>${icon}</span><strong>${s.num}. ${s.name}</strong><span style="color:var(--text3);font-size:.76rem;margin-left:auto">${s.summary||''}</span></div>`;});}
+if(json.momentumReason){html+=`<p style="margin-top:8px;font-size:.84rem;color:var(--text2)"><strong>Why:</strong> ${json.momentumReason}</p>`;}
+if(json.nextMove){html+=`<h4 style="color:#22c55e;margin-top:10px">🎯 Next Move</h4><p>${json.nextMove}</p>`;}
+if(json.escalationLines?.length){html+='<h4 style="margin-top:8px">💬 Escalation Messages</h4>';json.escalationLines.forEach((l,i)=>{html+=`<div style="padding:6px 10px;background:rgba(168,85,247,.06);border:1px solid rgba(168,85,247,.12);border-radius:8px;margin-bottom:4px;cursor:pointer;font-size:.85rem" onclick="navigator.clipboard.writeText(this.innerText);showToast('Copied!')">${i+1}. ${l}</div>`;});}
+if(json.warnings?.length){html+='<h4 style="color:#f59e0b;margin-top:8px">⚠️ Watch Out</h4>';json.warnings.forEach(w=>{html+=`<p>• ${w}</p>`;});}
+if(json.timeline){html+=`<div style="margin-top:10px;padding:8px;background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.15);border-radius:8px;font-size:.84rem"><strong>⏰ Timeline:</strong> ${json.timeline}</div>`;}
+html+='</div>';
+document.getElementById('ptToolResult').innerHTML=html;
+}catch(e){document.getElementById('ptToolResult').innerHTML='<div class="pt-result-card">Tracking failed. Try again!</div>';}
+btn.disabled=false;btn.textContent='📈 Track Progress';
+}
+
+// ===== WINGMAN LIVE MODE =====
+let wingmanActive=false;
+let wingmanInterval=null;
+
+function initWingman(){
+const btn=document.getElementById('wingmanBtn');
+const panel=document.getElementById('wingmanPanel');
+const closeBtn=document.getElementById('closeWingman');
+if(!btn)return;
+btn.addEventListener('click',toggleWingman);
+if(closeBtn)closeBtn.addEventListener('click',()=>{if(wingmanActive)toggleWingman();});
+}
+
+function toggleWingman(){
+wingmanActive=!wingmanActive;
+const btn=document.getElementById('wingmanBtn');
+const panel=document.getElementById('wingmanPanel');
+if(wingmanActive){
+btn.classList.add('active');
+panel.style.display='block';
+document.getElementById('wingmanBody').innerHTML='<div style="text-align:center;color:var(--text3);padding:20px;font-size:.84rem">Wingman active! Add their messages and I\'ll suggest replies in real-time.</div>';
+runWingmanAnalysis();
+}else{
+btn.classList.remove('active');
+panel.style.display='none';
+if(wingmanInterval)clearInterval(wingmanInterval);
+}
+}
+
+async function runWingmanAnalysis(){
+if(!wingmanActive||messages.length<1)return;
+const body=document.getElementById('wingmanBody');
+body.innerHTML='<div style="text-align:center;color:var(--text3);padding:10px;font-size:.82rem">🔄 Analyzing...</div>';
+const chatCtx=ptGetChatContext();
+const lastTheir=ptGetLastTheirMsg();
+if(!lastTheir){body.innerHTML='<div style="text-align:center;color:var(--text3);padding:20px;font-size:.84rem">Waiting for their message...</div>';return;}
+try{
+const msgs=[{role:'system',content:`You are an AI Wingman providing REAL-TIME coaching during a live conversation. Be quick and actionable. Return ONLY valid JSON:
+{"mood":"Their current mood/vibe","interest":7,"quickReplies":["instant reply 1","reply 2","reply 3"],"doNot":"What NOT to say right now","strategy":"1-sentence tactical advice","emoji":"Single best emoji to react with"}`},{role:'user',content:`Live wingman analysis. Their last message: "${lastTheir}"\nFull conversation:\n${chatCtx}`}];
+const res=await callProviders(msgs);
+const json=JSON.parse(res.match(/\{[\s\S]*\}/)?.[0]||'{}');
+const interest=json.interest||5;
+const iColor=interest>=7?'#22c55e':interest>=5?'#f59e0b':'#ef4444';
+let html=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><span style="font-size:.75rem;color:var(--text3)">Their vibe: <strong style="color:var(--text)">${json.mood||'?'}</strong></span><span style="font-size:.85rem;font-weight:800;color:${iColor}">${interest}/10 ${json.emoji||''}</span></div>`;
+if(json.quickReplies?.length){html+='<div style="display:flex;flex-direction:column;gap:4px">';json.quickReplies.forEach(r=>{html+=`<div class="wingman-reply" onclick="useWingmanReply(this.dataset.text)" data-text="${escapeHtml(r)}" style="padding:8px 12px;background:rgba(168,85,247,.06);border:1px solid rgba(168,85,247,.15);border-radius:10px;font-size:.84rem;cursor:pointer;transition:all .1s">${r}</div>`;});html+='</div>';}
+if(json.strategy){html+=`<div style="margin-top:6px;font-size:.76rem;color:var(--accent)">💡 ${json.strategy}</div>`;}
+if(json.doNot){html+=`<div style="margin-top:4px;font-size:.72rem;color:#ef4444">🚫 ${json.doNot}</div>`;}
+body.innerHTML=html;
+}catch(e){body.innerHTML='<div style="text-align:center;color:var(--text3);padding:10px;font-size:.82rem">Analysis failed. Will retry...</div>';}
+}
+
+function useWingmanReply(text){
+const input=document.getElementById('msgInput');
+input.value=text;
+input.focus();
+input.dispatchEvent(new Event('input'));
+showToast('Reply loaded!');
+}
+
+// ===== CONVO TEMPLATES LIBRARY =====
+const convoTemplates=[
+{id:'getNumber',emoji:'📱',name:'Get Their Number',desc:'Smoothly transition to getting digits',messages:[
+{sender:'them',text:'haha yeah that was such a good movie'},
+{sender:'me',text:'fr we should watch something together sometime'},
+{sender:'them',text:'omg yes that would be fun'},
+{sender:'me',text:'bet, drop your number so we can plan it'}
+]},
+{id:'askOut',emoji:'☕',name:'Ask Them Out',desc:'From texting to first date',messages:[
+{sender:'them',text:'i love trying new coffee places'},
+{sender:'me',text:'no way same, have you tried that new spot downtown?'},
+{sender:'them',text:'not yet! i heard its so good'},
+{sender:'me',text:'lets go check it out this weekend, my treat'}
+]},
+{id:'recoverFZ',emoji:'💔',name:'Escape Friendzone',desc:'Shift from friend to more',messages:[
+{sender:'them',text:'youre such a good friend honestly'},
+{sender:'me',text:'friend? nah i charge too much for the boyfriend experience to be giving it away free'},
+{sender:'them',text:'lmaooo stoppp 😂'},
+{sender:'me',text:'im serious though, dinner friday? and not as friends'}
+]},
+{id:'rekindle',emoji:'🔥',name:'Rekindle Old Flame',desc:'Message someone from the past',messages:[
+{sender:'me',text:'so I was at that restaurant we used to go to and they still have that terrible pasta we loved'},
+{sender:'them',text:'omg no way 😂 that place is still open??'},
+{sender:'me',text:'barely surviving just like my cooking skills. could use a taste tester again'},
+{sender:'them',text:'haha smooth. i might be available'}
+]},
+{id:'deepTalk',emoji:'🌙',name:'Go Deeper',desc:'Transition from small talk to real talk',messages:[
+{sender:'them',text:'nothing much just chilling wbu'},
+{sender:'me',text:'honestly been thinking about something random'},
+{sender:'them',text:'ooh what'},
+{sender:'me',text:'like what made you smile today? genuinely curious'},
+{sender:'them',text:'aww thats actually a really sweet question'}
+]},
+{id:'flirtEscalate',emoji:'🌶️',name:'Escalate Flirting',desc:'Turn up the heat naturally',messages:[
+{sender:'them',text:'you always know what to say haha'},
+{sender:'me',text:'thats because you make it easy. plus i like seeing you type lol'},
+{sender:'them',text:'what do you mean by that 👀'},
+{sender:'me',text:'i mean your energy is different. in a dangerously good way'}
+]},
+{id:'appToText',emoji:'💬',name:'App → Texting',desc:'Move from dating app to personal chat',messages:[
+{sender:'them',text:'yeah this app is so glitchy honestly'},
+{sender:'me',text:'fr the notifications never work. should we just move to ig or whatsapp so i dont miss your messages?'},
+{sender:'them',text:'sure! whats your @'},
+{sender:'me',text:'ill dm you rn, dont leave me on seen tho 😤'}
+]},
+{id:'morningText',emoji:'☀️',name:'Perfect Morning Text',desc:'Start their day right',messages:[
+{sender:'me',text:'good morning, hope you slept better than i did'},
+{sender:'them',text:'why what happened?'},
+{sender:'me',text:'kept thinking about our conversation last night ngl'},
+{sender:'them',text:'omg stoppp thats so cute 🥺'}
+]}
+];
+
+function initTemplates(){
+const btn=document.getElementById('templatesBtn');
+const panel=document.getElementById('templatesPanel');
+if(!btn)return;
+btn.addEventListener('click',()=>{panel.style.display=panel.style.display==='flex'?'none':'flex';renderTemplates();});
+document.getElementById('closeTemplates')?.addEventListener('click',()=>{panel.style.display='none';});
+}
+
+function renderTemplates(){
+const grid=document.getElementById('templateGrid');
+if(!grid)return;
+grid.innerHTML=convoTemplates.map(t=>`<button class="tpl-card" data-id="${t.id}"><span class="tpl-emoji">${t.emoji}</span><span class="tpl-name">${t.name}</span><span class="tpl-desc">${t.desc}</span></button>`).join('');
+grid.querySelectorAll('.tpl-card').forEach(c=>{
+c.addEventListener('click',()=>loadTemplate(c.dataset.id));
+});
+}
+
+function loadTemplate(id){
+const t=convoTemplates.find(x=>x.id===id);
+if(!t)return;
+messages=[];
+t.messages.forEach(m=>{
+messages.push({id:Date.now()+Math.random()*1000,sender:m.sender,text:m.text,time:new Date()});
+});
+renderMessages();
+saveChat();
+scrollToBottom();
+hideHint();
+document.getElementById('templatesPanel').style.display='none';
+showToast(`Template loaded: ${t.name}`);
 }
