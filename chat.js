@@ -121,6 +121,9 @@ addMessageDirect(b.dataset.sender,b.dataset.text);
 }));
 
 loadChat();
+adjustChatPadding();
+window.addEventListener('resize',adjustChatPadding);
+setTimeout(adjustChatPadding,200);
 });
 
 function addMessage(){
@@ -138,6 +141,7 @@ const msg={id:Date.now(),sender,text,time:new Date()};
 messages.push(msg);
 renderMessages();
 saveChat();
+adjustChatPadding();
 scrollToBottom();
 hideHint();
 if(wingmanActive&&sender==='them')setTimeout(runWingmanAnalysis,300);
@@ -629,7 +633,16 @@ if(el) el.remove();
 
 function scrollToBottom(){
 const c=document.getElementById('chatMessages');
-requestAnimationFrame(()=>c.scrollTop=c.scrollHeight);
+adjustChatPadding();
+requestAnimationFrame(()=>{c.scrollTop=c.scrollHeight;});
+}
+
+function adjustChatPadding(){
+const inputArea=document.querySelector('.chat-input-area');
+const msgContainer=document.getElementById('chatMessages');
+if(!inputArea||!msgContainer)return;
+const h=inputArea.offsetHeight+12;
+msgContainer.style.paddingBottom=h+'px';
 }
 
 function clearChat(){
