@@ -124,6 +124,8 @@ loadChat();
 adjustChatPadding();
 window.addEventListener('resize',adjustChatPadding);
 setTimeout(adjustChatPadding,200);
+setTimeout(adjustChatPadding,500);
+setTimeout(()=>{adjustChatPadding();scrollToBottom();},800);
 });
 
 function addMessage(){
@@ -634,15 +636,24 @@ if(el) el.remove();
 function scrollToBottom(){
 const c=document.getElementById('chatMessages');
 adjustChatPadding();
-requestAnimationFrame(()=>{c.scrollTop=c.scrollHeight;});
+requestAnimationFrame(()=>{requestAnimationFrame(()=>{c.scrollTop=c.scrollHeight;});});
 }
 
 function adjustChatPadding(){
 const inputArea=document.querySelector('.chat-input-area');
 const msgContainer=document.getElementById('chatMessages');
 if(!inputArea||!msgContainer)return;
-const h=inputArea.offsetHeight+12;
+const rect=inputArea.getBoundingClientRect();
+const h=rect.height+20;
 msgContainer.style.paddingBottom=h+'px';
+}
+
+if(typeof ResizeObserver!=='undefined'){
+const _ro=new ResizeObserver(()=>{adjustChatPadding();});
+document.addEventListener('DOMContentLoaded',()=>{
+const ia=document.querySelector('.chat-input-area');
+if(ia)_ro.observe(ia);
+});
 }
 
 function clearChat(){
