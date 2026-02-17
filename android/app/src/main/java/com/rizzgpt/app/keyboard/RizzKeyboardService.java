@@ -80,6 +80,8 @@ public class RizzKeyboardService extends InputMethodService {
 
     private static final String[][] TOOLS = {
         {"⚡", "Reply", "reply"},
+        {"🧠", "Chat Brain", "chatBrain"},
+        {"📸", "SS Reply", "screenshotReply"},
         {"🎯", "Coach", "coach"},
         {"🤖", "Wingman", "wingman"},
         {"🎭", "Mind Game", "mindgame"},
@@ -774,29 +776,50 @@ public class RizzKeyboardService extends InputMethodService {
     private HorizontalScrollView createTouchScrollView() {
         HorizontalScrollView sv = new HorizontalScrollView(this) {
             private float startX, startY;
+            private boolean isDragging = false;
             @Override
             public boolean onInterceptTouchEvent(MotionEvent ev) {
                 switch (ev.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         startX = ev.getX();
                         startY = ev.getY();
+                        isDragging = false;
                         getParent().requestDisallowInterceptTouchEvent(true);
                         break;
                     case MotionEvent.ACTION_MOVE:
                         float dx = Math.abs(ev.getX() - startX);
                         float dy = Math.abs(ev.getY() - startY);
-                        if (dx > dy) {
+                        if (dx > dp(8) && dx > dy) {
+                            isDragging = true;
                             getParent().requestDisallowInterceptTouchEvent(true);
                             return true;
                         }
+                        if (dy > dp(8) && dy > dx) {
+                            getParent().requestDisallowInterceptTouchEvent(false);
+                            isDragging = false;
+                        }
+                        break;
+                    case MotionEvent.ACTION_UP:
+                    case MotionEvent.ACTION_CANCEL:
+                        isDragging = false;
+                        getParent().requestDisallowInterceptTouchEvent(false);
                         break;
                 }
                 return super.onInterceptTouchEvent(ev);
             }
             @Override
             public boolean onTouchEvent(MotionEvent ev) {
-                if (ev.getAction() == MotionEvent.ACTION_DOWN || ev.getAction() == MotionEvent.ACTION_MOVE) {
-                    getParent().requestDisallowInterceptTouchEvent(true);
+                switch (ev.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        getParent().requestDisallowInterceptTouchEvent(true);
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        getParent().requestDisallowInterceptTouchEvent(true);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                    case MotionEvent.ACTION_CANCEL:
+                        getParent().requestDisallowInterceptTouchEvent(false);
+                        break;
                 }
                 return super.onTouchEvent(ev);
             }
@@ -805,6 +828,11 @@ public class RizzKeyboardService extends InputMethodService {
         sv.setPadding(0, 0, 0, dp(2));
         sv.setFillViewport(false);
         sv.setOverScrollMode(View.OVER_SCROLL_ALWAYS);
+        sv.setClipToPadding(false);
+        sv.setClipChildren(false);
+        LinearLayout.LayoutParams svParams = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        sv.setLayoutParams(svParams);
         return sv;
     }
 
@@ -812,13 +840,26 @@ public class RizzKeyboardService extends InputMethodService {
         rizzPanel = new LinearLayout(this);
         rizzPanel.setOrientation(LinearLayout.VERTICAL);
         rizzPanel.setPadding(dp(4), dp(2), dp(4), dp(2));
+        rizzPanel.setClipChildren(false);
+        rizzPanel.setClipToPadding(false);
 
         HorizontalScrollView toolScroll = createTouchScrollView();
         toolsContainer = new LinearLayout(this);
         toolsContainer.setOrientation(LinearLayout.HORIZONTAL);
+        toolsContainer.setPadding(dp(2), dp(2), dp(2), dp(2));
+        toolsContainer.setClipChildren(false);
+        toolsContainer.setClipToPadding(false);
         for (String[] tool : TOOLS) {
-            Button chip = makeChip(tool[0] + " " + tool[1], tool[2], tool[2].equals("reply"));
-            chip.setOnClickListener(v -> selectTool(chip));
+            boolean isDefault = tool[2].equals("reply");
+            Button chip = makeChip(tool[0] + " " + tool[1], tool[2], isDefault);
+            final String toolId = tool[2];
+            chip.setOnClickListener(v -> {
+                if (toolId.equals("chatBrain")) {
+                    toggleChatPicker();
+                    return;
+                }
+                selectTool(chip);
+            });
             toolsContainer.addView(chip);
         }
         toolScroll.addView(toolsContainer);
@@ -827,6 +868,9 @@ public class RizzKeyboardService extends InputMethodService {
         HorizontalScrollView modeScroll = createTouchScrollView();
         modesContainer = new LinearLayout(this);
         modesContainer.setOrientation(LinearLayout.HORIZONTAL);
+        modesContainer.setPadding(dp(2), dp(2), dp(2), dp(2));
+        modesContainer.setClipChildren(false);
+        modesContainer.setClipToPadding(false);
         String[][] modes = {
             {"😏 Smooth", "smooth"}, {"😂 Funny", "funny"}, {"🔥 Bold", "bold"},
             {"💜 Flirty", "flirty"}, {"💀 Savage", "savage"}, {"🍯 Sweet", "sweet"},
@@ -884,8 +928,10 @@ public class RizzKeyboardService extends InputMethodService {
         rizzPanel.addView(statusLabel);
 
         ScrollView sugScroll = new ScrollView(this);
-        sugScroll.setLayoutParams(new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, dp(100)));
+        LinearLayout.LayoutParams sugParams = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, 0);
+        sugParams.weight = 1f;
+        sugScroll.setLayoutParams(sugParams);
         suggestionsContainer = new LinearLayout(this);
         suggestionsContainer.setOrientation(LinearLayout.VERTICAL);
         suggestionsContainer.setPadding(0, dp(2), 0, dp(2));
@@ -948,6 +994,8 @@ public class RizzKeyboardService extends InputMethodService {
         String prefix = activeChat != null ? "🧠 " + activeChat + ": " : "";
         switch (selectedTool) {
             case "reply": rizzInput.setHint(prefix + "Their message to reply to..."); break;
+            case "chatBrain": rizzInput.setHint(prefix + "Paste chat or use 📖 Read..."); break;
+            case "screenshotReply": rizzInput.setHint(prefix + "Paste chat text from screenshot..."); break;
             case "coach": rizzInput.setHint(prefix + "Paste conversation..."); break;
             case "wingman": rizzInput.setHint(prefix + "Their last message..."); break;
             case "mindgame": rizzInput.setHint(prefix + "Paste chat for mind games..."); break;
@@ -1168,6 +1216,12 @@ public class RizzKeyboardService extends InputMethodService {
                 return "You generate date ideas." + lang + "\n5 date ideas numbered 1-5 with details.";
             case "complimentSched":
                 return "You generate compliments. Style: " + style + "." + lang + "\n5 compliments numbered 1-5.";
+            case "screenshotReply":
+                return "You analyze pasted chat text from a screenshot and generate the perfect reply. Style: " + style + ". Intensity: " + intNote + "." + lang + chatNote +
+                    "\nRules: 1. Read the pasted conversation carefully 2. Understand dynamics and context 3. Give exactly 5 reply options numbered 1-5 4. Sound human, not AI";
+            case "chatBrain":
+                return "You are a chat analysis mastermind." + lang + chatNote +
+                    "\nAnalyze the full conversation. Give: POWER DYNAMIC, THEIR INTEREST /10, PSYCHOLOGICAL PROFILE, 5 STRATEGIC REPLIES numbered 1-5 with mind game tactics.";
             case "redFlag":
                 return "You detect red/green flags." + lang + chatNote + "\nRED FLAGS, GREEN FLAGS, RATING /10, 5 RESPONSES numbered 1-5.";
             case "saveConvo":
@@ -1211,6 +1265,8 @@ public class RizzKeyboardService extends InputMethodService {
             case "manipulate": return "Manipulation playbook:\n" + context;
             case "powermove": return "Power move:\n" + context;
             case "profileRoast": return "Roast bio:\n\"" + context + "\"";
+            case "screenshotReply": return "Analyze this pasted chat and suggest 5 perfect replies:\n" + context;
+            case "chatBrain": return "Full chat brain analysis:\n" + context;
             case "responsePred": return "Predict response to: \"" + context + "\"";
             case "remixer": return "Remix: \"" + context + "\"";
             case "situational": return "Openers for: " + context;
@@ -1244,7 +1300,8 @@ public class RizzKeyboardService extends InputMethodService {
             tool.equals("responsePred") || tool.equals("compatibility") || tool.equals("emojiDecoder") ||
             tool.equals("redFlag") || tool.equals("antiCringe") || tool.equals("perspectiveFlip") ||
             tool.equals("rizzRater") || tool.equals("bioBeforeAfter") || tool.equals("dateScript") ||
-            tool.equals("msgDecoder") || tool.equals("dateIdea");
+            tool.equals("msgDecoder") || tool.equals("dateIdea") || tool.equals("chatBrain") ||
+            tool.equals("screenshotReply");
 
         if (isAnalysis) {
             String[] sections = content.split("\n\n");
