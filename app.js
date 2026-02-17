@@ -601,6 +601,10 @@ body.innerHTML=`<label class="tool-label">Paste their confusing message</label><
 document.querySelectorAll('#decoderChips .tool-chip').forEach(c=>c.onclick=()=>{document.querySelectorAll('#decoderChips .tool-chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');});
 document.getElementById('toolGenBtn').onclick=runMsgDecoder;
 break;
+case 'chatBrain':
+title.textContent='🧠 Chat Brain — AI Mind Games';
+renderChatBrainUI(body);
+break;
 }
 overlay.style.display='flex';
 }
@@ -1242,6 +1246,480 @@ return`<p style="margin-bottom:4px">${l}</p>`;
 
 function copyText(t){navigator.clipboard.writeText(t).then(()=>{showToast('Copied!');playSound('copy');});}
 
+// ===== CHAT BRAIN SYSTEM =====
+let chatBrainChats=JSON.parse(localStorage.getItem('chatBrainChats')||'{}');
+let chatBrainActive=null;
+let chatBrainUploading=false;
+let chatBrainImages=[];
+
+function saveChatBrainData(){localStorage.setItem('chatBrainChats',JSON.stringify(chatBrainChats));}
+
+function renderChatBrainUI(body){
+const chatNames=Object.keys(chatBrainChats);
+let savedHtml='';
+if(chatNames.length){
+savedHtml=`<div class="cb-saved-section"><h4 class="cb-section-title">💾 Saved Chats</h4><div class="cb-chat-list">`;
+chatNames.forEach(name=>{
+const c=chatBrainChats[name];
+const msgCount=c.messages?.length||0;
+const lastMsg=c.messages?.length?c.messages[c.messages.length-1]:'';
+const preview=lastMsg.length>50?lastMsg.substring(0,50)+'...':lastMsg;
+savedHtml+=`<div class="cb-chat-item" onclick="openSavedChat('${escAttr(name)}')">
+<div class="cb-chat-left"><div class="cb-chat-name">${escHtml(name)}</div><div class="cb-chat-preview">${msgCount} messages${preview?' • '+escHtml(preview):''}</div></div>
+<div class="cb-chat-actions"><button class="cb-action-btn cb-open" onclick="event.stopPropagation();openSavedChat('${escAttr(name)}')">🧠 Open</button><button class="cb-action-btn cb-del" onclick="event.stopPropagation();deleteSavedChat('${escAttr(name)}')">🗑️</button></div>
+</div>`;
+});
+savedHtml+=`</div></div>`;
+}
+
+body.innerHTML=`
+<div class="cb-container">
+<div class="cb-hero">
+<div class="cb-hero-icon">🧠</div>
+<p class="cb-hero-desc">Upload chat screenshots → AI reads everything → Get mind game strategies, manipulation tactics & perfect replies</p>
+</div>
+
+<div class="cb-upload-section">
+<h4 class="cb-section-title">📸 Upload Chat Screenshots</h4>
+<p class="cb-hint">Upload up to 30 screenshots in order (oldest → newest). AI will read & extract all messages.</p>
+<div class="cb-upload-area" id="cbUploadArea">
+<div class="cb-upload-icon">📸</div>
+<p>Tap to select screenshots</p>
+<p class="cb-upload-sub">Select multiple images at once • Max 30</p>
+</div>
+<div class="cb-preview-grid" id="cbPreviewGrid"></div>
+<div class="cb-upload-status" id="cbUploadStatus"></div>
+<div class="cb-upload-actions" id="cbUploadActions" style="display:none">
+<button class="tool-gen-btn cb-read-btn" id="cbReadBtn" onclick="readAllScreenshots()">🧠 Read All Screenshots with AI</button>
+</div>
+</div>
+
+<div class="cb-extract-result" id="cbExtractResult" style="display:none">
+<h4 class="cb-section-title">💬 Extracted Chat</h4>
+<div class="cb-extracted-text" id="cbExtractedText"></div>
+<div class="cb-save-section">
+<input class="tool-input cb-name-input" id="cbChatName" placeholder="Name this chat (e.g. Sarah, Crush, Ex...)">
+<button class="tool-gen-btn" onclick="saveChatBrain()">💾 Save Chat</button>
+</div>
+</div>
+
+${savedHtml}
+
+<div class="cb-active-chat" id="cbActiveChat" style="display:none">
+<div class="cb-active-header" id="cbActiveHeader"></div>
+<div class="cb-messages-box" id="cbMessagesBox"></div>
+<div class="cb-ai-panel" id="cbAiPanel"></div>
+<div class="cb-input-bar">
+<button class="cb-input-action" onclick="cbReadLastScreen()">📖 Read Screen</button>
+<input class="cb-chat-input" id="cbNewMsg" placeholder="Add new message...">
+<button class="cb-input-action cb-send" onclick="cbAddMessage()">➕ Add</button>
+</div>
+<div class="cb-strategy-bar">
+<button class="cb-strat-btn" onclick="cbRunStrategy('reply')">⚡ Smart Reply</button>
+<button class="cb-strat-btn" onclick="cbRunStrategy('mindgame')">🎭 Mind Games</button>
+<button class="cb-strat-btn" onclick="cbRunStrategy('manipulate')">🧠 Manipulation</button>
+<button class="cb-strat-btn" onclick="cbRunStrategy('analyze')">📊 Full Analysis</button>
+<button class="cb-strat-btn" onclick="cbRunStrategy('predict')">🔮 Predict Next</button>
+<button class="cb-strat-btn" onclick="cbRunStrategy('power')">👑 Power Move</button>
+</div>
+</div>
+</div>`;
+
+document.getElementById('cbUploadArea').onclick=()=>document.getElementById('chatBrainUpload').click();
+document.getElementById('chatBrainUpload').onchange=handleChatBrainUpload;
+}
+
+function handleChatBrainUpload(e){
+const files=Array.from(e.target.files||[]);
+if(!files.length)return;
+if(chatBrainImages.length+files.length>30){showToast('Max 30 screenshots!');return;}
+
+const grid=document.getElementById('cbPreviewGrid');
+const status=document.getElementById('cbUploadStatus');
+const actions=document.getElementById('cbUploadActions');
+
+files.forEach((file,idx)=>{
+if(!file.type.startsWith('image/'))return;
+const reader=new FileReader();
+reader.onload=function(ev){
+chatBrainImages.push({name:file.name,data:ev.target.result,index:chatBrainImages.length});
+const div=document.createElement('div');
+div.className='cb-img-preview';
+div.innerHTML=`<img src="${ev.target.result}"><div class="cb-img-num">${chatBrainImages.length}</div><button class="cb-img-remove" onclick="removeCbImage(${chatBrainImages.length-1},this.parentElement)">✕</button>`;
+grid.appendChild(div);
+status.textContent=`${chatBrainImages.length} screenshot${chatBrainImages.length>1?'s':''} ready`;
+actions.style.display='flex';
+};
+reader.readAsDataURL(file);
+});
+e.target.value='';
+}
+
+function removeCbImage(idx,el){
+chatBrainImages.splice(idx,1);
+el.remove();
+const grid=document.getElementById('cbPreviewGrid');
+grid.querySelectorAll('.cb-img-num').forEach((n,i)=>n.textContent=i+1);
+document.getElementById('cbUploadStatus').textContent=chatBrainImages.length?`${chatBrainImages.length} screenshots ready`:'';
+if(!chatBrainImages.length)document.getElementById('cbUploadActions').style.display='none';
+}
+
+async function readAllScreenshots(){
+if(chatBrainUploading||!chatBrainImages.length)return;
+chatBrainUploading=true;
+const btn=document.getElementById('cbReadBtn');
+const resultDiv=document.getElementById('cbExtractResult');
+const textDiv=document.getElementById('cbExtractedText');
+btn.disabled=true;btn.textContent='🧠 Reading screenshots... (0/'+chatBrainImages.length+')';
+
+let allMessages=[];
+for(let i=0;i<chatBrainImages.length;i++){
+btn.textContent=`🧠 Reading screenshot ${i+1}/${chatBrainImages.length}...`;
+try{
+const msgs=await extractChatFromImage(chatBrainImages[i].data,i+1,chatBrainImages.length);
+allMessages=allMessages.concat(msgs);
+}catch(e){
+allMessages.push(`[Screenshot ${i+1}: Could not read - ${e.message}]`);
+}
+}
+
+resultDiv.style.display='block';
+let html='<div class="cb-msg-list">';
+allMessages.forEach((msg,i)=>{
+const isMe=msg.toLowerCase().startsWith('me:')||msg.toLowerCase().startsWith('you:')||msg.toLowerCase().startsWith('sent:');
+html+=`<div class="cb-msg ${isMe?'cb-msg-me':'cb-msg-them'}">${escHtml(msg)}</div>`;
+});
+html+='</div>';
+html+=`<div class="cb-msg-count">${allMessages.length} messages extracted</div>`;
+textDiv.innerHTML=html;
+
+window._cbExtractedMessages=allMessages;
+chatBrainUploading=false;
+btn.disabled=false;btn.textContent='🧠 Read All Screenshots with AI';
+resultDiv.scrollIntoView({behavior:'smooth'});
+}
+
+async function extractChatFromImage(base64Data,num,total){
+const msgs=[{role:'system',content:`You are a chat screenshot OCR expert. Extract ALL text messages from this chat screenshot image. 
+Rules:
+- Extract EVERY message visible in the screenshot
+- Format each message on a new line
+- For sent messages (right side/blue/green bubbles): prefix with "Me: "
+- For received messages (left side/white/gray bubbles): prefix with "Them: "
+- Include timestamps if visible, in brackets like [2:30 PM]
+- Extract EXACTLY what's written, don't paraphrase
+- If you see emojis, include them
+- Order: top to bottom (oldest to newest)
+- If you can't read something, write [unclear]
+- Don't add any commentary, just the messages`},
+{role:'user',content:[
+{type:'text',text:`Extract all chat messages from screenshot ${num}/${total}. Return ONLY the messages, one per line, with "Me: " or "Them: " prefix.`},
+{type:'image_url',image_url:{url:base64Data}}
+]}];
+
+const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
+body:JSON.stringify({model:'llama-3.2-90b-vision-preview',messages:msgs,max_tokens:2000,temperature:0.1})
+});
+if(!res.ok){
+const fallbackMsgs=[{role:'system',content:'You extract chat messages from screenshot descriptions. The user will describe what they see. Format each message with "Me: " or "Them: " prefix.'},{role:'user',content:`I have a chat screenshot (image ${num}/${total}). Please help me extract messages. Since you may not be able to see the image directly, just output a placeholder like: [Screenshot ${num} - paste the messages you see here]`}];
+const text=await callAIRaw(fallbackMsgs);
+return text.split('\n').filter(l=>l.trim().length>0);
+}
+const data=await res.json();
+const content=data?.choices?.[0]?.message?.content||'';
+return content.split('\n').map(l=>l.trim()).filter(l=>l.length>1);
+}
+
+function saveChatBrain(){
+const name=document.getElementById('cbChatName').value.trim();
+if(!name){showToast('Enter a name for this chat!');return;}
+const messages=window._cbExtractedMessages||[];
+if(!messages.length){showToast('No messages to save!');return;}
+
+chatBrainChats[name]={
+messages:messages,
+created:Date.now(),
+updated:Date.now(),
+autoSave:true
+};
+saveChatBrainData();
+showToast(`💾 "${name}" saved with ${messages.length} messages!`);
+playSound('generate');
+openSavedChat(name);
+}
+
+function deleteSavedChat(name){
+if(!confirm(`Delete "${name}"?`))return;
+delete chatBrainChats[name];
+saveChatBrainData();
+showToast('Deleted!');
+openTool('chatBrain');
+}
+
+function openSavedChat(name){
+chatBrainActive=name;
+const chat=chatBrainChats[name];
+if(!chat)return;
+
+document.getElementById('cbActiveChat').style.display='block';
+try{document.querySelector('.cb-upload-section').style.display='none';}catch(e){}
+try{document.getElementById('cbExtractResult').style.display='none';}catch(e){}
+try{document.querySelector('.cb-saved-section').style.display='none';}catch(e){}
+
+const header=document.getElementById('cbActiveHeader');
+header.innerHTML=`<div class="cb-active-title"><span class="cb-active-icon">🧠</span><span>${escHtml(name)}</span><span class="cb-msg-badge">${chat.messages.length} msgs</span></div>
+<div class="cb-active-actions"><button class="cb-action-sm" onclick="cbAddScreenshots()">📸 Add Screenshots</button><button class="cb-action-sm" onclick="openTool('chatBrain')">← Back</button></div>`;
+
+renderChatMessages(chat.messages);
+cbAutoAnalyze(chat.messages);
+}
+
+function renderChatMessages(messages){
+const box=document.getElementById('cbMessagesBox');
+let html='';
+const start=Math.max(0,messages.length-30);
+if(start>0)html+=`<div class="cb-msg-more">... ${start} earlier messages</div>`;
+for(let i=start;i<messages.length;i++){
+const msg=messages[i];
+const isMe=msg.toLowerCase().startsWith('me:')||msg.toLowerCase().startsWith('sent:');
+html+=`<div class="cb-msg ${isMe?'cb-msg-me':'cb-msg-them'}">${escHtml(msg)}</div>`;
+}
+box.innerHTML=html;
+box.scrollTop=box.scrollHeight;
+}
+
+function cbAddMessage(){
+const input=document.getElementById('cbNewMsg');
+const msg=input.value.trim();
+if(!msg||!chatBrainActive)return;
+
+const isMe=!msg.toLowerCase().startsWith('them:');
+const formatted=isMe?(msg.toLowerCase().startsWith('me:')?msg:'Me: '+msg):msg;
+
+chatBrainChats[chatBrainActive].messages.push(formatted);
+chatBrainChats[chatBrainActive].updated=Date.now();
+saveChatBrainData();
+input.value='';
+
+renderChatMessages(chatBrainChats[chatBrainActive].messages);
+cbAutoAnalyze(chatBrainChats[chatBrainActive].messages);
+}
+
+function cbReadLastScreen(){
+try{
+const clipboard=navigator.clipboard;
+clipboard.readText().then(text=>{
+if(text&&text.trim()){
+document.getElementById('cbNewMsg').value='Them: '+text.trim();
+showToast('📖 Clipboard text loaded — tap ➕ to add');
+}else{
+showToast('📋 Copy their last message first, then tap Read Screen');
+}
+}).catch(()=>{
+showToast('📋 Copy their last message, then tap Read Screen');
+});
+}catch(e){
+showToast('📋 Copy their last message, then tap Read Screen');
+}
+}
+
+function cbAddScreenshots(){
+chatBrainImages=[];
+document.getElementById('chatBrainUpload').onchange=async function(e){
+const files=Array.from(e.target.files||[]);
+if(!files.length)return;
+showToast(`Reading ${files.length} new screenshots...`);
+
+for(let i=0;i<Math.min(files.length,30);i++){
+const reader=new FileReader();
+const data=await new Promise(resolve=>{
+reader.onload=ev=>resolve(ev.target.result);
+reader.readAsDataURL(files[i]);
+});
+try{
+const msgs=await extractChatFromImage(data,i+1,files.length);
+chatBrainChats[chatBrainActive].messages=chatBrainChats[chatBrainActive].messages.concat(msgs);
+}catch(ex){}
+}
+
+chatBrainChats[chatBrainActive].updated=Date.now();
+saveChatBrainData();
+showToast(`✅ Added new messages!`);
+renderChatMessages(chatBrainChats[chatBrainActive].messages);
+cbAutoAnalyze(chatBrainChats[chatBrainActive].messages);
+e.target.value='';
+};
+document.getElementById('chatBrainUpload').click();
+}
+
+async function cbAutoAnalyze(messages){
+const panel=document.getElementById('cbAiPanel');
+const last5=messages.slice(-5);
+const lastThem=messages.filter(m=>m.toLowerCase().startsWith('them:')).slice(-1)[0]||'';
+
+panel.innerHTML=`<div class="cb-auto-suggest"><div class="cb-suggest-header">🧠 AI Auto-Suggestions</div><div class="cb-suggest-loading">Analyzing conversation...</div></div>`;
+
+try{
+const chatCtx=messages.slice(-20).join('\n');
+const msgs=[{role:'system',content:`You're an advanced dating AI strategist. Analyze this chat conversation and provide INSTANT tactical suggestions. Be manipulative, strategic, and smart. Return ONLY valid JSON:
+{"mood":"their current mood/vibe in 2-3 words","interest":7,"power":"who has more power (me/them/equal)","suggestion":"1 sentence - what to do RIGHT NOW","quickReplies":["reply option 1","reply 2","reply 3"],"mindGame":"1 specific mind game to play right now","warning":"1 thing to NOT do"}`},
+{role:'user',content:`Analyze and give instant suggestions:\n${chatCtx}\n\nTheir last message: "${lastThem}"`}];
+const text=await callAIRaw(msgs);
+const json=JSON.parse(text.match(/\{[\s\S]*\}/)?.[0]||'{}');
+
+let html=`<div class="cb-auto-suggest">`;
+html+=`<div class="cb-suggest-header">🧠 AI Auto-Suggestions</div>`;
+html+=`<div class="cb-suggest-row"><span class="cb-tag">Mood: ${json.mood||'?'}</span><span class="cb-tag">Interest: ${json.interest||'?'}/10</span><span class="cb-tag">Power: ${json.power||'?'}</span></div>`;
+if(json.suggestion)html+=`<div class="cb-suggest-tip">💡 ${json.suggestion}</div>`;
+if(json.mindGame)html+=`<div class="cb-suggest-tip cb-mind">🎭 ${json.mindGame}</div>`;
+if(json.warning)html+=`<div class="cb-suggest-tip cb-warn">⚠️ ${json.warning}</div>`;
+if(json.quickReplies?.length){
+html+=`<div class="cb-quick-replies">`;
+json.quickReplies.forEach(r=>{
+html+=`<button class="cb-quick-reply" onclick="cbUseReply(this)" data-reply="${escAttr(r)}">${escHtml(r)}</button>`;
+});
+html+=`</div>`;
+}
+html+=`</div>`;
+panel.innerHTML=html;
+}catch(e){
+panel.innerHTML=`<div class="cb-auto-suggest"><div class="cb-suggest-header">🧠 AI Auto-Suggestions</div><p style="color:var(--text3);font-size:.8rem">Use the strategy buttons below ↓</p></div>`;
+}
+}
+
+function cbUseReply(el){
+const reply=el.dataset.reply;
+const input=document.getElementById('cbNewMsg');
+input.value='Me: '+reply;
+showToast('Reply loaded — tap ➕ to add to chat');
+}
+
+async function cbRunStrategy(type){
+if(!chatBrainActive)return;
+const chat=chatBrainChats[chatBrainActive];
+const panel=document.getElementById('cbAiPanel');
+panel.innerHTML=`<div class="cb-strategy-result"><div class="cb-suggest-loading">${type==='mindgame'?'🎭 Crafting mind games...':type==='manipulate'?'🧠 Building manipulation strategy...':type==='analyze'?'📊 Deep analyzing...':type==='predict'?'🔮 Predicting their next move...':type==='power'?'👑 Planning power move...':'⚡ Generating replies...'}</div></div>`;
+
+const chatCtx=chat.messages.slice(-30).join('\n');
+const fullCtx=chat.messages.join('\n');
+let sysPrompt='',userPrompt='';
+
+switch(type){
+case 'reply':
+sysPrompt=`You're an expert texter. Analyze the FULL conversation history and generate 7 perfect replies. Consider: conversation flow, their personality, power dynamics, timing. Each reply should have a different strategy. Format: number each 1-7, include a brief [strategy tag] before each.`;
+userPrompt=`Full chat:\n${fullCtx}\n\nGenerate 7 strategic replies for the next message. Each with a different approach.`;
+break;
+
+case 'mindgame':
+sysPrompt=`You're a master psychological strategist in dating. Analyze this conversation and create a DETAILED mind game playbook. Be specific and tactical. Include:
+1. CURRENT DYNAMIC: Who's chasing who, power balance
+2. THEIR PSYCHOLOGY: What drives them, insecurities, what they want
+3. 5 MIND GAMES TO PLAY NOW: Each with exact message templates, timing, and expected reaction
+4. PUSH-PULL STRATEGY: Specific messages that push away then pull back
+5. SCARCITY PLAY: How to make yourself seem more valuable
+6. JEALOUSY TRIGGERS: Subtle ways to trigger jealousy without being obvious
+7. THE LONG GAME: 1-week strategy timeline with daily actions
+Be specific with EXACT messages to send.`;
+userPrompt=`Full conversation history:\n${fullCtx}\n\nCreate a complete mind game strategy playbook.`;
+break;
+
+case 'manipulate':
+sysPrompt=`You're an advanced conversation manipulation expert. Analyze ALL messages and create a manipulation strategy. Include:
+1. VULNERABILITY MAP: Their emotional triggers, insecurities, desires
+2. ATTACHMENT STYLE: Their attachment style and how to exploit it
+3. EMOTIONAL HOOKS: 5 specific messages designed to create emotional dependency
+4. INTERMITTENT REINFORCEMENT: Schedule of hot/cold behavior with exact messages
+5. FRAME CONTROL: How to control the conversation frame, with examples
+6. INVESTMENT LADDER: Steps to make them invest more emotionally
+7. FUTURE FAKING: Subtle hints at a future together that create urgency
+8. BREADCRUMBING STRATEGY: Keep them interested with minimal effort
+9. POWER REVERSAL: If they have power, exact steps to flip the dynamic
+10. NUCLEAR OPTIONS: 3 messages that will make them obsess over you
+Each point must have EXACT MESSAGE TEMPLATES to send.`;
+userPrompt=`Full conversation:\n${fullCtx}\n\nCreate a complete manipulation playbook with exact messages.`;
+break;
+
+case 'analyze':
+sysPrompt=`You're a world-class dating conversation analyst. Do a DEEP analysis of this entire conversation. Include:
+1. CONVERSATION SCORE: Rate the overall conversation /100
+2. WHO'S MORE INTERESTED: With evidence from messages
+3. POWER DYNAMICS: Who controls the conversation, shifts in power
+4. THEIR PERSONALITY PROFILE: Based on texting patterns
+5. RED FLAGS: Any concerning patterns
+6. GREEN FLAGS: Positive signs
+7. CHEMISTRY ANALYSIS: How well you two click
+8. MESSAGE PATTERNS: Response times, message length, emoji usage patterns
+9. TURNING POINTS: Key moments that shifted the dynamic
+10. PREDICTION: Where this is heading
+11. MASTERPLAN: Complete strategy to get them more interested
+12. TOP 5 NEXT MESSAGES: Ranked by effectiveness`;
+userPrompt=`Analyze this FULL conversation:\n${fullCtx}`;
+break;
+
+case 'predict':
+sysPrompt=`You're an AI that predicts human texting behavior. Based on conversation patterns, predict:
+1. THEIR NEXT MESSAGE: Most likely response (3 versions)
+2. IF I GHOST: What they'll do if I stop texting
+3. IF I DOUBLE TEXT: How they'll react
+4. IF I SEND A RISKY TEXT: Reaction probability
+5. THEIR INTEREST TRAJECTORY: Going up or down
+6. WILL THEY GHOST: Probability and signs
+7. NEXT 24 HOURS: What will happen
+8. BEST TIME TO TEXT: When to send next message
+9. OPTIMAL STRATEGY: Based on predictions, what's the winning move
+For each prediction, include probability % and confidence level.`;
+userPrompt=`Based on full conversation:\n${fullCtx}\n\nPredict their behavior.`;
+break;
+
+case 'power':
+sysPrompt=`You're a power dynamics expert. Create THE ULTIMATE POWER MOVE based on this conversation. Include:
+1. CURRENT POWER SCORE: You vs Them (who has more)
+2. THE POWER MOVE: One single devastating message that will flip all dynamics in your favor
+3. WHY IT WORKS: Psychology behind it
+4. TIMING: Exactly when to send it
+5. THEIR EXPECTED REACTION: What they'll do
+6. FOLLOW-UP PLAN: What to do after the power move
+7. ALTERNATIVE POWER MOVES: 5 more options ranked by impact
+8. DANGER LEVEL: What could go wrong
+Each must include EXACT messages to send.`;
+userPrompt=`Conversation:\n${fullCtx}\n\nCreate power move strategy.`;
+break;
+}
+
+try{
+const msgs=[{role:'system',content:sysPrompt},{role:'user',content:userPrompt}];
+const text=await callAIRaw(msgs);
+
+let html=`<div class="cb-strategy-result">`;
+html+=`<div class="cb-strat-title">${type==='mindgame'?'🎭 Mind Game Playbook':type==='manipulate'?'🧠 Manipulation Strategy':type==='analyze'?'📊 Deep Analysis':type==='predict'?'🔮 Predictions':type==='power'?'👑 Power Move Strategy':'⚡ Smart Replies'}</div>`;
+
+if(type==='reply'){
+const replies=text.split('\n').map(l=>l.trim().replace(/^\d+[.):\-\s]+/,'').trim()).filter(l=>l.length>5);
+html+=`<div class="cb-reply-list">`;
+replies.forEach(r=>{
+const tag=r.match(/\[([^\]]+)\]/)?.[1]||'';
+const cleanReply=r.replace(/\[[^\]]+\]/,'').trim();
+if(cleanReply.length>3){
+html+=`<button class="cb-strat-reply" onclick="cbUseReply(this)" data-reply="${escAttr(cleanReply)}">
+${tag?`<span class="cb-reply-tag">${tag}</span>`:''}
+<span class="cb-reply-text">${escHtml(cleanReply)}</span>
+</button>`;
+}
+});
+html+=`</div>`;
+}else{
+html+=`<div class="cb-strat-content">${formatToolResult(text)}</div>`;
+}
+html+=`</div>`;
+panel.innerHTML=html;
+panel.scrollIntoView({behavior:'smooth',block:'start'});
+playSound('generate');
+}catch(e){
+panel.innerHTML=`<div class="cb-strategy-result"><p style="color:var(--red)">Strategy generation failed. Try again!</p></div>`;
+}
+}
+
 // ===== KEYBOARD EXTENSION DRAWER =====
 function openKeyboardDrawer(){
 document.getElementById('kbDrawer').classList.add('open');
@@ -1282,5 +1760,16 @@ return;
 }
 }catch(e){}
 showToast('Go to Settings → Accessibility → RizzGPT Screen Reader → Enable');
+}
+
+function openAppInfoSettings(){
+try{
+const cap=window.Capacitor;
+if(cap&&cap.Plugins&&cap.Plugins.KeyboardSetup){
+cap.Plugins.KeyboardSetup.openAppSettings();
+return;
+}
+}catch(e){}
+showToast('Go to Settings → Apps → RizzGPT → ⋮ menu → Allow restricted settings');
 }
 
