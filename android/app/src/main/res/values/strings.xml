@@ -4,4 +4,5 @@
     <string name="title_activity_main">RizzGPT</string>
     <string name="package_name">com.rizzgpt.app</string>
     <string name="custom_url_scheme">com.rizzgpt.app</string>
+    <string name="accessibility_service_description">RizzGPT Screen Reader reads chat messages from Instagram, Snapchat, WhatsApp and other apps so the keyboard can generate smart replies. Enable this to let RizzGPT auto-read conversations on your screen.</string>
 </resources>

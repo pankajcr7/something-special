@@ -444,19 +444,47 @@ public class RizzKeyboardService extends InputMethodService {
 
     private void autoReadMessages() {
         String readText = "";
+        String source = "";
 
         try {
-            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-            if (clipboard != null && clipboard.hasPrimaryClip()) {
-                ClipData clip = clipboard.getPrimaryClip();
-                if (clip != null && clip.getItemCount() > 0) {
-                    CharSequence clipText = clip.getItemAt(0).getText();
-                    if (clipText != null && clipText.length() > 0) {
-                        readText = clipText.toString().trim();
+            String screenMsgs = RizzAccessibilityService.readScreenMessages(this);
+            String appName = RizzAccessibilityService.readLastApp(this);
+            long ts = RizzAccessibilityService.readTimestamp(this);
+            long age = System.currentTimeMillis() - ts;
+
+            if (screenMsgs != null && screenMsgs.length() > 3 && age < 60000) {
+                String[] parts = screenMsgs.split("\\n---MSG---\\n");
+                StringBuilder recent = new StringBuilder();
+                int start = Math.max(0, parts.length - 8);
+                for (int i = start; i < parts.length; i++) {
+                    String msg = parts[i].trim();
+                    if (msg.length() > 2) {
+                        if (recent.length() > 0) recent.append("\n");
+                        recent.append(msg);
                     }
+                }
+                if (recent.length() > 3) {
+                    readText = recent.toString();
+                    source = appName != null && !appName.isEmpty() ? appName : "Screen";
                 }
             }
         } catch (Exception e) {}
+
+        if (readText.isEmpty()) {
+            try {
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                if (clipboard != null && clipboard.hasPrimaryClip()) {
+                    ClipData clip = clipboard.getPrimaryClip();
+                    if (clip != null && clip.getItemCount() > 0) {
+                        CharSequence clipText = clip.getItemAt(0).getText();
+                        if (clipText != null && clipText.length() > 0) {
+                            readText = clipText.toString().trim();
+                            source = "Clipboard";
+                        }
+                    }
+                }
+            } catch (Exception e) {}
+        }
 
         if (readText.isEmpty()) {
             InputConnection ic = getCurrentInputConnection();
@@ -464,6 +492,7 @@ public class RizzKeyboardService extends InputMethodService {
                 ExtractedText et = ic.getExtractedText(new ExtractedTextRequest(), 0);
                 if (et != null && et.text != null && et.text.length() > 0) {
                     readText = et.text.toString().trim();
+                    source = "Input";
                 }
                 if (readText.isEmpty()) {
                     CharSequence before = ic.getTextBeforeCursor(500, 0);
@@ -472,16 +501,22 @@ public class RizzKeyboardService extends InputMethodService {
                     if (before != null) sb.append(before);
                     if (after != null) sb.append(after);
                     readText = sb.toString().trim();
+                    if (!readText.isEmpty()) source = "Input";
                 }
             }
         }
 
         if (readText.isEmpty()) {
-            statusLabel.setText("📋 Copy their message first, then tap Read");
+            boolean accessibilityOn = RizzAccessibilityService.isRunning();
+            if (!accessibilityOn) {
+                statusLabel.setText("⚠️ Enable Screen Reader in Settings → Accessibility → RizzGPT");
+            } else {
+                statusLabel.setText("📋 No messages found — open a chat first or copy text");
+            }
         } else {
             rizzInput.setText(readText);
-            String preview = readText.length() > 50 ? readText.substring(0, 50) + "..." : readText;
-            statusLabel.setText("📋 Read: \"" + preview + "\"");
+            String preview = readText.length() > 45 ? readText.substring(0, 45) + "..." : readText;
+            statusLabel.setText("📖 " + source + ": \"" + preview + "\"");
         }
     }
 
