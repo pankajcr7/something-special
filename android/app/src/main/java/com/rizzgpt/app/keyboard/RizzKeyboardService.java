@@ -99,6 +99,9 @@ public class RizzKeyboardService extends InputMethodService {
         {"💬", "Pickup", "pickup"},
         {"💘", "Flirty", "flirty"},
         {"💀", "Savage", "savage"},
+        {"🧠", "Mind Game", "mindgame"},
+        {"🎭", "Manipulate", "manipulate"},
+        {"👑", "Power Move", "powermove"},
     };
 
     @Override
@@ -735,6 +738,9 @@ public class RizzKeyboardService extends InputMethodService {
             case "pickup": rizzInput.setHint("Topic or their name (optional)..."); break;
             case "flirty": rizzInput.setHint("Context for flirty texts..."); break;
             case "savage": rizzInput.setHint("Context for savage reply..."); break;
+            case "mindgame": rizzInput.setHint("Paste their messages for mind games..."); break;
+            case "manipulate": rizzInput.setHint("Paste conversation for manipulation..."); break;
+            case "powermove": rizzInput.setHint("Paste chat for power move..."); break;
         }
         statusLabel.setText("🔧 " + getToolName(selectedTool) + " selected — type context → ⚡");
     }
@@ -1015,6 +1021,18 @@ public class RizzKeyboardService extends InputMethodService {
                 return "You generate savage, witty comebacks and replies. Intensity: " + intNote + "." + langNote + "\n" +
                     "Give 5 savage replies numbered 1-5. Be witty, sharp, and confident. Not mean - just alpha energy.";
 
+            case "mindgame":
+                return "You're a master psychological strategist in dating. Analyze this conversation and suggest mind games." + langNote + "\n" +
+                    "Give: CURRENT DYNAMIC, THEIR PSYCHOLOGY, then 5 MIND GAME STRATEGIES numbered 1-5 with exact messages to send. Include push-pull, scarcity, jealousy triggers.";
+
+            case "manipulate":
+                return "You're an advanced conversation manipulation expert." + langNote + "\n" +
+                    "Analyze and give: VULNERABILITY MAP, EMOTIONAL HOOKS, INTERMITTENT REINFORCEMENT schedule, then 5 MANIPULATION MESSAGES numbered 1-5 designed to create emotional dependency.";
+
+            case "powermove":
+                return "You're a power dynamics expert in dating." + langNote + "\n" +
+                    "Give: POWER SCORE (you vs them), THE POWER MOVE (1 devastating message), then 5 ALTERNATIVE POWER MOVES numbered 1-5. Each with exact message and timing.";
+
             default:
                 return "You generate text message replies. Style: " + style + "." + langNote + "\nGive 5 replies numbered 1-5.";
         }
@@ -1050,6 +1068,9 @@ public class RizzKeyboardService extends InputMethodService {
             case "pickup": return "Generate 5 " + style + " pickup lines" + (context.isEmpty() ? "" : " about: " + context);
             case "flirty": return "Generate 5 flirty texts for: " + context;
             case "savage": return "Generate 5 savage replies to: \"" + context + "\"";
+            case "mindgame": return "Create mind game strategies for this conversation:\n" + context;
+            case "manipulate": return "Create manipulation playbook for:\n" + context;
+            case "powermove": return "Create power move strategy for:\n" + context;
             default: return "Generate 5 " + style + " replies to: \"" + context + "\"";
         }
     }
@@ -1063,7 +1084,8 @@ public class RizzKeyboardService extends InputMethodService {
             tool.equals("redFlag") || tool.equals("antiCringe") ||
             tool.equals("perspectiveFlip") || tool.equals("rizzRater") ||
             tool.equals("bioBeforeAfter") || tool.equals("dateScript") ||
-            tool.equals("msgDecoder") || tool.equals("dateIdea");
+            tool.equals("msgDecoder") || tool.equals("dateIdea") ||
+            tool.equals("mindgame") || tool.equals("manipulate") || tool.equals("powermove");
 
         if (isAnalysisTool) {
             String[] sections = content.split("\n\n");
