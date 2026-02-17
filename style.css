@@ -65,6 +65,11 @@ body.light .nav-links{background:rgba(255,255,255,.98)}
 .cta-btn.primary:hover{transform:translateY(-2px);box-shadow:0 6px 30px rgba(168,85,247,.4)}
 .cta-btn.secondary{background:var(--card);color:var(--text);border:1px solid var(--border2)}
 .cta-btn.secondary:hover{border-color:var(--accent);color:var(--accent)}
+.cta-btn.apk-btn{background:linear-gradient(135deg,#10b981,#059669);color:#fff;box-shadow:0 4px 20px rgba(16,185,129,.3);position:relative;overflow:hidden}
+.cta-btn.apk-btn:hover{transform:translateY(-2px);box-shadow:0 6px 30px rgba(16,185,129,.4)}
+.cta-btn.apk-btn::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:linear-gradient(45deg,transparent,rgba(255,255,255,.1),transparent);animation:apkShine 3s infinite}
+@keyframes apkShine{0%{transform:translateX(-100%) rotate(45deg)}100%{transform:translateX(100%) rotate(45deg)}}
+.apk-nav-link{color:var(--accent)!important;font-weight:600!important;background:rgba(16,185,129,.1);border-radius:8px;padding:4px 10px!important}
 .hero-stats{display:flex;gap:32px;justify-content:center}
 .stat{display:flex;flex-direction:column;align-items:center;gap:2px}
 .stat-num{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.3rem}
