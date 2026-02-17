@@ -18,6 +18,7 @@ import android.content.ClipboardManager;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.view.MotionEvent;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -770,14 +771,49 @@ public class RizzKeyboardService extends InputMethodService {
     }
 
     // ===== RIZZ PANEL =====
+    private HorizontalScrollView createTouchScrollView() {
+        HorizontalScrollView sv = new HorizontalScrollView(this) {
+            private float startX, startY;
+            @Override
+            public boolean onInterceptTouchEvent(MotionEvent ev) {
+                switch (ev.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        startX = ev.getX();
+                        startY = ev.getY();
+                        getParent().requestDisallowInterceptTouchEvent(true);
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        float dx = Math.abs(ev.getX() - startX);
+                        float dy = Math.abs(ev.getY() - startY);
+                        if (dx > dy) {
+                            getParent().requestDisallowInterceptTouchEvent(true);
+                            return true;
+                        }
+                        break;
+                }
+                return super.onInterceptTouchEvent(ev);
+            }
+            @Override
+            public boolean onTouchEvent(MotionEvent ev) {
+                if (ev.getAction() == MotionEvent.ACTION_DOWN || ev.getAction() == MotionEvent.ACTION_MOVE) {
+                    getParent().requestDisallowInterceptTouchEvent(true);
+                }
+                return super.onTouchEvent(ev);
+            }
+        };
+        sv.setHorizontalScrollBarEnabled(false);
+        sv.setPadding(0, 0, 0, dp(2));
+        sv.setFillViewport(false);
+        sv.setOverScrollMode(View.OVER_SCROLL_ALWAYS);
+        return sv;
+    }
+
     private void buildRizzPanel() {
         rizzPanel = new LinearLayout(this);
         rizzPanel.setOrientation(LinearLayout.VERTICAL);
         rizzPanel.setPadding(dp(4), dp(2), dp(4), dp(2));
 
-        HorizontalScrollView toolScroll = new HorizontalScrollView(this);
-        toolScroll.setHorizontalScrollBarEnabled(false);
-        toolScroll.setPadding(0, 0, 0, dp(2));
+        HorizontalScrollView toolScroll = createTouchScrollView();
         toolsContainer = new LinearLayout(this);
         toolsContainer.setOrientation(LinearLayout.HORIZONTAL);
         for (String[] tool : TOOLS) {
@@ -788,9 +824,7 @@ public class RizzKeyboardService extends InputMethodService {
         toolScroll.addView(toolsContainer);
         rizzPanel.addView(toolScroll);
 
-        HorizontalScrollView modeScroll = new HorizontalScrollView(this);
-        modeScroll.setHorizontalScrollBarEnabled(false);
-        modeScroll.setPadding(0, 0, 0, dp(2));
+        HorizontalScrollView modeScroll = createTouchScrollView();
         modesContainer = new LinearLayout(this);
         modesContainer.setOrientation(LinearLayout.HORIZONTAL);
         String[][] modes = {
