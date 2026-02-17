@@ -2,11 +2,11 @@ package com.rizzgpt.app;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.provider.Settings;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.text.TextUtils;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.view.accessibility.AccessibilityManager;
 
@@ -16,13 +16,18 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 @CapacitorPlugin(name = "KeyboardSetup")
 public class KeyboardSetupPlugin extends Plugin {
 
     private static final String KEYBOARD_ID = "com.rizzgpt.app/.keyboard.RizzKeyboardService";
-    private static final String ACCESSIBILITY_ID = "com.rizzgpt.app/.keyboard.RizzAccessibilityService";
+    private static final String CHAT_PREFS = "rizzgpt_chatbrain";
 
     @PluginMethod
     public void getKeyboardStatus(PluginCall call) {
@@ -94,6 +99,97 @@ public class KeyboardSetupPlugin extends Plugin {
         intent.setData(Uri.parse("package:" + getContext().getPackageName()));
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         getContext().startActivity(intent);
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void saveChatBrain(PluginCall call) {
+        String name = call.getString("name", "");
+        String messagesJson = call.getString("messages", "[]");
+        if (name.isEmpty()) { call.reject("Name required"); return; }
+
+        SharedPreferences prefs = getContext().getSharedPreferences(CHAT_PREFS, Context.MODE_PRIVATE);
+        String existing = prefs.getString("chats_index", "[]");
+        try {
+            JSONArray index = new JSONArray(existing);
+            boolean found = false;
+            for (int i = 0; i < index.length(); i++) {
+                if (index.getString(i).equals(name)) { found = true; break; }
+            }
+            if (!found) index.put(name);
+            prefs.edit()
+                .putString("chats_index", index.toString())
+                .putString("chat_" + name, messagesJson)
+                .putLong("chat_updated_" + name, System.currentTimeMillis())
+                .apply();
+        } catch (Exception e) {
+            call.reject("Save failed: " + e.getMessage());
+            return;
+        }
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void getChatBrainList(PluginCall call) {
+        SharedPreferences prefs = getContext().getSharedPreferences(CHAT_PREFS, Context.MODE_PRIVATE);
+        String indexStr = prefs.getString("chats_index", "[]");
+        try {
+            JSONArray index = new JSONArray(indexStr);
+            JSONArray result = new JSONArray();
+            for (int i = 0; i < index.length(); i++) {
+                String name = index.getString(i);
+                String msgs = prefs.getString("chat_" + name, "[]");
+                long updated = prefs.getLong("chat_updated_" + name, 0);
+                JSONArray msgArr = new JSONArray(msgs);
+                JSONObject item = new JSONObject();
+                item.put("name", name);
+                item.put("messageCount", msgArr.length());
+                item.put("updated", updated);
+                if (msgArr.length() > 0) {
+                    item.put("lastMessage", msgArr.getString(msgArr.length() - 1));
+                }
+                result.put(item);
+            }
+            JSObject res = new JSObject();
+            res.put("chats", result.toString());
+            call.resolve(res);
+        } catch (Exception e) {
+            JSObject res = new JSObject();
+            res.put("chats", "[]");
+            call.resolve(res);
+        }
+    }
+
+    @PluginMethod
+    public void getChatBrainMessages(PluginCall call) {
+        String name = call.getString("name", "");
+        if (name.isEmpty()) { call.reject("Name required"); return; }
+        SharedPreferences prefs = getContext().getSharedPreferences(CHAT_PREFS, Context.MODE_PRIVATE);
+        String msgs = prefs.getString("chat_" + name, "[]");
+        JSObject res = new JSObject();
+        res.put("messages", msgs);
+        res.put("updated", prefs.getLong("chat_updated_" + name, 0));
+        call.resolve(res);
+    }
+
+    @PluginMethod
+    public void deleteChatBrain(PluginCall call) {
+        String name = call.getString("name", "");
+        if (name.isEmpty()) { call.reject("Name required"); return; }
+        SharedPreferences prefs = getContext().getSharedPreferences(CHAT_PREFS, Context.MODE_PRIVATE);
+        String indexStr = prefs.getString("chats_index", "[]");
+        try {
+            JSONArray index = new JSONArray(indexStr);
+            JSONArray newIndex = new JSONArray();
+            for (int i = 0; i < index.length(); i++) {
+                if (!index.getString(i).equals(name)) newIndex.put(index.getString(i));
+            }
+            prefs.edit()
+                .putString("chats_index", newIndex.toString())
+                .remove("chat_" + name)
+                .remove("chat_updated_" + name)
+                .apply();
+        } catch (Exception e) {}
         call.resolve();
     }
 }

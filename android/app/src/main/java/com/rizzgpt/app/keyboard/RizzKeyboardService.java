@@ -13,12 +13,11 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.InputType;
-import android.text.TextUtils;
 import android.view.Gravity;
-import android.view.KeyEvent;
 import android.content.ClipboardManager;
 import android.content.ClipData;
 import android.content.Context;
+import android.content.SharedPreferences;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -36,6 +35,7 @@ public class RizzKeyboardService extends InputMethodService {
     private LinearLayout rootLayout;
     private LinearLayout qwertyContainer;
     private LinearLayout rizzPanel;
+    private LinearLayout chatPickerPanel;
     private EditText rizzInput;
     private TextView statusLabel;
     private LinearLayout suggestionsContainer;
@@ -43,19 +43,24 @@ public class RizzKeyboardService extends InputMethodService {
     private LinearLayout toolsContainer;
     private Button generateBtn;
     private Button rizzToggleBtn;
-    private HorizontalScrollView toolScroll;
+    private Button chatBtn;
     private boolean isShift = false;
     private boolean isCaps = false;
     private boolean isNumbers = false;
     private boolean showingRizz = false;
+    private boolean showingChatPicker = false;
     private String selectedMode = "smooth";
     private String selectedTool = "reply";
     private String selectedLang = "english";
     private String selectedIntensity = "bold";
+    private String activeChat = null;
+    private List<String> activeChatMessages = new ArrayList<>();
     private boolean isLoading = false;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private List<Button> letterKeys = new ArrayList<>();
+
+    private static final String CHAT_PREFS = "rizzgpt_chatbrain";
 
     private static final String GROQ_KEY;
     static {
@@ -76,6 +81,9 @@ public class RizzKeyboardService extends InputMethodService {
         {"⚡", "Reply", "reply"},
         {"🎯", "Coach", "coach"},
         {"🤖", "Wingman", "wingman"},
+        {"🎭", "Mind Game", "mindgame"},
+        {"🧠", "Manipulate", "manipulate"},
+        {"👑", "Power Move", "powermove"},
         {"🔥", "Roast Bio", "profileRoast"},
         {"🔮", "Predict", "responsePred"},
         {"🎵", "Remixer", "remixer"},
@@ -99,9 +107,6 @@ public class RizzKeyboardService extends InputMethodService {
         {"💬", "Pickup", "pickup"},
         {"💘", "Flirty", "flirty"},
         {"💀", "Savage", "savage"},
-        {"🧠", "Mind Game", "mindgame"},
-        {"🎭", "Manipulate", "manipulate"},
-        {"👑", "Power Move", "powermove"},
     };
 
     @Override
@@ -114,89 +119,111 @@ public class RizzKeyboardService extends InputMethodService {
         buildTopBar();
         buildQwertyKeyboard();
         buildRizzPanel();
+        buildChatPickerPanel();
 
         rizzPanel.setVisibility(View.GONE);
+        chatPickerPanel.setVisibility(View.GONE);
         qwertyContainer.setVisibility(View.VISIBLE);
 
         return rootLayout;
     }
 
+    // ===== TOP BAR =====
     private void buildTopBar() {
         LinearLayout topBar = new LinearLayout(this);
         topBar.setOrientation(LinearLayout.HORIZONTAL);
         topBar.setGravity(Gravity.CENTER_VERTICAL);
-        topBar.setPadding(dp(6), dp(2), dp(6), dp(2));
-        LinearLayout.LayoutParams topParams = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, dp(36));
-        topBar.setLayoutParams(topParams);
+        topBar.setPadding(dp(4), dp(2), dp(4), dp(2));
+        topBar.setLayoutParams(new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, dp(34)));
 
         TextView logo = new TextView(this);
-        logo.setText("⚡ RizzGPT");
+        logo.setText("⚡RizzGPT");
         logo.setTextColor(Color.parseColor("#a855f7"));
-        logo.setTextSize(13);
+        logo.setTextSize(12);
         logo.setTypeface(null, Typeface.BOLD);
 
         View spacer = new View(this);
         spacer.setLayoutParams(new LinearLayout.LayoutParams(0, 1, 1f));
 
-        Button autoReadBtn = makeSmallBtn("📋 Read", Color.parseColor("#10b981"));
+        chatBtn = makeTopBtn("🧠", Color.parseColor("#ec4899"));
+        chatBtn.setOnClickListener(v -> toggleChatPicker());
+        updateChatBtnLabel();
+
+        Button autoReadBtn = makeTopBtn("📖", Color.parseColor("#10b981"));
         autoReadBtn.setOnClickListener(v -> autoReadMessages());
 
-        rizzToggleBtn = makeSmallBtn("⚡ Rizz", Color.parseColor("#a855f7"));
+        rizzToggleBtn = makeTopBtn("⚡ Rizz", Color.parseColor("#a855f7"));
         rizzToggleBtn.setOnClickListener(v -> toggleRizzPanel());
 
-        Button switchBtn = makeSmallBtn("🌐", Color.parseColor("#6366f1"));
+        Button switchBtn = makeTopBtn("🌐", Color.parseColor("#6366f1"));
         switchBtn.setOnClickListener(v -> {
             try { switchToNextInputMethod(false); } catch (Exception e) {}
         });
 
         topBar.addView(logo);
         topBar.addView(spacer);
+        topBar.addView(chatBtn);
         topBar.addView(autoReadBtn);
         topBar.addView(rizzToggleBtn);
         topBar.addView(switchBtn);
         rootLayout.addView(topBar);
     }
 
-    private Button makeSmallBtn(String text, int color) {
+    private Button makeTopBtn(String text, int color) {
         Button btn = new Button(this);
         btn.setText(text);
-        btn.setTextSize(10);
+        btn.setTextSize(9);
         btn.setAllCaps(false);
         btn.setTextColor(Color.WHITE);
-        btn.setPadding(dp(8), dp(2), dp(8), dp(2));
+        btn.setPadding(dp(7), dp(1), dp(7), dp(1));
         GradientDrawable bg = new GradientDrawable();
-        bg.setCornerRadius(dp(12));
+        bg.setCornerRadius(dp(10));
         bg.setColor(color);
         btn.setBackground(bg);
         LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT, dp(28));
-        p.setMargins(dp(3), 0, dp(3), 0);
+            LinearLayout.LayoutParams.WRAP_CONTENT, dp(26));
+        p.setMargins(dp(2), 0, dp(2), 0);
         btn.setLayoutParams(p);
         return btn;
     }
 
+    private void updateChatBtnLabel() {
+        if (activeChat != null) {
+            String short_name = activeChat.length() > 6 ? activeChat.substring(0, 6) + ".." : activeChat;
+            chatBtn.setText("🧠" + short_name);
+            GradientDrawable bg = new GradientDrawable();
+            bg.setCornerRadius(dp(10));
+            bg.setColor(Color.parseColor("#22c55e"));
+            chatBtn.setBackground(bg);
+        } else {
+            chatBtn.setText("🧠 Chats");
+            GradientDrawable bg = new GradientDrawable();
+            bg.setCornerRadius(dp(10));
+            bg.setColor(Color.parseColor("#ec4899"));
+            chatBtn.setBackground(bg);
+        }
+    }
+
+    // ===== QWERTY KEYBOARD =====
     private void buildQwertyKeyboard() {
         qwertyContainer = new LinearLayout(this);
         qwertyContainer.setOrientation(LinearLayout.VERTICAL);
         qwertyContainer.setPadding(dp(2), dp(2), dp(2), dp(2));
-
-        addKeyRow(qwertyContainer, ROW1, false, false);
-        addKeyRow(qwertyContainer, ROW2, false, false);
+        addKeyRow(qwertyContainer, ROW1);
+        addKeyRow(qwertyContainer, ROW2);
         addShiftRow(qwertyContainer, ROW3);
         addBottomRow(qwertyContainer);
-
         rootLayout.addView(qwertyContainer);
     }
 
-    private void addKeyRow(LinearLayout parent, String[] keys, boolean offsetStart, boolean offsetEnd) {
+    private void addKeyRow(LinearLayout parent, String[] keys) {
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER);
-        LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, dp(42));
-        rowParams.setMargins(0, dp(2), 0, dp(2));
-        row.setLayoutParams(rowParams);
+        row.setLayoutParams(new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, dp(42)));
+        ((LinearLayout.LayoutParams) row.getLayoutParams()).setMargins(0, dp(2), 0, dp(2));
 
         for (String key : keys) {
             Button btn = new Button(this);
@@ -205,22 +232,17 @@ public class RizzKeyboardService extends InputMethodService {
             btn.setAllCaps(false);
             btn.setTextColor(Color.parseColor("#f0f0f5"));
             btn.setPadding(0, 0, 0, 0);
-            btn.setTypeface(null, Typeface.NORMAL);
-
             GradientDrawable bg = new GradientDrawable();
             bg.setCornerRadius(dp(6));
             bg.setColor(Color.parseColor("#2a2a40"));
             btn.setBackground(bg);
-
             LinearLayout.LayoutParams kp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
             kp.setMargins(dp(2), 0, dp(2), 0);
             btn.setLayoutParams(kp);
-
             btn.setOnClickListener(v -> onKeyPress(btn.getText().toString()));
             row.addView(btn);
             letterKeys.add(btn);
         }
-
         parent.addView(row);
     }
 
@@ -228,10 +250,9 @@ public class RizzKeyboardService extends InputMethodService {
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER);
-        LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, dp(42));
-        rowParams.setMargins(0, dp(2), 0, dp(2));
-        row.setLayoutParams(rowParams);
+        row.setLayoutParams(new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, dp(42)));
+        ((LinearLayout.LayoutParams) row.getLayoutParams()).setMargins(0, dp(2), 0, dp(2));
 
         Button shiftBtn = makeSpecialKey("⇧", dp(44));
         shiftBtn.setOnClickListener(v -> toggleShift());
@@ -245,16 +266,13 @@ public class RizzKeyboardService extends InputMethodService {
             btn.setAllCaps(false);
             btn.setTextColor(Color.parseColor("#f0f0f5"));
             btn.setPadding(0, 0, 0, 0);
-
             GradientDrawable bg = new GradientDrawable();
             bg.setCornerRadius(dp(6));
             bg.setColor(Color.parseColor("#2a2a40"));
             btn.setBackground(bg);
-
             LinearLayout.LayoutParams kp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
             kp.setMargins(dp(2), 0, dp(2), 0);
             btn.setLayoutParams(kp);
-
             btn.setOnClickListener(v -> onKeyPress(btn.getText().toString()));
             row.addView(btn);
             letterKeys.add(btn);
@@ -265,17 +283,11 @@ public class RizzKeyboardService extends InputMethodService {
         bksp.setOnLongClickListener(v -> {
             final Handler h = new Handler(Looper.getMainLooper());
             final Runnable[] r = new Runnable[1];
-            r[0] = () -> {
-                if (bksp.isPressed()) {
-                    onBackspace();
-                    h.postDelayed(r[0], 50);
-                }
-            };
+            r[0] = () -> { if (bksp.isPressed()) { onBackspace(); h.postDelayed(r[0], 50); } };
             h.postDelayed(r[0], 50);
             return true;
         });
         row.addView(bksp);
-
         parent.addView(row);
     }
 
@@ -283,47 +295,46 @@ public class RizzKeyboardService extends InputMethodService {
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER);
-        LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, dp(42));
-        rowParams.setMargins(0, dp(2), 0, dp(2));
-        row.setLayoutParams(rowParams);
+        row.setLayoutParams(new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, dp(42)));
+        ((LinearLayout.LayoutParams) row.getLayoutParams()).setMargins(0, dp(2), 0, dp(2));
 
         Button numBtn = makeSpecialKey("123", dp(48));
         numBtn.setTextSize(13);
         numBtn.setOnClickListener(v -> toggleNumbers());
         row.addView(numBtn);
 
-        Button commaBtn = makeSpecialKey(",", dp(36));
-        commaBtn.setOnClickListener(v -> typeChar(","));
-        row.addView(commaBtn);
+        Button comma = makeSpecialKey(",", dp(36));
+        comma.setOnClickListener(v -> typeChar(","));
+        row.addView(comma);
 
-        Button spaceBtn = new Button(this);
-        spaceBtn.setText("RizzGPT");
-        spaceBtn.setTextSize(12);
-        spaceBtn.setAllCaps(false);
-        spaceBtn.setTextColor(Color.parseColor("#9898b0"));
-        GradientDrawable spaceBg = new GradientDrawable();
-        spaceBg.setCornerRadius(dp(6));
-        spaceBg.setColor(Color.parseColor("#2a2a40"));
-        spaceBtn.setBackground(spaceBg);
+        Button space = new Button(this);
+        space.setText(activeChat != null ? "🧠 " + activeChat : "RizzGPT");
+        space.setTextSize(11);
+        space.setAllCaps(false);
+        space.setTextColor(activeChat != null ? Color.parseColor("#22c55e") : Color.parseColor("#9898b0"));
+        GradientDrawable sBg = new GradientDrawable();
+        sBg.setCornerRadius(dp(6));
+        sBg.setColor(Color.parseColor("#2a2a40"));
+        space.setBackground(sBg);
         LinearLayout.LayoutParams sp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
         sp.setMargins(dp(3), 0, dp(3), 0);
-        spaceBtn.setLayoutParams(sp);
-        spaceBtn.setOnClickListener(v -> typeChar(" "));
-        row.addView(spaceBtn);
+        space.setLayoutParams(sp);
+        space.setOnClickListener(v -> typeChar(" "));
+        row.addView(space);
 
-        Button dotBtn = makeSpecialKey(".", dp(36));
-        dotBtn.setOnClickListener(v -> typeChar("."));
-        row.addView(dotBtn);
+        Button dot = makeSpecialKey(".", dp(36));
+        dot.setOnClickListener(v -> typeChar("."));
+        row.addView(dot);
 
-        Button enterBtn = makeSpecialKey("↵", dp(52));
-        enterBtn.setTextSize(18);
-        GradientDrawable enterBg = new GradientDrawable();
-        enterBg.setCornerRadius(dp(6));
-        enterBg.setColor(Color.parseColor("#a855f7"));
-        enterBtn.setBackground(enterBg);
-        enterBtn.setOnClickListener(v -> onEnter());
-        row.addView(enterBtn);
+        Button enter = makeSpecialKey("↵", dp(52));
+        enter.setTextSize(18);
+        GradientDrawable eBg = new GradientDrawable();
+        eBg.setCornerRadius(dp(6));
+        eBg.setColor(Color.parseColor("#a855f7"));
+        enter.setBackground(eBg);
+        enter.setOnClickListener(v -> onEnter());
+        row.addView(enter);
 
         parent.addView(row);
     }
@@ -350,10 +361,7 @@ public class RizzKeyboardService extends InputMethodService {
         if (ic == null) return;
         String ch = (isShift || isCaps) ? key.toUpperCase() : key.toLowerCase();
         ic.commitText(ch, 1);
-        if (isShift && !isCaps) {
-            isShift = false;
-            updateKeyLabels();
-        }
+        if (isShift && !isCaps) { isShift = false; updateKeyLabels(); }
     }
 
     private void typeChar(String ch) {
@@ -365,11 +373,8 @@ public class RizzKeyboardService extends InputMethodService {
         InputConnection ic = getCurrentInputConnection();
         if (ic != null) {
             CharSequence sel = ic.getSelectedText(0);
-            if (sel != null && sel.length() > 0) {
-                ic.commitText("", 1);
-            } else {
-                ic.deleteSurroundingText(1, 0);
-            }
+            if (sel != null && sel.length() > 0) ic.commitText("", 1);
+            else ic.deleteSurroundingText(1, 0);
         }
     }
 
@@ -377,32 +382,20 @@ public class RizzKeyboardService extends InputMethodService {
         InputConnection ic = getCurrentInputConnection();
         if (ic != null) {
             EditorInfo ei = getCurrentInputEditorInfo();
-            if (ei != null && (ei.imeOptions & EditorInfo.IME_FLAG_NO_ENTER_ACTION) == 0) {
+            if (ei != null && (ei.imeOptions & EditorInfo.IME_FLAG_NO_ENTER_ACTION) == 0)
                 ic.performEditorAction(ei.imeOptions & EditorInfo.IME_MASK_ACTION);
-            } else {
-                ic.commitText("\n", 1);
-            }
+            else ic.commitText("\n", 1);
         }
     }
 
-    private void toggleShift() {
-        isShift = !isShift;
-        isCaps = false;
-        updateKeyLabels();
-    }
-
-    private void toggleCaps() {
-        isCaps = !isCaps;
-        isShift = isCaps;
-        updateKeyLabels();
-    }
+    private void toggleShift() { isShift = !isShift; isCaps = false; updateKeyLabels(); }
+    private void toggleCaps() { isCaps = !isCaps; isShift = isCaps; updateKeyLabels(); }
 
     private void updateKeyLabels() {
         for (Button btn : letterKeys) {
             String t = btn.getText().toString();
-            if (t.length() == 1 && Character.isLetter(t.charAt(0))) {
+            if (t.length() == 1 && Character.isLetter(t.charAt(0)))
                 btn.setText((isShift || isCaps) ? t.toUpperCase() : t.toLowerCase());
-            }
         }
     }
 
@@ -411,40 +404,291 @@ public class RizzKeyboardService extends InputMethodService {
         qwertyContainer.removeAllViews();
         letterKeys.clear();
         if (isNumbers) {
-            addKeyRow(qwertyContainer, NUM_ROW1, false, false);
-            addKeyRow(qwertyContainer, NUM_ROW2, false, false);
+            addKeyRow(qwertyContainer, NUM_ROW1);
+            addKeyRow(qwertyContainer, NUM_ROW2);
             addShiftRow(qwertyContainer, NUM_ROW3);
-            addBottomRow(qwertyContainer);
         } else {
-            addKeyRow(qwertyContainer, ROW1, false, false);
-            addKeyRow(qwertyContainer, ROW2, false, false);
+            addKeyRow(qwertyContainer, ROW1);
+            addKeyRow(qwertyContainer, ROW2);
             addShiftRow(qwertyContainer, ROW3);
-            addBottomRow(qwertyContainer);
+        }
+        addBottomRow(qwertyContainer);
+    }
+
+    // ===== CHAT PICKER PANEL =====
+    private void buildChatPickerPanel() {
+        chatPickerPanel = new LinearLayout(this);
+        chatPickerPanel.setOrientation(LinearLayout.VERTICAL);
+        chatPickerPanel.setPadding(dp(6), dp(4), dp(6), dp(4));
+        rootLayout.addView(chatPickerPanel);
+    }
+
+    private void toggleChatPicker() {
+        showingChatPicker = !showingChatPicker;
+        if (showingChatPicker) {
+            qwertyContainer.setVisibility(View.GONE);
+            rizzPanel.setVisibility(View.GONE);
+            chatPickerPanel.setVisibility(View.VISIBLE);
+            showingRizz = false;
+            refreshChatPicker();
+        } else {
+            chatPickerPanel.setVisibility(View.GONE);
+            qwertyContainer.setVisibility(View.VISIBLE);
         }
     }
 
+    private void refreshChatPicker() {
+        chatPickerPanel.removeAllViews();
+
+        TextView title = new TextView(this);
+        title.setText("🧠 Chat Brain — Saved Chats");
+        title.setTextColor(Color.parseColor("#a855f7"));
+        title.setTextSize(13);
+        title.setTypeface(null, Typeface.BOLD);
+        title.setPadding(0, 0, 0, dp(6));
+        chatPickerPanel.addView(title);
+
+        if (activeChat != null) {
+            LinearLayout activeBar = new LinearLayout(this);
+            activeBar.setOrientation(LinearLayout.HORIZONTAL);
+            activeBar.setGravity(Gravity.CENTER_VERTICAL);
+            activeBar.setPadding(dp(8), dp(6), dp(8), dp(6));
+            GradientDrawable abg = new GradientDrawable();
+            abg.setCornerRadius(dp(10));
+            abg.setColor(Color.parseColor("#0d3320"));
+            abg.setStroke(dp(1), Color.parseColor("#22c55e"));
+            activeBar.setBackground(abg);
+            activeBar.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+            ((LinearLayout.LayoutParams)activeBar.getLayoutParams()).setMargins(0, 0, 0, dp(6));
+
+            TextView activeTxt = new TextView(this);
+            activeTxt.setText("✅ Active: " + activeChat + " (" + activeChatMessages.size() + " msgs)");
+            activeTxt.setTextColor(Color.parseColor("#22c55e"));
+            activeTxt.setTextSize(11);
+            activeTxt.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+            activeBar.addView(activeTxt);
+
+            Button disconnBtn = new Button(this);
+            disconnBtn.setText("✕ Disconnect");
+            disconnBtn.setTextSize(9);
+            disconnBtn.setAllCaps(false);
+            disconnBtn.setTextColor(Color.parseColor("#ef4444"));
+            disconnBtn.setPadding(dp(8), dp(2), dp(8), dp(2));
+            GradientDrawable dbg = new GradientDrawable();
+            dbg.setCornerRadius(dp(8));
+            dbg.setColor(Color.parseColor("#2a1515"));
+            disconnBtn.setBackground(dbg);
+            disconnBtn.setOnClickListener(v -> {
+                activeChat = null;
+                activeChatMessages.clear();
+                updateChatBtnLabel();
+                refreshChatPicker();
+                rebuildQwerty();
+            });
+            activeBar.addView(disconnBtn);
+            chatPickerPanel.addView(activeBar);
+        }
+
+        SharedPreferences prefs = getSharedPreferences(CHAT_PREFS, MODE_PRIVATE);
+        String indexStr = prefs.getString("chats_index", "[]");
+        try {
+            JSONArray index = new JSONArray(indexStr);
+            if (index.length() == 0) {
+                TextView empty = new TextView(this);
+                empty.setText("No saved chats. Open RizzGPT app → Tools → 🧠 Chat Brain to upload screenshots and save chats.");
+                empty.setTextColor(Color.parseColor("#9898b0"));
+                empty.setTextSize(11);
+                empty.setPadding(dp(8), dp(12), dp(8), dp(12));
+                chatPickerPanel.addView(empty);
+            } else {
+                ScrollView scroll = new ScrollView(this);
+                scroll.setLayoutParams(new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, dp(140)));
+                LinearLayout list = new LinearLayout(this);
+                list.setOrientation(LinearLayout.VERTICAL);
+
+                for (int i = 0; i < index.length(); i++) {
+                    final String chatName = index.getString(i);
+                    String msgsStr = prefs.getString("chat_" + chatName, "[]");
+                    JSONArray msgs = new JSONArray(msgsStr);
+                    int count = msgs.length();
+                    String last = count > 0 ? msgs.getString(count - 1) : "";
+                    if (last.length() > 40) last = last.substring(0, 40) + "...";
+                    boolean isActive = chatName.equals(activeChat);
+
+                    LinearLayout item = new LinearLayout(this);
+                    item.setOrientation(LinearLayout.HORIZONTAL);
+                    item.setGravity(Gravity.CENTER_VERTICAL);
+                    item.setPadding(dp(10), dp(8), dp(10), dp(8));
+                    GradientDrawable ibg = new GradientDrawable();
+                    ibg.setCornerRadius(dp(10));
+                    if (isActive) {
+                        ibg.setColor(Color.parseColor("#0d3320"));
+                        ibg.setStroke(dp(1), Color.parseColor("#22c55e"));
+                    } else {
+                        ibg.setColor(Color.parseColor("#1a1a26"));
+                        ibg.setStroke(dp(1), Color.parseColor("#2a2a36"));
+                    }
+                    item.setBackground(ibg);
+                    LinearLayout.LayoutParams ilp = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                    ilp.setMargins(0, 0, 0, dp(4));
+                    item.setLayoutParams(ilp);
+
+                    LinearLayout info = new LinearLayout(this);
+                    info.setOrientation(LinearLayout.VERTICAL);
+                    info.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+
+                    TextView name = new TextView(this);
+                    name.setText((isActive ? "✅ " : "💬 ") + chatName);
+                    name.setTextColor(isActive ? Color.parseColor("#22c55e") : Color.parseColor("#f0f0f5"));
+                    name.setTextSize(12);
+                    name.setTypeface(null, Typeface.BOLD);
+                    info.addView(name);
+
+                    TextView details = new TextView(this);
+                    details.setText(count + " msgs" + (last.isEmpty() ? "" : " • " + last));
+                    details.setTextColor(Color.parseColor("#9898b0"));
+                    details.setTextSize(9);
+                    details.setSingleLine(true);
+                    info.addView(details);
+
+                    item.addView(info);
+
+                    Button connectBtn = new Button(this);
+                    connectBtn.setText(isActive ? "Active" : "Connect");
+                    connectBtn.setTextSize(9);
+                    connectBtn.setAllCaps(false);
+                    connectBtn.setTextColor(Color.WHITE);
+                    connectBtn.setPadding(dp(10), dp(3), dp(10), dp(3));
+                    GradientDrawable cbg = new GradientDrawable();
+                    cbg.setCornerRadius(dp(8));
+                    cbg.setColor(isActive ? Color.parseColor("#22c55e") : Color.parseColor("#a855f7"));
+                    connectBtn.setBackground(cbg);
+                    connectBtn.setEnabled(!isActive);
+                    connectBtn.setOnClickListener(v -> connectToChat(chatName));
+                    item.addView(connectBtn);
+
+                    list.addView(item);
+                }
+                scroll.addView(list);
+                chatPickerPanel.addView(scroll);
+            }
+        } catch (Exception e) {}
+
+        Button backBtn = new Button(this);
+        backBtn.setText("⌨️ Back to Keyboard");
+        backBtn.setTextSize(11);
+        backBtn.setAllCaps(false);
+        backBtn.setTextColor(Color.WHITE);
+        backBtn.setPadding(dp(10), dp(6), dp(10), dp(6));
+        GradientDrawable bbg = new GradientDrawable();
+        bbg.setCornerRadius(dp(10));
+        bbg.setColor(Color.parseColor("#6366f1"));
+        backBtn.setBackground(bbg);
+        LinearLayout.LayoutParams blp = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, dp(36));
+        blp.setMargins(0, dp(6), 0, 0);
+        backBtn.setLayoutParams(blp);
+        backBtn.setOnClickListener(v -> toggleChatPicker());
+        chatPickerPanel.addView(backBtn);
+    }
+
+    private void connectToChat(String name) {
+        activeChat = name;
+        loadChatMessages(name);
+        updateChatBtnLabel();
+        rebuildQwerty();
+        showingChatPicker = false;
+        chatPickerPanel.setVisibility(View.GONE);
+        qwertyContainer.setVisibility(View.VISIBLE);
+        statusLabel.setText("🧠 Connected to " + name + " — AI reads full history");
+    }
+
+    private void loadChatMessages(String name) {
+        activeChatMessages.clear();
+        SharedPreferences prefs = getSharedPreferences(CHAT_PREFS, MODE_PRIVATE);
+        String msgsStr = prefs.getString("chat_" + name, "[]");
+        try {
+            JSONArray arr = new JSONArray(msgsStr);
+            for (int i = 0; i < arr.length(); i++) {
+                activeChatMessages.add(arr.getString(i));
+            }
+        } catch (Exception e) {}
+    }
+
+    private void saveChatMessages() {
+        if (activeChat == null) return;
+        SharedPreferences prefs = getSharedPreferences(CHAT_PREFS, MODE_PRIVATE);
+        JSONArray arr = new JSONArray();
+        for (String msg : activeChatMessages) arr.put(msg);
+        prefs.edit()
+            .putString("chat_" + activeChat, arr.toString())
+            .putLong("chat_updated_" + activeChat, System.currentTimeMillis())
+            .apply();
+
+        String indexStr = prefs.getString("chats_index", "[]");
+        try {
+            JSONArray index = new JSONArray(indexStr);
+            boolean found = false;
+            for (int i = 0; i < index.length(); i++) {
+                if (index.getString(i).equals(activeChat)) { found = true; break; }
+            }
+            if (!found) {
+                index.put(activeChat);
+                prefs.edit().putString("chats_index", index.toString()).apply();
+            }
+        } catch (Exception e) {}
+    }
+
+    private void addMessageToChat(String msg) {
+        if (activeChat == null) return;
+        activeChatMessages.add(msg);
+        saveChatMessages();
+    }
+
+    private void rebuildQwerty() {
+        qwertyContainer.removeAllViews();
+        letterKeys.clear();
+        if (isNumbers) {
+            addKeyRow(qwertyContainer, NUM_ROW1);
+            addKeyRow(qwertyContainer, NUM_ROW2);
+            addShiftRow(qwertyContainer, NUM_ROW3);
+        } else {
+            addKeyRow(qwertyContainer, ROW1);
+            addKeyRow(qwertyContainer, ROW2);
+            addShiftRow(qwertyContainer, ROW3);
+        }
+        addBottomRow(qwertyContainer);
+    }
+
+    // ===== PANEL TOGGLES =====
     private void toggleRizzPanel() {
         showingRizz = !showingRizz;
+        showingChatPicker = false;
+        chatPickerPanel.setVisibility(View.GONE);
         if (showingRizz) {
             qwertyContainer.setVisibility(View.GONE);
             rizzPanel.setVisibility(View.VISIBLE);
             GradientDrawable bg = new GradientDrawable();
-            bg.setCornerRadius(dp(12));
+            bg.setCornerRadius(dp(10));
             bg.setColor(Color.parseColor("#ec4899"));
             rizzToggleBtn.setBackground(bg);
-            rizzToggleBtn.setText("⌨️ Keys");
+            rizzToggleBtn.setText("⌨️");
             autoReadMessages();
         } else {
             rizzPanel.setVisibility(View.GONE);
             qwertyContainer.setVisibility(View.VISIBLE);
             GradientDrawable bg = new GradientDrawable();
-            bg.setCornerRadius(dp(12));
+            bg.setCornerRadius(dp(10));
             bg.setColor(Color.parseColor("#a855f7"));
             rizzToggleBtn.setBackground(bg);
             rizzToggleBtn.setText("⚡ Rizz");
         }
     }
 
+    // ===== AUTO READ =====
     private void autoReadMessages() {
         String readText = "";
         String source = "";
@@ -454,22 +698,15 @@ public class RizzKeyboardService extends InputMethodService {
             String appName = RizzAccessibilityService.readLastApp(this);
             long ts = RizzAccessibilityService.readTimestamp(this);
             long age = System.currentTimeMillis() - ts;
-
             if (screenMsgs != null && screenMsgs.length() > 3 && age < 60000) {
                 String[] parts = screenMsgs.split("\\n---MSG---\\n");
                 StringBuilder recent = new StringBuilder();
                 int start = Math.max(0, parts.length - 8);
                 for (int i = start; i < parts.length; i++) {
                     String msg = parts[i].trim();
-                    if (msg.length() > 2) {
-                        if (recent.length() > 0) recent.append("\n");
-                        recent.append(msg);
-                    }
+                    if (msg.length() > 2) { if (recent.length() > 0) recent.append("\n"); recent.append(msg); }
                 }
-                if (recent.length() > 3) {
-                    readText = recent.toString();
-                    source = appName != null && !appName.isEmpty() ? appName : "Screen";
-                }
+                if (recent.length() > 3) { readText = recent.toString(); source = appName != null && !appName.isEmpty() ? appName : "Screen"; }
             }
         } catch (Exception e) {}
 
@@ -479,11 +716,8 @@ public class RizzKeyboardService extends InputMethodService {
                 if (clipboard != null && clipboard.hasPrimaryClip()) {
                     ClipData clip = clipboard.getPrimaryClip();
                     if (clip != null && clip.getItemCount() > 0) {
-                        CharSequence clipText = clip.getItemAt(0).getText();
-                        if (clipText != null && clipText.length() > 0) {
-                            readText = clipText.toString().trim();
-                            source = "Clipboard";
-                        }
+                        CharSequence ct = clip.getItemAt(0).getText();
+                        if (ct != null && ct.length() > 0) { readText = ct.toString().trim(); source = "Clipboard"; }
                     }
                 }
             } catch (Exception e) {}
@@ -493,10 +727,7 @@ public class RizzKeyboardService extends InputMethodService {
             InputConnection ic = getCurrentInputConnection();
             if (ic != null) {
                 ExtractedText et = ic.getExtractedText(new ExtractedTextRequest(), 0);
-                if (et != null && et.text != null && et.text.length() > 0) {
-                    readText = et.text.toString().trim();
-                    source = "Input";
-                }
+                if (et != null && et.text != null && et.text.length() > 0) { readText = et.text.toString().trim(); source = "Input"; }
                 if (readText.isEmpty()) {
                     CharSequence before = ic.getTextBeforeCursor(500, 0);
                     CharSequence after = ic.getTextAfterCursor(500, 0);
@@ -510,57 +741,47 @@ public class RizzKeyboardService extends InputMethodService {
         }
 
         if (readText.isEmpty()) {
-            boolean accessibilityOn = RizzAccessibilityService.isRunning();
-            if (!accessibilityOn) {
-                statusLabel.setText("⚠️ Enable Screen Reader in Settings → Accessibility → RizzGPT");
-            } else {
-                statusLabel.setText("📋 No messages found — open a chat first or copy text");
-            }
+            boolean accOn = RizzAccessibilityService.isRunning();
+            statusLabel.setText(accOn ? "📋 No messages — open a chat or copy text" : "⚠️ Enable Screen Reader: Settings → Accessibility → RizzGPT");
         } else {
             rizzInput.setText(readText);
-            String preview = readText.length() > 45 ? readText.substring(0, 45) + "..." : readText;
-            statusLabel.setText("📖 " + source + ": \"" + preview + "\"");
+            String preview = readText.length() > 40 ? readText.substring(0, 40) + "..." : readText;
+            statusLabel.setText("📖 " + source + ": " + preview);
+
+            if (activeChat != null) {
+                String[] lines = readText.split("\n");
+                for (String line : lines) {
+                    String l = line.trim();
+                    if (l.length() > 2) {
+                        boolean isDuplicate = false;
+                        for (int i = Math.max(0, activeChatMessages.size() - 10); i < activeChatMessages.size(); i++) {
+                            if (activeChatMessages.get(i).equals("Them: " + l) || activeChatMessages.get(i).equals(l)) {
+                                isDuplicate = true; break;
+                            }
+                        }
+                        if (!isDuplicate) {
+                            addMessageToChat("Them: " + l);
+                        }
+                    }
+                }
+                statusLabel.setText("📖 " + source + " → auto-saved to " + activeChat);
+            }
         }
     }
 
+    // ===== RIZZ PANEL =====
     private void buildRizzPanel() {
         rizzPanel = new LinearLayout(this);
         rizzPanel.setOrientation(LinearLayout.VERTICAL);
         rizzPanel.setPadding(dp(4), dp(2), dp(4), dp(2));
 
-        toolScroll = new HorizontalScrollView(this);
+        HorizontalScrollView toolScroll = new HorizontalScrollView(this);
         toolScroll.setHorizontalScrollBarEnabled(false);
         toolScroll.setPadding(0, 0, 0, dp(2));
-
         toolsContainer = new LinearLayout(this);
         toolsContainer.setOrientation(LinearLayout.HORIZONTAL);
-
         for (String[] tool : TOOLS) {
-            Button chip = new Button(this);
-            chip.setText(tool[0] + " " + tool[1]);
-            chip.setTextSize(9);
-            chip.setAllCaps(false);
-            chip.setTag(tool[2]);
-            chip.setPadding(dp(8), dp(1), dp(8), dp(1));
-
-            GradientDrawable bg = new GradientDrawable();
-            bg.setCornerRadius(dp(12));
-
-            if (tool[2].equals("reply")) {
-                bg.setColor(Color.parseColor("#2a1a3a"));
-                bg.setStroke(dp(1), Color.parseColor("#a855f7"));
-                chip.setTextColor(Color.parseColor("#a855f7"));
-            } else {
-                bg.setColor(Color.parseColor("#1a1a26"));
-                bg.setStroke(dp(1), Color.parseColor("#333344"));
-                chip.setTextColor(Color.parseColor("#9898b0"));
-            }
-            chip.setBackground(bg);
-
-            LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT, dp(26));
-            cp.setMargins(0, 0, dp(4), 0);
-            chip.setLayoutParams(cp);
+            Button chip = makeChip(tool[0] + " " + tool[1], tool[2], tool[2].equals("reply"));
             chip.setOnClickListener(v -> selectTool(chip));
             toolsContainer.addView(chip);
         }
@@ -570,44 +791,17 @@ public class RizzKeyboardService extends InputMethodService {
         HorizontalScrollView modeScroll = new HorizontalScrollView(this);
         modeScroll.setHorizontalScrollBarEnabled(false);
         modeScroll.setPadding(0, 0, 0, dp(2));
-
         modesContainer = new LinearLayout(this);
         modesContainer.setOrientation(LinearLayout.HORIZONTAL);
-
         String[][] modes = {
             {"😏 Smooth", "smooth"}, {"😂 Funny", "funny"}, {"🔥 Bold", "bold"},
             {"💜 Flirty", "flirty"}, {"💀 Savage", "savage"}, {"🍯 Sweet", "sweet"},
             {"🇮🇳 Hinglish", "lang_hinglish"}, {"🇬🇧 English", "lang_english"}, {"🇮🇳 Hindi", "lang_hindi"},
             {"🔥 Extreme", "int_extreme"}, {"💪 Bold", "int_bold"}, {"🌸 Mild", "int_mild"}
         };
-
-        for (String[] mode : modes) {
-            Button chip = new Button(this);
-            chip.setText(mode[0]);
-            chip.setTextSize(9);
-            chip.setAllCaps(false);
-            chip.setTag(mode[1]);
-            chip.setPadding(dp(8), dp(1), dp(8), dp(1));
-
-            GradientDrawable bg = new GradientDrawable();
-            bg.setCornerRadius(dp(12));
-
-            boolean isActive = mode[1].equals("smooth") || mode[1].equals("lang_english") || mode[1].equals("int_bold");
-            if (isActive) {
-                bg.setColor(Color.parseColor("#2a1a3a"));
-                bg.setStroke(dp(1), Color.parseColor("#a855f7"));
-                chip.setTextColor(Color.parseColor("#a855f7"));
-            } else {
-                bg.setColor(Color.parseColor("#1a1a26"));
-                bg.setStroke(dp(1), Color.parseColor("#333344"));
-                chip.setTextColor(Color.parseColor("#9898b0"));
-            }
-            chip.setBackground(bg);
-
-            LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT, dp(26));
-            cp.setMargins(0, 0, dp(4), 0);
-            chip.setLayoutParams(cp);
+        for (String[] m : modes) {
+            boolean active = m[1].equals("smooth") || m[1].equals("lang_english") || m[1].equals("int_bold");
+            Button chip = makeChip(m[0], m[1], active);
             chip.setOnClickListener(v -> selectMode(chip));
             modesContainer.addView(chip);
         }
@@ -619,173 +813,151 @@ public class RizzKeyboardService extends InputMethodService {
         inputRow.setGravity(Gravity.CENTER_VERTICAL);
         inputRow.setPadding(0, dp(2), 0, dp(2));
 
-        Button readBtn = new Button(this);
-        readBtn.setText("📋");
-        readBtn.setTextSize(14);
-        readBtn.setPadding(0, 0, 0, 0);
-        GradientDrawable readBg = new GradientDrawable();
-        readBg.setCornerRadius(dp(16));
-        readBg.setColor(Color.parseColor("#10b981"));
-        readBtn.setBackground(readBg);
+        Button readBtn = makeRoundBtn("📖", Color.parseColor("#10b981"), dp(30));
         readBtn.setOnClickListener(v -> autoReadMessages());
-        LinearLayout.LayoutParams readP = new LinearLayout.LayoutParams(dp(32), dp(32));
-        readP.setMargins(0, 0, dp(4), 0);
-        readBtn.setLayoutParams(readP);
+        inputRow.addView(readBtn);
 
         rizzInput = new EditText(this);
-        rizzInput.setHint("Copy msg → tap 📋 or type here...");
+        rizzInput.setHint(activeChat != null ? "🧠 " + activeChat + " — context auto-loaded" : "Copy msg → 📖 or type...");
         rizzInput.setHintTextColor(Color.parseColor("#5a5a72"));
         rizzInput.setTextColor(Color.parseColor("#f0f0f5"));
-        rizzInput.setTextSize(12);
+        rizzInput.setTextSize(11);
         rizzInput.setSingleLine(false);
         rizzInput.setMaxLines(2);
         rizzInput.setPadding(dp(10), dp(4), dp(10), dp(4));
         rizzInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
-        GradientDrawable inputBg = new GradientDrawable();
-        inputBg.setCornerRadius(dp(14));
-        inputBg.setColor(Color.parseColor("#1a1a26"));
-        inputBg.setStroke(dp(1), Color.parseColor("#2a2a36"));
-        rizzInput.setBackground(inputBg);
-        LinearLayout.LayoutParams ip = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
-        rizzInput.setLayoutParams(ip);
-
-        generateBtn = new Button(this);
-        generateBtn.setText("⚡");
-        generateBtn.setTextSize(16);
-        generateBtn.setPadding(0, 0, 0, 0);
-        GradientDrawable genBg = new GradientDrawable();
-        genBg.setCornerRadius(dp(16));
-        genBg.setColor(Color.parseColor("#a855f7"));
-        generateBtn.setBackground(genBg);
-        generateBtn.setTextColor(Color.WHITE);
-        LinearLayout.LayoutParams gp = new LinearLayout.LayoutParams(dp(32), dp(32));
-        gp.setMargins(dp(4), 0, 0, 0);
-        generateBtn.setLayoutParams(gp);
-        generateBtn.setOnClickListener(v -> onGenerate());
-
-        inputRow.addView(readBtn);
+        GradientDrawable ibg = new GradientDrawable();
+        ibg.setCornerRadius(dp(12));
+        ibg.setColor(Color.parseColor("#1a1a26"));
+        ibg.setStroke(dp(1), Color.parseColor("#2a2a36"));
+        rizzInput.setBackground(ibg);
+        rizzInput.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+        ((LinearLayout.LayoutParams) rizzInput.getLayoutParams()).setMargins(dp(4), 0, dp(4), 0);
         inputRow.addView(rizzInput);
+
+        generateBtn = makeRoundBtn("⚡", Color.parseColor("#a855f7"), dp(30));
+        generateBtn.setOnClickListener(v -> onGenerate());
         inputRow.addView(generateBtn);
+
         rizzPanel.addView(inputRow);
 
         statusLabel = new TextView(this);
-        statusLabel.setText("📋 Copy their msg → Read | Pick tool → ⚡ Generate");
+        statusLabel.setText(activeChat != null ? "🧠 Connected: " + activeChat + " — AI reads full history" : "📋 Copy msg → Read | Pick tool → ⚡");
         statusLabel.setTextColor(Color.parseColor("#9898b0"));
         statusLabel.setTextSize(9);
         statusLabel.setGravity(Gravity.CENTER);
         statusLabel.setPadding(0, dp(1), 0, dp(1));
         rizzPanel.addView(statusLabel);
 
-        ScrollView suggestScroll = new ScrollView(this);
-        LinearLayout.LayoutParams scrollP = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, dp(100));
-        suggestScroll.setLayoutParams(scrollP);
-
+        ScrollView sugScroll = new ScrollView(this);
+        sugScroll.setLayoutParams(new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, dp(100)));
         suggestionsContainer = new LinearLayout(this);
         suggestionsContainer.setOrientation(LinearLayout.VERTICAL);
         suggestionsContainer.setPadding(0, dp(2), 0, dp(2));
-        suggestScroll.addView(suggestionsContainer);
-        rizzPanel.addView(suggestScroll);
+        sugScroll.addView(suggestionsContainer);
+        rizzPanel.addView(sugScroll);
 
         rootLayout.addView(rizzPanel);
+    }
+
+    private Button makeChip(String text, String tag, boolean active) {
+        Button chip = new Button(this);
+        chip.setText(text);
+        chip.setTextSize(9);
+        chip.setAllCaps(false);
+        chip.setTag(tag);
+        chip.setPadding(dp(8), dp(1), dp(8), dp(1));
+        GradientDrawable bg = new GradientDrawable();
+        bg.setCornerRadius(dp(12));
+        if (active) {
+            bg.setColor(Color.parseColor("#2a1a3a"));
+            bg.setStroke(dp(1), Color.parseColor("#a855f7"));
+            chip.setTextColor(Color.parseColor("#a855f7"));
+        } else {
+            bg.setColor(Color.parseColor("#1a1a26"));
+            bg.setStroke(dp(1), Color.parseColor("#333344"));
+            chip.setTextColor(Color.parseColor("#9898b0"));
+        }
+        chip.setBackground(bg);
+        LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT, dp(26));
+        p.setMargins(0, 0, dp(4), 0);
+        chip.setLayoutParams(p);
+        return chip;
+    }
+
+    private Button makeRoundBtn(String text, int color, int size) {
+        Button btn = new Button(this);
+        btn.setText(text);
+        btn.setTextSize(13);
+        btn.setPadding(0, 0, 0, 0);
+        GradientDrawable bg = new GradientDrawable();
+        bg.setCornerRadius(dp(15));
+        bg.setColor(color);
+        btn.setBackground(bg);
+        btn.setTextColor(Color.WHITE);
+        btn.setLayoutParams(new LinearLayout.LayoutParams(size, size));
+        return btn;
     }
 
     private void selectTool(Button selected) {
         selectedTool = (String) selected.getTag();
         for (int i = 0; i < toolsContainer.getChildCount(); i++) {
-            Button chip = (Button) toolsContainer.getChildAt(i);
-            GradientDrawable bg = new GradientDrawable();
-            bg.setCornerRadius(dp(12));
-            if (chip == selected) {
-                bg.setColor(Color.parseColor("#2a1a3a"));
-                bg.setStroke(dp(1), Color.parseColor("#a855f7"));
-                chip.setTextColor(Color.parseColor("#a855f7"));
-            } else {
-                bg.setColor(Color.parseColor("#1a1a26"));
-                bg.setStroke(dp(1), Color.parseColor("#333344"));
-                chip.setTextColor(Color.parseColor("#9898b0"));
-            }
-            chip.setBackground(bg);
+            Button c = (Button) toolsContainer.getChildAt(i);
+            setChipActive(c, c == selected);
         }
         updateHintForTool();
     }
 
     private void updateHintForTool() {
+        String prefix = activeChat != null ? "🧠 " + activeChat + ": " : "";
         switch (selectedTool) {
-            case "reply": rizzInput.setHint("Their message to reply to..."); break;
-            case "coach": rizzInput.setHint("Paste full conversation..."); break;
-            case "wingman": rizzInput.setHint("Their last message..."); break;
+            case "reply": rizzInput.setHint(prefix + "Their message to reply to..."); break;
+            case "coach": rizzInput.setHint(prefix + "Paste conversation..."); break;
+            case "wingman": rizzInput.setHint(prefix + "Their last message..."); break;
+            case "mindgame": rizzInput.setHint(prefix + "Paste chat for mind games..."); break;
+            case "manipulate": rizzInput.setHint(prefix + "Paste for manipulation..."); break;
+            case "powermove": rizzInput.setHint(prefix + "Paste for power move..."); break;
             case "profileRoast": rizzInput.setHint("Paste dating profile bio..."); break;
-            case "responsePred": rizzInput.setHint("What did you send them?"); break;
-            case "remixer": rizzInput.setHint("Paste a pickup line to remix..."); break;
-            case "situational": rizzInput.setHint("Situation: coffee shop, gym, party..."); break;
-            case "flowBuilder": rizzInput.setHint("Their opening message..."); break;
-            case "compatibility": rizzInput.setHint("Your zodiac/MBTI + theirs..."); break;
-            case "emojiDecoder": rizzInput.setHint("Paste emojis to decode..."); break;
-            case "dateIdea": rizzInput.setHint("Budget & interests..."); break;
-            case "complimentSched": rizzInput.setHint("Person's name & style..."); break;
-            case "redFlag": rizzInput.setHint("Paste their message or profile..."); break;
-            case "saveConvo": rizzInput.setHint("Paste the dying conversation..."); break;
-            case "antiCringe": rizzInput.setHint("What you're about to send..."); break;
-            case "toneTranslator": rizzInput.setHint("Your message to translate tone..."); break;
-            case "perspectiveFlip": rizzInput.setHint("What you're about to send..."); break;
-            case "ghostRecovery": rizzInput.setHint("Last msgs before being ghosted..."); break;
-            case "rizzRater": rizzInput.setHint("Your line or message to rate..."); break;
-            case "bioBeforeAfter": rizzInput.setHint("Your current bio to transform..."); break;
-            case "dateScript": rizzInput.setHint("Date type & their interests..."); break;
-            case "trendingLines": rizzInput.setHint("Category: memes, movies, pop..."); break;
-            case "msgDecoder": rizzInput.setHint("Their confusing message..."); break;
-            case "pickup": rizzInput.setHint("Topic or their name (optional)..."); break;
-            case "flirty": rizzInput.setHint("Context for flirty texts..."); break;
-            case "savage": rizzInput.setHint("Context for savage reply..."); break;
-            case "mindgame": rizzInput.setHint("Paste their messages for mind games..."); break;
-            case "manipulate": rizzInput.setHint("Paste conversation for manipulation..."); break;
-            case "powermove": rizzInput.setHint("Paste chat for power move..."); break;
+            case "responsePred": rizzInput.setHint(prefix + "What did you send?"); break;
+            case "remixer": rizzInput.setHint("Line to remix..."); break;
+            case "situational": rizzInput.setHint("Situation: coffee shop, gym..."); break;
+            default: rizzInput.setHint(prefix + "Enter context..."); break;
         }
-        statusLabel.setText("🔧 " + getToolName(selectedTool) + " selected — type context → ⚡");
+        statusLabel.setText("🔧 " + getToolName(selectedTool));
     }
 
     private String getToolName(String tool) {
-        for (String[] t : TOOLS) {
-            if (t[2].equals(tool)) return t[0] + " " + t[1];
-        }
+        for (String[] t : TOOLS) { if (t[2].equals(tool)) return t[0] + " " + t[1]; }
         return tool;
     }
 
     private void selectMode(Button selected) {
         String tag = (String) selected.getTag();
-
         if (tag.startsWith("lang_")) {
             selectedLang = tag.replace("lang_", "");
             for (int i = 0; i < modesContainer.getChildCount(); i++) {
-                Button chip = (Button) modesContainer.getChildAt(i);
-                String ctag = (String) chip.getTag();
-                if (ctag.startsWith("lang_")) {
-                    updateChipStyle(chip, chip == selected);
-                }
+                Button c = (Button) modesContainer.getChildAt(i);
+                if (((String) c.getTag()).startsWith("lang_")) setChipActive(c, c == selected);
             }
         } else if (tag.startsWith("int_")) {
             selectedIntensity = tag.replace("int_", "");
             for (int i = 0; i < modesContainer.getChildCount(); i++) {
-                Button chip = (Button) modesContainer.getChildAt(i);
-                String ctag = (String) chip.getTag();
-                if (ctag.startsWith("int_")) {
-                    updateChipStyle(chip, chip == selected);
-                }
+                Button c = (Button) modesContainer.getChildAt(i);
+                if (((String) c.getTag()).startsWith("int_")) setChipActive(c, c == selected);
             }
         } else {
             selectedMode = tag;
             for (int i = 0; i < modesContainer.getChildCount(); i++) {
-                Button chip = (Button) modesContainer.getChildAt(i);
-                String ctag = (String) chip.getTag();
-                if (!ctag.startsWith("lang_") && !ctag.startsWith("int_")) {
-                    updateChipStyle(chip, chip == selected);
-                }
+                Button c = (Button) modesContainer.getChildAt(i);
+                String t = (String) c.getTag();
+                if (!t.startsWith("lang_") && !t.startsWith("int_")) setChipActive(c, c == selected);
             }
         }
     }
 
-    private void updateChipStyle(Button chip, boolean active) {
+    private void setChipActive(Button chip, boolean active) {
         GradientDrawable bg = new GradientDrawable();
         bg.setCornerRadius(dp(12));
         if (active) {
@@ -800,20 +972,31 @@ public class RizzKeyboardService extends InputMethodService {
         chip.setBackground(bg);
     }
 
+    // ===== GENERATE =====
     private void onGenerate() {
         if (isLoading) return;
         String context = rizzInput.getText().toString().trim();
-
-        if (context.isEmpty() && !selectedTool.equals("pickup") && !selectedTool.equals("trendingLines")) {
-            statusLabel.setText("⚠️ Enter context first or tap 📋 to read clipboard");
+        if (context.isEmpty() && activeChat == null && !selectedTool.equals("pickup") && !selectedTool.equals("trendingLines")) {
+            statusLabel.setText("⚠️ Enter context or connect a chat first");
             return;
         }
         runTool(context, selectedTool, selectedMode);
     }
 
+    private String getChatContext() {
+        if (activeChat == null || activeChatMessages.isEmpty()) return "";
+        int start = Math.max(0, activeChatMessages.size() - 25);
+        StringBuilder sb = new StringBuilder();
+        sb.append("[FULL CHAT HISTORY with ").append(activeChat).append("]\n");
+        for (int i = start; i < activeChatMessages.size(); i++) {
+            sb.append(activeChatMessages.get(i)).append("\n");
+        }
+        return sb.toString();
+    }
+
     private String getLangInstruction() {
         switch (selectedLang) {
-            case "hinglish": return " Write in Hinglish (Hindi+English mix, Roman script) like young Indians text on WhatsApp. Use yaar/arre/accha naturally.";
+            case "hinglish": return " Write in Hinglish (Hindi+English mix, Roman script) like young Indians text on WhatsApp.";
             case "hindi": return " Write in casual Roman Hindi (no Devanagari).";
             default: return "";
         }
@@ -834,15 +1017,18 @@ public class RizzKeyboardService extends InputMethodService {
         final String emoji = toolEmoji;
 
         mainHandler.post(() -> {
-            statusLabel.setText(emoji + " Generating...");
+            statusLabel.setText(emoji + " Generating" + (activeChat != null ? " for " + activeChat : "") + "...");
             generateBtn.setEnabled(false);
             suggestionsContainer.removeAllViews();
         });
 
         executor.execute(() -> {
             try {
-                String systemPrompt = buildSystemPrompt(tool, style, context);
-                String userPrompt = buildUserPrompt(tool, style, context);
+                String chatCtx = getChatContext();
+                String fullContext = chatCtx.isEmpty() ? context : chatCtx + "\n[Current input]: " + context;
+
+                String systemPrompt = buildSystemPrompt(tool, style, fullContext);
+                String userPrompt = buildUserPrompt(tool, style, fullContext);
 
                 JSONObject body = new JSONObject();
                 body.put("model", "llama-3.3-70b-versatile");
@@ -854,7 +1040,6 @@ public class RizzKeyboardService extends InputMethodService {
                 sysMsg.put("role", "system");
                 sysMsg.put("content", systemPrompt);
                 msgs.put(sysMsg);
-
                 JSONObject userMsg = new JSONObject();
                 userMsg.put("role", "user");
                 userMsg.put("content", userPrompt);
@@ -885,23 +1070,17 @@ public class RizzKeyboardService extends InputMethodService {
 
                 JSONObject resp = new JSONObject(sb.toString());
                 String content = resp.getJSONArray("choices")
-                    .getJSONObject(0)
-                    .getJSONObject("message")
-                    .getString("content");
+                    .getJSONObject(0).getJSONObject("message").getString("content");
 
                 List<String> replies = parseReplies(content, tool);
 
                 mainHandler.post(() -> {
                     isLoading = false;
                     generateBtn.setEnabled(true);
-                    if (replies.isEmpty()) {
-                        statusLabel.setText("❌ No results. Try again!");
-                        return;
-                    }
-                    statusLabel.setText(emoji + " Tap to type it ↓");
+                    if (replies.isEmpty()) { statusLabel.setText("❌ No results. Try again!"); return; }
+                    statusLabel.setText(emoji + " Tap to type ↓" + (activeChat != null ? " (auto-saves to " + activeChat + ")" : ""));
                     showReplies(replies);
                 });
-
             } catch (Exception e) {
                 mainHandler.post(() -> {
                     isLoading = false;
@@ -913,227 +1092,159 @@ public class RizzKeyboardService extends InputMethodService {
     }
 
     private String buildSystemPrompt(String tool, String style, String context) {
-        String langNote = getLangInstruction();
+        String lang = getLangInstruction();
         String intNote = getIntensityDesc();
+        boolean hasChat = activeChat != null && !activeChatMessages.isEmpty();
+        String chatNote = hasChat ? " You have access to the FULL chat history with " + activeChat + ". Use it to understand their personality, texting patterns, interest level, and conversation dynamics. Generate responses that fit perfectly into this specific conversation." : "";
 
         switch (tool) {
             case "reply":
-                return "You generate text message replies. Style: " + style + ". Intensity: " + intNote + "." + langNote + "\n" +
-                    "Rules: 1. Type like a real person: lowercase, casual 2. Keep short: 5-20 words per reply 3. Sound human NOT AI 4. Give exactly 5 different replies numbered 1-5 5. Each on its own line";
-
+                return "You generate text message replies. Style: " + style + ". Intensity: " + intNote + "." + lang + chatNote +
+                    "\nRules: 1. Type like real person, lowercase casual 2. Short 5-20 words 3. Sound human NOT AI 4. Give exactly 5 replies numbered 1-5";
             case "coach":
-                return "You're a dating/texting coach. Analyze the conversation and give coaching advice." + langNote + "\n" +
-                    "Format:\nVIBE CHECK: [1 line assessment]\nGREEN FLAGS: [what's going well]\nRED FLAGS: [concerns]\n3 TIPS: [numbered tips]\nNEXT MOVE: [what to do next]\n5 SUGGESTED REPLIES: [numbered 1-5, short natural messages]";
-
+                return "You're a dating coach." + lang + chatNote +
+                    "\nFormat: VIBE CHECK, GREEN FLAGS, RED FLAGS, 3 TIPS, NEXT MOVE, 5 REPLIES numbered 1-5";
             case "wingman":
-                return "You are an AI Wingman providing REAL-TIME coaching during a live conversation. Be quick and actionable." + langNote + "\n" +
-                    "Give: MOOD (their vibe), INTEREST LEVEL (1-10), 5 QUICK REPLIES (numbered), DO NOT SAY (what to avoid), STRATEGY (1-line advice). Format each reply on numbered lines.";
-
-            case "profileRoast":
-                return "You're a brutally honest but helpful dating profile reviewer." + langNote + "\n" +
-                    "First ROAST the bio (be savage, 2-3 lines). Score /10. Then give 5 IMPROVED BIO versions numbered 1-5 that are short, catchy, and swipe-right worthy.";
-
-            case "responsePred":
-                return "You predict how someone will reply to a text." + langNote + "\n" +
-                    "Give 5 predicted responses numbered 1-5 with probability %. Range from best to worst case. Each line: N. [probability%] \"predicted reply\" → Best response: \"your reply\"";
-
-            case "remixer":
-                return "You remix pickup lines into different styles: " + style + ". Intensity: " + intNote + "." + langNote + "\n" +
-                    "Give 5 remixed versions numbered 1-5. Each should feel unique and fresh.";
-
-            case "situational":
-                return "You generate pickup lines and conversation starters for specific real-life situations. Style: " + style + "." + langNote + "\n" +
-                    "Give 5 situation-specific openers numbered 1-5. Make them feel natural for the setting.";
-
-            case "flowBuilder":
-                return "You build conversation flows - a step-by-step texting strategy." + langNote + "\n" +
-                    "Give 5 possible next messages numbered 1-5, then a FLOW: Opening → Build rapport → Create interest → Close with action. Keep each step as a sendable message.";
-
-            case "compatibility":
-                return "You analyze zodiac/MBTI compatibility for dating." + langNote + "\n" +
-                    "Give: MATCH SCORE /10, CHEMISTRY (1 line), STRENGTHS (3 points), CHALLENGES (3 points), then 5 CONVERSATION STARTERS numbered 1-5 specific to this combo.";
-
-            case "emojiDecoder":
-                return "You decode emoji messages and reveal hidden meanings." + langNote + "\n" +
-                    "Decode each emoji, give OVERALL MEANING, HIDDEN SUBTEXT, INTEREST LEVEL /10, then 5 REPLY OPTIONS numbered 1-5.";
-
-            case "dateIdea":
-                return "You generate creative, unique date ideas." + langNote + "\n" +
-                    "Give 5 date ideas numbered 1-5. Each: name, what to do (2 lines), pro tip, estimated cost. Make them memorable and unique.";
-
-            case "complimentSched":
-                return "You generate personalized compliments." + langNote + " Style: " + style + ". Intensity: " + intNote + ".\n" +
-                    "Give 5 unique compliments numbered 1-5. Make each feel genuine, specific, and personal. Mix different types: appearance, personality, talent, vibe, energy.";
-
-            case "redFlag":
-                return "You detect red flags and green flags in messages/profiles." + langNote + "\n" +
-                    "Analyze and give: RED FLAGS (list), GREEN FLAGS (list), OVERALL RATING /10, VERDICT, then 5 RESPONSE OPTIONS numbered 1-5 ranging from cautious to bold.";
-
-            case "saveConvo":
-                return "You rescue dying/awkward conversations." + langNote + " Intensity: " + intNote + ".\n" +
-                    "Diagnose WHAT WENT WRONG, give 5 RECOVERY MESSAGES numbered 1-5 that can save the convo. Range from safe to bold. Make them natural.";
-
-            case "antiCringe":
-                return "You're a cringe detector that checks messages before sending." + langNote + "\n" +
-                    "CRINGE SCORE /10 (10=max cringe), WHAT'S WRONG (honest feedback), then 5 IMPROVED VERSIONS numbered 1-5 from least to most changed.";
-
-            case "toneTranslator":
-                return "You translate messages into different tones. Target tone: " + style + ". Intensity: " + intNote + "." + langNote + "\n" +
-                    "Give 5 versions numbered 1-5 in the " + style + " tone. Each should feel distinct but carry the same meaning.";
-
-            case "perspectiveFlip":
-                return "You flip perspective - show how the receiver sees a message." + langNote + "\n" +
-                    "THEIR FIRST IMPRESSION, INTEREST LEVEL /10, WHAT THEY'RE THINKING, then 5 BETTER VERSIONS numbered 1-5 that would impress them more.";
-
-            case "ghostRecovery":
-                return "You help recover from being ghosted." + langNote + " Intensity: " + intNote + ".\n" +
-                    "DIAGNOSIS (why they ghosted), STRATEGY, then 5 COMEBACK MESSAGES numbered 1-5. Range from casual check-in to bold power move.";
-
-            case "rizzRater":
-                return "You rate pickup lines and messages on a rizz scale." + langNote + "\n" +
-                    "RIZZ SCORE /10, BREAKDOWN (delivery, creativity, confidence), WHAT WORKS, WHAT DOESN'T, then 5 UPGRADED VERSIONS numbered 1-5.";
-
-            case "bioBeforeAfter":
-                return "You transform dating profile bios from boring to fire." + langNote + "\n" +
-                    "BEFORE SCORE /10, PROBLEMS (what's wrong), then 5 TRANSFORMED BIOS numbered 1-5. Each should be short, catchy, and swipe-right worthy. AFTER SCORE /10.";
-
-            case "dateScript":
-                return "You write first date scripts - what to say and when." + langNote + "\n" +
-                    "Give a FULL SCRIPT: Opening (first 5 min), Warmup topics, Deep dive questions, Fun activities to suggest, Closing move. Then 5 KEY LINES numbered 1-5 to memorize.";
-
-            case "trendingLines":
-                return "You generate trending, viral-style pickup lines based on current pop culture, memes, movies, music. Style: " + style + "." + langNote + "\n" +
-                    "Give 5 trending pickup lines numbered 1-5. Reference current trends, movies, shows, songs, memes. Make them feel fresh and shareable.";
-
-            case "msgDecoder":
-                return "You decode confusing/ambiguous text messages to reveal what they REALLY mean." + langNote + "\n" +
-                    "SURFACE MEANING, HIDDEN MEANING, INTEREST LEVEL /10, WHAT TO DO, then 5 REPLY OPTIONS numbered 1-5.";
-
-            case "pickup":
-                return "You generate the best pickup lines. Style: " + style + ". Intensity: " + intNote + "." + langNote + "\n" +
-                    "Give 5 unique, creative pickup lines numbered 1-5. Make each feel fresh, not overused.";
-
-            case "flirty":
-                return "You generate flirty text messages. Intensity: " + intNote + "." + langNote + "\n" +
-                    "Give 5 flirty messages numbered 1-5. Each should be playful, teasing, and make them smile. Keep it natural.";
-
-            case "savage":
-                return "You generate savage, witty comebacks and replies. Intensity: " + intNote + "." + langNote + "\n" +
-                    "Give 5 savage replies numbered 1-5. Be witty, sharp, and confident. Not mean - just alpha energy.";
-
+                return "You are an AI Wingman." + lang + chatNote +
+                    "\nGive: MOOD, INTEREST /10, 5 QUICK REPLIES numbered, DO NOT SAY, STRATEGY";
             case "mindgame":
-                return "You're a master psychological strategist in dating. Analyze this conversation and suggest mind games." + langNote + "\n" +
-                    "Give: CURRENT DYNAMIC, THEIR PSYCHOLOGY, then 5 MIND GAME STRATEGIES numbered 1-5 with exact messages to send. Include push-pull, scarcity, jealousy triggers.";
-
+                return "You're a master psychological strategist." + lang + chatNote +
+                    "\nGive: CURRENT DYNAMIC, THEIR PSYCHOLOGY, 5 MIND GAMES numbered 1-5 with exact messages. Include push-pull, scarcity, jealousy.";
             case "manipulate":
-                return "You're an advanced conversation manipulation expert." + langNote + "\n" +
-                    "Analyze and give: VULNERABILITY MAP, EMOTIONAL HOOKS, INTERMITTENT REINFORCEMENT schedule, then 5 MANIPULATION MESSAGES numbered 1-5 designed to create emotional dependency.";
-
+                return "You're a manipulation expert." + lang + chatNote +
+                    "\nGive: VULNERABILITY MAP, EMOTIONAL HOOKS, 5 MANIPULATION MESSAGES numbered 1-5 to create dependency. Include intermittent reinforcement.";
             case "powermove":
-                return "You're a power dynamics expert in dating." + langNote + "\n" +
-                    "Give: POWER SCORE (you vs them), THE POWER MOVE (1 devastating message), then 5 ALTERNATIVE POWER MOVES numbered 1-5. Each with exact message and timing.";
-
+                return "You're a power dynamics expert." + lang + chatNote +
+                    "\nGive: POWER SCORE, THE POWER MOVE (1 devastating msg), 5 ALTERNATIVES numbered 1-5 with timing.";
+            case "profileRoast":
+                return "You're a dating profile reviewer." + lang + "\nROAST, SCORE /10, 5 IMPROVED BIOS numbered 1-5.";
+            case "responsePred":
+                return "You predict text responses." + lang + chatNote + "\n5 predictions numbered 1-5 with probability %.";
+            case "remixer":
+                return "You remix pickup lines. Style: " + style + "." + lang + "\n5 remixed versions numbered 1-5.";
+            case "situational":
+                return "You generate situation-specific openers. Style: " + style + "." + lang + "\n5 openers numbered 1-5.";
+            case "flowBuilder":
+                return "You build conversation flows." + lang + chatNote + "\n5 next messages numbered 1-5 plus flow strategy.";
+            case "compatibility":
+                return "You analyze zodiac/MBTI compatibility." + lang + "\nMATCH /10, STRENGTHS, CHALLENGES, 5 STARTERS numbered 1-5.";
+            case "emojiDecoder":
+                return "You decode emojis." + lang + "\nDecode, MEANING, INTEREST /10, 5 REPLY OPTIONS numbered 1-5.";
+            case "dateIdea":
+                return "You generate date ideas." + lang + "\n5 date ideas numbered 1-5 with details.";
+            case "complimentSched":
+                return "You generate compliments. Style: " + style + "." + lang + "\n5 compliments numbered 1-5.";
+            case "redFlag":
+                return "You detect red/green flags." + lang + chatNote + "\nRED FLAGS, GREEN FLAGS, RATING /10, 5 RESPONSES numbered 1-5.";
+            case "saveConvo":
+                return "You rescue dying conversations." + lang + chatNote + "\nDIAGNOSIS, 5 RECOVERY MESSAGES numbered 1-5.";
+            case "antiCringe":
+                return "You're a cringe detector." + lang + "\nCRINGE SCORE /10, 5 IMPROVED VERSIONS numbered 1-5.";
+            case "toneTranslator":
+                return "You translate message tone to: " + style + "." + lang + "\n5 versions numbered 1-5.";
+            case "perspectiveFlip":
+                return "You flip perspective." + lang + chatNote + "\nIMPRESSION, INTEREST /10, 5 BETTER VERSIONS numbered 1-5.";
+            case "ghostRecovery":
+                return "You recover from ghosting." + lang + chatNote + "\nDIAGNOSIS, 5 COMEBACKS numbered 1-5.";
+            case "rizzRater":
+                return "You rate rizz." + lang + "\nSCORE /10, BREAKDOWN, 5 UPGRADES numbered 1-5.";
+            case "bioBeforeAfter":
+                return "You transform bios." + lang + "\nSCORE, PROBLEMS, 5 TRANSFORMS numbered 1-5.";
+            case "dateScript":
+                return "You write date scripts." + lang + "\nFULL SCRIPT, 5 KEY LINES numbered 1-5.";
+            case "trendingLines":
+                return "You generate trending pickup lines. Style: " + style + "." + lang + "\n5 trending lines numbered 1-5.";
+            case "msgDecoder":
+                return "You decode messages." + lang + chatNote + "\nSURFACE, HIDDEN, INTEREST /10, 5 REPLIES numbered 1-5.";
+            case "pickup":
+                return "You generate pickup lines. Style: " + style + ". Intensity: " + intNote + "." + lang + "\n5 lines numbered 1-5.";
+            case "flirty":
+                return "You generate flirty texts. Intensity: " + intNote + "." + lang + "\n5 messages numbered 1-5.";
+            case "savage":
+                return "You generate savage replies. Intensity: " + intNote + "." + lang + "\n5 replies numbered 1-5.";
             default:
-                return "You generate text message replies. Style: " + style + "." + langNote + "\nGive 5 replies numbered 1-5.";
+                return "You generate text replies. Style: " + style + "." + lang + "\n5 replies numbered 1-5.";
         }
     }
 
     private String buildUserPrompt(String tool, String style, String context) {
         if (context.isEmpty()) context = "general/any topic";
-
         switch (tool) {
             case "reply": return "Generate 5 " + style + " replies to: \"" + context + "\"";
-            case "coach": return "Analyze this conversation and coach me:\n" + context;
-            case "wingman": return "Wingman analysis - their message: \"" + context + "\"\nGive quick replies and strategy.";
-            case "profileRoast": return "Roast and improve this dating bio:\n\"" + context + "\"";
-            case "responsePred": return "Predict how they'll respond to: \"" + context + "\"";
-            case "remixer": return "Remix this line in " + style + " style: \"" + context + "\"";
-            case "situational": return "Generate openers for this situation: " + context;
-            case "flowBuilder": return "Build a conversation flow starting from: \"" + context + "\"";
-            case "compatibility": return "Analyze dating compatibility: " + context;
-            case "emojiDecoder": return "Decode these emojis/message: " + context;
-            case "dateIdea": return "Generate date ideas for: " + context;
-            case "complimentSched": return "Generate compliments for: " + context;
-            case "redFlag": return "Detect red/green flags in: \"" + context + "\"";
-            case "saveConvo": return "Save this dying conversation:\n" + context;
-            case "antiCringe": return "Cringe-check this message before I send it: \"" + context + "\"";
-            case "toneTranslator": return "Translate this to " + style + " tone: \"" + context + "\"";
-            case "perspectiveFlip": return "How would they see this message: \"" + context + "\"";
-            case "ghostRecovery": return "Help me recover from ghosting. Last messages:\n" + context;
-            case "rizzRater": return "Rate the rizz of: \"" + context + "\"";
-            case "bioBeforeAfter": return "Transform this bio:\n\"" + context + "\"";
-            case "dateScript": return "Write a first date script for: " + context;
-            case "trendingLines": return "Generate trending pickup lines about: " + context;
-            case "msgDecoder": return "Decode this message: \"" + context + "\"";
-            case "pickup": return "Generate 5 " + style + " pickup lines" + (context.isEmpty() ? "" : " about: " + context);
-            case "flirty": return "Generate 5 flirty texts for: " + context;
-            case "savage": return "Generate 5 savage replies to: \"" + context + "\"";
-            case "mindgame": return "Create mind game strategies for this conversation:\n" + context;
-            case "manipulate": return "Create manipulation playbook for:\n" + context;
-            case "powermove": return "Create power move strategy for:\n" + context;
-            default: return "Generate 5 " + style + " replies to: \"" + context + "\"";
+            case "coach": return "Coach me on:\n" + context;
+            case "wingman": return "Wingman: " + context;
+            case "mindgame": return "Mind game strategy:\n" + context;
+            case "manipulate": return "Manipulation playbook:\n" + context;
+            case "powermove": return "Power move:\n" + context;
+            case "profileRoast": return "Roast bio:\n\"" + context + "\"";
+            case "responsePred": return "Predict response to: \"" + context + "\"";
+            case "remixer": return "Remix: \"" + context + "\"";
+            case "situational": return "Openers for: " + context;
+            case "flowBuilder": return "Build flow from: \"" + context + "\"";
+            case "compatibility": return "Analyze: " + context;
+            case "emojiDecoder": return "Decode: " + context;
+            case "dateIdea": return "Date ideas for: " + context;
+            case "complimentSched": return "Compliments for: " + context;
+            case "redFlag": return "Detect flags: \"" + context + "\"";
+            case "saveConvo": return "Save convo:\n" + context;
+            case "antiCringe": return "Cringe-check: \"" + context + "\"";
+            case "toneTranslator": return "Translate to " + style + ": \"" + context + "\"";
+            case "perspectiveFlip": return "Flip perspective: \"" + context + "\"";
+            case "ghostRecovery": return "Ghost recovery:\n" + context;
+            case "rizzRater": return "Rate: \"" + context + "\"";
+            case "bioBeforeAfter": return "Transform bio:\n\"" + context + "\"";
+            case "dateScript": return "Date script for: " + context;
+            case "trendingLines": return "Trending lines: " + context;
+            case "msgDecoder": return "Decode: \"" + context + "\"";
+            case "pickup": return "5 " + style + " pickup lines" + (context.length() > 20 ? " about: " + context : "");
+            case "flirty": return "5 flirty texts for: " + context;
+            case "savage": return "5 savage replies to: \"" + context + "\"";
+            default: return "Generate 5 replies to: \"" + context + "\"";
         }
     }
 
     private List<String> parseReplies(String content, String tool) {
         List<String> replies = new ArrayList<>();
+        boolean isAnalysis = tool.equals("coach") || tool.equals("wingman") || tool.equals("mindgame") ||
+            tool.equals("manipulate") || tool.equals("powermove") || tool.equals("profileRoast") ||
+            tool.equals("responsePred") || tool.equals("compatibility") || tool.equals("emojiDecoder") ||
+            tool.equals("redFlag") || tool.equals("antiCringe") || tool.equals("perspectiveFlip") ||
+            tool.equals("rizzRater") || tool.equals("bioBeforeAfter") || tool.equals("dateScript") ||
+            tool.equals("msgDecoder") || tool.equals("dateIdea");
 
-        boolean isAnalysisTool = tool.equals("coach") || tool.equals("wingman") ||
-            tool.equals("profileRoast") || tool.equals("responsePred") ||
-            tool.equals("compatibility") || tool.equals("emojiDecoder") ||
-            tool.equals("redFlag") || tool.equals("antiCringe") ||
-            tool.equals("perspectiveFlip") || tool.equals("rizzRater") ||
-            tool.equals("bioBeforeAfter") || tool.equals("dateScript") ||
-            tool.equals("msgDecoder") || tool.equals("dateIdea") ||
-            tool.equals("mindgame") || tool.equals("manipulate") || tool.equals("powermove");
-
-        if (isAnalysisTool) {
+        if (isAnalysis) {
             String[] sections = content.split("\n\n");
             StringBuilder analysis = new StringBuilder();
-            List<String> actionItems = new ArrayList<>();
-
+            List<String> items = new ArrayList<>();
             for (String section : sections) {
                 String trimmed = section.trim();
                 if (trimmed.isEmpty()) continue;
-
-                boolean hasNumbered = false;
+                boolean hasNum = false;
                 for (String line : trimmed.split("\n")) {
-                    String clean = line.trim();
-                    if (clean.matches("^\\d+[.)\\-:\\s]+.+") && clean.length() > 8) {
-                        String item = clean.replaceAll("^\\d+[.)\\-:\\s]+", "").replaceAll("^\"|\"$", "").trim();
-                        if (item.length() > 3) {
-                            actionItems.add(item);
-                            hasNumbered = true;
-                        }
+                    String cl = line.trim();
+                    if (cl.matches("^\\d+[.)\\-:\\s]+.+") && cl.length() > 8) {
+                        String item = cl.replaceAll("^\\d+[.)\\-:\\s]+", "").replaceAll("^\"|\"$", "").trim();
+                        if (item.length() > 3) { items.add(item); hasNum = true; }
                     }
                 }
-                if (!hasNumbered && analysis.length() < 400) {
+                if (!hasNum && analysis.length() < 400) {
                     if (analysis.length() > 0) analysis.append("\n");
                     analysis.append(trimmed);
                 }
             }
-
             if (analysis.length() > 0) {
-                String analysisText = analysis.toString();
-                if (analysisText.length() > 200) {
-                    analysisText = analysisText.substring(0, 200) + "...";
-                }
-                replies.add("📊 " + analysisText);
+                String a = analysis.toString();
+                if (a.length() > 200) a = a.substring(0, 200) + "...";
+                replies.add("📊 " + a);
             }
-
-            for (String item : actionItems) {
-                replies.add(item);
-                if (replies.size() >= 8) break;
-            }
+            for (String item : items) { replies.add(item); if (replies.size() >= 8) break; }
         } else {
             for (String l : content.split("\n")) {
-                String clean = l.trim().replaceAll("^\\d+[.)\\-:\\s]+", "").replaceAll("^\"|\"$", "").trim();
-                if (clean.length() > 3 && !clean.startsWith("#") && !clean.startsWith("*") && !clean.startsWith("---")) {
-                    replies.add(clean);
-                }
+                String cl = l.trim().replaceAll("^\\d+[.)\\-:\\s]+", "").replaceAll("^\"|\"$", "").trim();
+                if (cl.length() > 3 && !cl.startsWith("#") && !cl.startsWith("*") && !cl.startsWith("---"))
+                    replies.add(cl);
             }
         }
-
         return replies;
     }
 
@@ -1142,39 +1253,44 @@ public class RizzKeyboardService extends InputMethodService {
         int count = Math.min(replies.size(), 8);
         for (int i = 0; i < count; i++) {
             final String reply = replies.get(i);
-            final boolean isAnalysis = reply.startsWith("📊 ");
+            final boolean isInfo = reply.startsWith("📊 ");
 
             Button btn = new Button(this);
             btn.setText(reply);
             btn.setTextSize(11);
             btn.setAllCaps(false);
-            btn.setTextColor(Color.parseColor(isAnalysis ? "#a0a0c0" : "#f0f0f5"));
+            btn.setTextColor(Color.parseColor(isInfo ? "#a0a0c0" : "#f0f0f5"));
             btn.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
-            btn.setPadding(dp(10), dp(5), dp(10), dp(5));
+            btn.setPadding(dp(10), dp(4), dp(10), dp(4));
 
             GradientDrawable bg = new GradientDrawable();
             bg.setCornerRadius(dp(8));
-            bg.setColor(Color.parseColor(isAnalysis ? "#12121e" : "#1a1a26"));
-            bg.setStroke(dp(1), Color.parseColor(isAnalysis ? "#333355" : "#2a1a3a"));
+            bg.setColor(Color.parseColor(isInfo ? "#12121e" : "#1a1a26"));
+            bg.setStroke(dp(1), Color.parseColor(isInfo ? "#333355" : "#2a1a3a"));
             btn.setBackground(bg);
 
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            params.setMargins(0, 0, 0, dp(2));
-            btn.setLayoutParams(params);
+            p.setMargins(0, 0, 0, dp(2));
+            btn.setLayoutParams(p);
 
             btn.setOnClickListener(v -> {
-                String textToType = isAnalysis ? reply.substring(2).trim() : reply;
+                String text = isInfo ? reply.substring(2).trim() : reply;
                 InputConnection ic = getCurrentInputConnection();
-                if (ic != null) {
-                    ic.commitText(textToType, 1);
+                if (ic != null) ic.commitText(text, 1);
+
+                if (activeChat != null) {
+                    addMessageToChat("Me: " + text);
+                    statusLabel.setText("✅ Typed + saved to " + activeChat);
+                } else {
+                    statusLabel.setText("✅ Typed! Hit send");
                 }
-                statusLabel.setText("✅ Typed! Hit send in the app");
+
                 showingRizz = false;
                 rizzPanel.setVisibility(View.GONE);
                 qwertyContainer.setVisibility(View.VISIBLE);
                 GradientDrawable tbg = new GradientDrawable();
-                tbg.setCornerRadius(dp(12));
+                tbg.setCornerRadius(dp(10));
                 tbg.setColor(Color.parseColor("#a855f7"));
                 rizzToggleBtn.setBackground(tbg);
                 rizzToggleBtn.setText("⚡ Rizz");
