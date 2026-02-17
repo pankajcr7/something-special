@@ -5,6 +5,9 @@ import android.content.Intent;
 import android.provider.Settings;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.text.TextUtils;
+import android.accessibilityservice.AccessibilityServiceInfo;
+import android.view.accessibility.AccessibilityManager;
 
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
@@ -18,6 +21,7 @@ import java.util.List;
 public class KeyboardSetupPlugin extends Plugin {
 
     private static final String KEYBOARD_ID = "com.rizzgpt.app/.keyboard.RizzKeyboardService";
+    private static final String ACCESSIBILITY_ID = "com.rizzgpt.app/.keyboard.RizzAccessibilityService";
 
     @PluginMethod
     public void getKeyboardStatus(PluginCall call) {
@@ -40,10 +44,24 @@ public class KeyboardSetupPlugin extends Plugin {
             isSelected = true;
         }
 
+        boolean accessibilityEnabled = isAccessibilityEnabled(ctx);
+
         JSObject result = new JSObject();
         result.put("isEnabled", isEnabled);
         result.put("isSelected", isSelected);
+        result.put("accessibilityEnabled", accessibilityEnabled);
         call.resolve(result);
+    }
+
+    private boolean isAccessibilityEnabled(Context ctx) {
+        AccessibilityManager am = (AccessibilityManager) ctx.getSystemService(Context.ACCESSIBILITY_SERVICE);
+        List<AccessibilityServiceInfo> services = am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_GENERIC);
+        for (AccessibilityServiceInfo info : services) {
+            if (info.getId() != null && info.getId().contains("RizzAccessibilityService")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @PluginMethod
@@ -58,6 +76,14 @@ public class KeyboardSetupPlugin extends Plugin {
     public void openInputMethodPicker(PluginCall call) {
         InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.showInputMethodPicker();
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void openAccessibilitySettings(PluginCall call) {
+        Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        getContext().startActivity(intent);
         call.resolve();
     }
 }

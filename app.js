@@ -1273,3 +1273,14 @@ return;
 showToast('Long-press spacebar or tap 🌐 on your keyboard to switch');
 }
 
+function openAccessibilitySettings(){
+try{
+const cap=window.Capacitor;
+if(cap&&cap.Plugins&&cap.Plugins.KeyboardSetup){
+cap.Plugins.KeyboardSetup.openAccessibilitySettings();
+return;
+}
+}catch(e){}
+showToast('Go to Settings → Accessibility → RizzGPT Screen Reader → Enable');
+}
+
