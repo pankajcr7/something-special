@@ -75,32 +75,46 @@ body.light .nav-links{background:rgba(255,255,255,.98)}
 .stat-num{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.3rem}
 .stat-label{font-size:.72rem;color:var(--text3)}
 
-/* ===== KEYBOARD SETUP ===== */
-.keyboard-setup{padding:0 20px 30px;max-width:700px;margin:0 auto}
-.keyboard-setup-card{background:var(--bg2);border:1px solid rgba(168,85,247,.25);border-radius:var(--r2);padding:24px;position:relative;overflow:hidden}
-.keyboard-setup-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#a855f7,#ec4899,#6366f1)}
-.keyboard-setup-header{display:flex;align-items:center;gap:14px;margin-bottom:20px}
-.keyboard-setup-icon{font-size:2rem;background:rgba(168,85,247,.12);width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.keyboard-setup-title{font-family:'Space Grotesk',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:3px}
-.keyboard-setup-sub{color:var(--text2);font-size:.85rem}
-.keyboard-steps{display:flex;flex-direction:column;gap:12px;margin-bottom:18px}
-.keyboard-step{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);transition:all .2s}
-.keyboard-step.done{border-color:rgba(16,185,129,.3);background:rgba(16,185,129,.05)}
-.step-num{width:28px;height:28px;border-radius:50%;background:var(--grad);color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.keyboard-step.done .step-num{background:linear-gradient(135deg,#10b981,#059669)}
-.step-content{flex:1;display:flex;flex-direction:column;gap:6px}
-.step-text{font-size:.88rem;font-weight:500}
-.step-btn{padding:8px 18px;border:none;border-radius:20px;background:var(--grad);color:#fff;font-family:var(--font);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;align-self:flex-start}
-.step-btn:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(168,85,247,.3)}
-.step-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
-.step-status{font-size:1.2rem;flex-shrink:0}
-.keyboard-demo{background:rgba(168,85,247,.06);border:1px solid rgba(168,85,247,.12);border-radius:var(--r);padding:14px 16px}
-.keyboard-demo-text{font-size:.85rem;color:var(--text2);line-height:1.5}
-@media(max-width:500px){
-.keyboard-setup-header{flex-direction:column;text-align:center}
-.keyboard-step{flex-wrap:wrap}
-.step-btn{width:100%}
-}
+/* ===== KEYBOARD EXTENSION DRAWER ===== */
+.kb-drawer{position:fixed;inset:0;z-index:200;display:none}
+.kb-drawer.open{display:flex}
+.kb-drawer-overlay{position:absolute;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px)}
+.kb-drawer-panel{position:absolute;right:0;top:0;bottom:0;width:min(420px,92vw);background:var(--bg2);border-left:1px solid var(--border);overflow-y:auto;animation:slideIn .25s ease;display:flex;flex-direction:column}
+.kb-drawer-header{display:flex;align-items:center;justify-content:space-between;padding:20px 20px 14px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2);z-index:1}
+.kb-drawer-header h3{font-size:1.1rem;font-weight:700}
+.kb-drawer-close{background:none;border:none;color:var(--text2);cursor:pointer;padding:4px}
+.kb-drawer-body{padding:20px;flex:1;overflow-y:auto}
+.kb-hero-section{text-align:center;padding:24px 16px;background:linear-gradient(135deg,rgba(168,85,247,.1),rgba(236,72,153,.08));border:1px solid rgba(168,85,247,.2);border-radius:var(--r2);margin-bottom:24px}
+.kb-hero-icon{font-size:2.5rem;margin-bottom:8px}
+.kb-hero-section h4{font-family:'Space Grotesk',sans-serif;font-size:1.3rem;font-weight:700;margin-bottom:6px}
+.kb-hero-section p{color:var(--text2);font-size:.88rem;line-height:1.5}
+.kb-section-title{font-size:.8rem;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:600;margin-bottom:14px}
+.kb-steps-section{margin-bottom:24px}
+.kb-step{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--border)}
+.kb-step:last-child{border-bottom:none}
+.kb-step-num{width:32px;height:32px;border-radius:50%;background:var(--grad);color:#fff;font-size:.85rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.kb-step-info{flex:1}
+.kb-step-info strong{font-size:.92rem;display:block;margin-bottom:4px}
+.kb-step-info p{color:var(--text2);font-size:.82rem;line-height:1.5;margin-bottom:8px}
+.kb-step-action{padding:8px 20px;border:none;border-radius:20px;background:var(--grad);color:#fff;font-family:var(--font);font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s}
+.kb-step-action:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(168,85,247,.3)}
+.kb-preview-section{margin-bottom:24px}
+.kb-preview-box{background:#0a0a0f;border:1px solid rgba(255,255,255,.1);border-radius:var(--r);padding:12px;font-size:.82rem}
+.kb-preview-header{display:flex;justify-content:space-between;color:#a855f7;font-weight:700;font-size:.85rem;margin-bottom:8px}
+.kb-preview-modes{display:flex;gap:6px;margin-bottom:10px;overflow-x:auto}
+.kb-mode{padding:4px 10px;border-radius:12px;background:#1a1a26;color:#9898b0;font-size:.72rem;white-space:nowrap}
+.kb-mode.active{background:rgba(168,85,247,.15);color:#a855f7;border:1px solid rgba(168,85,247,.3)}
+.kb-preview-input{padding:8px 12px;background:#1a1a26;border-radius:18px;color:#5a5a72;margin-bottom:8px;font-size:.8rem}
+.kb-preview-reply{padding:8px 12px;background:#1a1a26;border:1px solid #2a1a3a;border-radius:10px;margin-bottom:4px;color:#f0f0f5;font-size:.8rem;cursor:pointer}
+.kb-preview-reply:hover{border-color:#a855f7;background:rgba(168,85,247,.06)}
+.kb-note-section{background:rgba(168,85,247,.06);border:1px solid rgba(168,85,247,.12);border-radius:var(--r);padding:14px 16px}
+.kb-note-section p{font-size:.84rem;color:var(--text2);line-height:1.5}
+.kb-icon-btn{position:relative}
+.kb-icon-btn::after{content:'';position:absolute;top:2px;right:2px;width:8px;height:8px;border-radius:50%;background:var(--pink);animation:kbPulse 2s infinite}
+@keyframes kbPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+.kb-nav-link{color:#10b981!important;font-weight:600!important}
+.kb-cta-btn{background:linear-gradient(135deg,#6366f1,#a855f7)!important;color:#fff!important;border:none!important;box-shadow:0 4px 20px rgba(99,102,241,.3)}
+.kb-cta-btn:hover{transform:translateY(-2px);box-shadow:0 6px 30px rgba(99,102,241,.4)}
 
 /* ===== DAILY CHALLENGE ===== */
 .daily-challenge{padding:0 20px 30px;max-width:700px;margin:0 auto}
