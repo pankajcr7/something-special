@@ -1,0 +1,35 @@
+{
+  "name": "rizzgpt",
+  "version": "1.0.0",
+  "description": "RizzGPT - AI Dating & Texting Assistant",
+  "main": "app.js",
+  "scripts": {
+    "sync": "cp *.html *.js *.css *.svg *.json www/ 2>/dev/null; npx cap sync",
+    "ios": "npm run sync && npx cap open ios",
+    "android": "npm run sync && npx cap open android",
+    "build:web": "cp *.html *.js *.css *.svg manifest.json sw.js www/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pankajcr7/something-special.git"
+  },
+  "keywords": ["rizz", "dating", "ai", "keyboard"],
+  "author": "Anku",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/pankajcr7/something-special/issues"
+  },
+  "homepage": "https://github.com/pankajcr7/something-special#readme",
+  "dependencies": {
+    "@capacitor/android": "^8.1.0",
+    "@capacitor/app": "^8.0.1",
+    "@capacitor/cli": "^8.1.0",
+    "@capacitor/core": "^8.1.0",
+    "@capacitor/haptics": "^8.0.0",
+    "@capacitor/ios": "^8.1.0",
+    "@capacitor/keyboard": "^8.0.0",
+    "@capacitor/splash-screen": "^8.0.1",
+    "@capacitor/status-bar": "^8.0.1"
+  }
+}
