@@ -44,8 +44,12 @@
                 <a href="#tools" class="nav-link">Tools</a>
                 <a href="#battle" class="nav-link">Battle</a>
                 <a href="RizzGPT.apk" download="RizzGPT.apk" class="nav-link apk-nav-link">📱 APK</a>
+                <a href="#" class="nav-link kb-nav-link" onclick="event.preventDefault();openKeyboardDrawer()">⌨️ Keyboard</a>
             </div>
             <div class="nav-actions">
+                <button class="nav-icon-btn kb-icon-btn" id="keyboardBtn" title="Keyboard Extension" onclick="openKeyboardDrawer()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M8 16h8"/></svg>
+                </button>
                 <button class="nav-icon-btn" id="soundToggle" title="Sound Effects">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
                 </button>
@@ -78,52 +82,12 @@
                 <a href="#generator" class="cta-btn primary">Start Generating</a>
                 <a href="chat.html" class="cta-btn secondary">💬 Chat Mode</a>
                 <a href="RizzGPT.apk" download="RizzGPT.apk" class="cta-btn apk-btn">📱 Download APK</a>
+                <button class="cta-btn kb-cta-btn" onclick="openKeyboardDrawer()">⌨️ Enable Keyboard</button>
             </div>
             <div class="hero-stats">
                 <div class="stat"><span class="stat-num">500K+</span><span class="stat-label">Lines Generated</span></div>
                 <div class="stat"><span class="stat-num">100%</span><span class="stat-label">Free Forever</span></div>
                 <div class="stat"><span class="stat-num">⚡</span><span class="stat-label">Instant Results</span></div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Keyboard Setup Banner (Android App Only) -->
-    <section class="keyboard-setup" id="keyboardSetup" style="display:none">
-        <div class="keyboard-setup-card">
-            <div class="keyboard-setup-header">
-                <span class="keyboard-setup-icon">⌨️</span>
-                <div>
-                    <h3 class="keyboard-setup-title">Enable RizzGPT Keyboard</h3>
-                    <p class="keyboard-setup-sub">Use AI rizz directly in WhatsApp, Instagram, Tinder & more</p>
-                </div>
-            </div>
-            <div class="keyboard-steps" id="keyboardSteps">
-                <div class="keyboard-step" id="kbStep1">
-                    <div class="step-num">1</div>
-                    <div class="step-content">
-                        <span class="step-text">Enable RizzGPT Keyboard in Settings</span>
-                        <button class="step-btn" id="kbEnableBtn" onclick="openKeyboardSettings()">Open Settings</button>
-                    </div>
-                    <span class="step-status" id="kbStep1Status">⏳</span>
-                </div>
-                <div class="keyboard-step" id="kbStep2">
-                    <div class="step-num">2</div>
-                    <div class="step-content">
-                        <span class="step-text">Switch to RizzGPT as your keyboard</span>
-                        <button class="step-btn" id="kbSwitchBtn" onclick="openKeyboardPicker()">Switch Keyboard</button>
-                    </div>
-                    <span class="step-status" id="kbStep2Status">⏳</span>
-                </div>
-                <div class="keyboard-step" id="kbStep3">
-                    <div class="step-num">3</div>
-                    <div class="step-content">
-                        <span class="step-text">Open any chat app and start typing with AI</span>
-                    </div>
-                    <span class="step-status">🚀</span>
-                </div>
-            </div>
-            <div class="keyboard-demo">
-                <p class="keyboard-demo-text">💡 <strong>How it works:</strong> Switch to RizzGPT keyboard in any chat → type their message → tap ⚡ → get AI-powered replies instantly!</p>
             </div>
         </div>
     </section>
@@ -588,6 +552,78 @@
                 </button>
             </div>
             <div class="history-list" id="historyList"></div>
+        </div>
+    </div>
+
+    <!-- Keyboard Extension Drawer -->
+    <div class="kb-drawer" id="kbDrawer">
+        <div class="kb-drawer-overlay" onclick="closeKeyboardDrawer()"></div>
+        <div class="kb-drawer-panel">
+            <div class="kb-drawer-header">
+                <h3>⌨️ Keyboard Extension</h3>
+                <button class="kb-drawer-close" onclick="closeKeyboardDrawer()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="kb-drawer-body">
+                <div class="kb-hero-section">
+                    <div class="kb-hero-icon">⚡</div>
+                    <h4>RizzGPT Keyboard</h4>
+                    <p>Generate AI replies directly inside WhatsApp, Instagram, Tinder & any chat app!</p>
+                </div>
+                <div class="kb-steps-section">
+                    <h4 class="kb-section-title">Setup Steps</h4>
+                    <div class="kb-step">
+                        <div class="kb-step-num">1</div>
+                        <div class="kb-step-info">
+                            <strong>Open Keyboard Settings</strong>
+                            <p>Go to Settings → System → Languages & Input → On-screen keyboard → Manage keyboards</p>
+                            <button class="kb-step-action" onclick="openKeyboardSettings()">Open Input Settings</button>
+                        </div>
+                    </div>
+                    <div class="kb-step">
+                        <div class="kb-step-num">2</div>
+                        <div class="kb-step-info">
+                            <strong>Enable RizzGPT Keyboard</strong>
+                            <p>Toggle ON "RizzGPT Keyboard" in the list of available keyboards</p>
+                        </div>
+                    </div>
+                    <div class="kb-step">
+                        <div class="kb-step-num">3</div>
+                        <div class="kb-step-info">
+                            <strong>Switch to RizzGPT</strong>
+                            <p>Open any chat app → tap the keyboard icon (globe/switch) → select RizzGPT</p>
+                            <button class="kb-step-action" onclick="openKeyboardPicker()">Switch Keyboard Now</button>
+                        </div>
+                    </div>
+                    <div class="kb-step">
+                        <div class="kb-step-num">4</div>
+                        <div class="kb-step-info">
+                            <strong>Start Using AI Rizz!</strong>
+                            <p>Type their message → select style → tap ⚡ → get AI replies → tap to send!</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="kb-preview-section">
+                    <h4 class="kb-section-title">How It Looks</h4>
+                    <div class="kb-preview-box">
+                        <div class="kb-preview-header">⚡ RizzGPT <span>🌐</span></div>
+                        <div class="kb-preview-modes">
+                            <span class="kb-mode active">😏 Smooth</span>
+                            <span class="kb-mode">😂 Funny</span>
+                            <span class="kb-mode">🔥 Bold</span>
+                            <span class="kb-mode">💜 Flirty</span>
+                        </div>
+                        <div class="kb-preview-input">Their message... ⚡</div>
+                        <div class="kb-preview-reply">→ hey, you really know how to make someone smile haha</div>
+                        <div class="kb-preview-reply">→ ngl that was smooth, but i can do better 😏</div>
+                        <div class="kb-preview-reply">→ you must be a magician because you made everyone else disappear</div>
+                    </div>
+                </div>
+                <div class="kb-note-section">
+                    <p>💡 <strong>Tip:</strong> Long-press the spacebar or tap the globe icon 🌐 on your keyboard to quickly switch between keyboards.</p>
+                </div>
+            </div>
         </div>
     </div>
 
