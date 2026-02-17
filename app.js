@@ -1243,18 +1243,18 @@ return`<p style="margin-bottom:4px">${l}</p>`;
 function copyText(t){navigator.clipboard.writeText(t).then(()=>{showToast('Copied!');playSound('copy');});}
 
 // ===== KEYBOARD SETUP (Android App Only) =====
-(function initKeyboardSetup(){
-const isCapacitor=window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform();
-if(!isCapacitor)return;
+function _tryInitKeyboard(){
+const cap=window.Capacitor;
+if(!cap||!cap.isNativePlatform)return false;
+if(!cap.isNativePlatform())return false;
+if(!cap.Plugins||!cap.Plugins.KeyboardSetup)return false;
 const section=document.getElementById('keyboardSetup');
-if(!section)return;
+if(!section)return false;
 section.style.display='block';
 
 async function checkStatus(){
 try{
-const {KeyboardSetup}=window.Capacitor.Plugins;
-if(!KeyboardSetup)return;
-const status=await KeyboardSetup.getKeyboardStatus();
+const status=await cap.Plugins.KeyboardSetup.getKeyboardStatus();
 const step1El=document.getElementById('kbStep1');
 const step2El=document.getElementById('kbStep2');
 const s1Status=document.getElementById('kbStep1Status');
@@ -1289,19 +1289,31 @@ switchBtn.disabled=false;
 checkStatus();
 document.addEventListener('resume',()=>setTimeout(checkStatus,500));
 setInterval(checkStatus,3000);
+return true;
+}
+
+(function initKeyboardSetup(){
+if(_tryInitKeyboard())return;
+let attempts=0;
+const timer=setInterval(()=>{
+attempts++;
+if(_tryInitKeyboard()||attempts>20){clearInterval(timer);}
+},500);
+document.addEventListener('DOMContentLoaded',()=>{_tryInitKeyboard();});
+window.addEventListener('load',()=>{_tryInitKeyboard();});
 })();
 
 function openKeyboardSettings(){
 try{
-const {KeyboardSetup}=window.Capacitor.Plugins;
-if(KeyboardSetup)KeyboardSetup.openInputMethodSettings();
+const cap=window.Capacitor;
+if(cap&&cap.Plugins&&cap.Plugins.KeyboardSetup)cap.Plugins.KeyboardSetup.openInputMethodSettings();
 }catch(e){console.log(e);}
 }
 
 function openKeyboardPicker(){
 try{
-const {KeyboardSetup}=window.Capacitor.Plugins;
-if(KeyboardSetup)KeyboardSetup.openInputMethodPicker();
+const cap=window.Capacitor;
+if(cap&&cap.Plugins&&cap.Plugins.KeyboardSetup)cap.Plugins.KeyboardSetup.openInputMethodPicker();
 }catch(e){console.log(e);}
 }
 
