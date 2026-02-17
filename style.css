@@ -75,6 +75,33 @@ body.light .nav-links{background:rgba(255,255,255,.98)}
 .stat-num{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.3rem}
 .stat-label{font-size:.72rem;color:var(--text3)}
 
+/* ===== KEYBOARD SETUP ===== */
+.keyboard-setup{padding:0 20px 30px;max-width:700px;margin:0 auto}
+.keyboard-setup-card{background:var(--bg2);border:1px solid rgba(168,85,247,.25);border-radius:var(--r2);padding:24px;position:relative;overflow:hidden}
+.keyboard-setup-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#a855f7,#ec4899,#6366f1)}
+.keyboard-setup-header{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.keyboard-setup-icon{font-size:2rem;background:rgba(168,85,247,.12);width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.keyboard-setup-title{font-family:'Space Grotesk',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:3px}
+.keyboard-setup-sub{color:var(--text2);font-size:.85rem}
+.keyboard-steps{display:flex;flex-direction:column;gap:12px;margin-bottom:18px}
+.keyboard-step{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);transition:all .2s}
+.keyboard-step.done{border-color:rgba(16,185,129,.3);background:rgba(16,185,129,.05)}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--grad);color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.keyboard-step.done .step-num{background:linear-gradient(135deg,#10b981,#059669)}
+.step-content{flex:1;display:flex;flex-direction:column;gap:6px}
+.step-text{font-size:.88rem;font-weight:500}
+.step-btn{padding:8px 18px;border:none;border-radius:20px;background:var(--grad);color:#fff;font-family:var(--font);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;align-self:flex-start}
+.step-btn:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(168,85,247,.3)}
+.step-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.step-status{font-size:1.2rem;flex-shrink:0}
+.keyboard-demo{background:rgba(168,85,247,.06);border:1px solid rgba(168,85,247,.12);border-radius:var(--r);padding:14px 16px}
+.keyboard-demo-text{font-size:.85rem;color:var(--text2);line-height:1.5}
+@media(max-width:500px){
+.keyboard-setup-header{flex-direction:column;text-align:center}
+.keyboard-step{flex-wrap:wrap}
+.step-btn{width:100%}
+}
+
 /* ===== DAILY CHALLENGE ===== */
 .daily-challenge{padding:0 20px 30px;max-width:700px;margin:0 auto}
 .challenge-card{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);padding:24px;position:relative;overflow:hidden}

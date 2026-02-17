@@ -1242,3 +1242,78 @@ return`<p style="margin-bottom:4px">${l}</p>`;
 
 function copyText(t){navigator.clipboard.writeText(t).then(()=>{showToast('Copied!');playSound('copy');});}
 
+// ===== KEYBOARD SETUP (Android App Only) =====
+function _tryInitKeyboard(){
+const cap=window.Capacitor;
+if(!cap||!cap.isNativePlatform)return false;
+if(!cap.isNativePlatform())return false;
+if(!cap.Plugins||!cap.Plugins.KeyboardSetup)return false;
+const section=document.getElementById('keyboardSetup');
+if(!section)return false;
+section.style.display='block';
+
+async function checkStatus(){
+try{
+const status=await cap.Plugins.KeyboardSetup.getKeyboardStatus();
+const step1El=document.getElementById('kbStep1');
+const step2El=document.getElementById('kbStep2');
+const s1Status=document.getElementById('kbStep1Status');
+const s2Status=document.getElementById('kbStep2Status');
+const enableBtn=document.getElementById('kbEnableBtn');
+const switchBtn=document.getElementById('kbSwitchBtn');
+if(status.isEnabled){
+step1El.classList.add('done');
+s1Status.textContent='✅';
+enableBtn.textContent='Enabled';
+enableBtn.disabled=true;
+}else{
+step1El.classList.remove('done');
+s1Status.textContent='⏳';
+enableBtn.textContent='Open Settings';
+enableBtn.disabled=false;
+}
+if(status.isSelected){
+step2El.classList.add('done');
+s2Status.textContent='✅';
+switchBtn.textContent='Active';
+switchBtn.disabled=true;
+}else{
+step2El.classList.remove('done');
+s2Status.textContent='⏳';
+switchBtn.textContent='Switch Keyboard';
+switchBtn.disabled=false;
+}
+}catch(e){console.log('KeyboardSetup check error:',e);}
+}
+
+checkStatus();
+document.addEventListener('resume',()=>setTimeout(checkStatus,500));
+setInterval(checkStatus,3000);
+return true;
+}
+
+(function initKeyboardSetup(){
+if(_tryInitKeyboard())return;
+let attempts=0;
+const timer=setInterval(()=>{
+attempts++;
+if(_tryInitKeyboard()||attempts>20){clearInterval(timer);}
+},500);
+document.addEventListener('DOMContentLoaded',()=>{_tryInitKeyboard();});
+window.addEventListener('load',()=>{_tryInitKeyboard();});
+})();
+
+function openKeyboardSettings(){
+try{
+const cap=window.Capacitor;
+if(cap&&cap.Plugins&&cap.Plugins.KeyboardSetup)cap.Plugins.KeyboardSetup.openInputMethodSettings();
+}catch(e){console.log(e);}
+}
+
+function openKeyboardPicker(){
+try{
+const cap=window.Capacitor;
+if(cap&&cap.Plugins&&cap.Plugins.KeyboardSetup)cap.Plugins.KeyboardSetup.openInputMethodPicker();
+}catch(e){console.log(e);}
+}
+
