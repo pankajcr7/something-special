@@ -1252,7 +1252,55 @@ let chatBrainActive=null;
 let chatBrainUploading=false;
 let chatBrainImages=[];
 
-function saveChatBrainData(){localStorage.setItem('chatBrainChats',JSON.stringify(chatBrainChats));}
+function saveChatBrainData(){
+localStorage.setItem('chatBrainChats',JSON.stringify(chatBrainChats));
+syncChatToNative();
+}
+
+async function syncChatToNative(){
+try{
+const cap=window.Capacitor;
+if(!cap||!cap.Plugins||!cap.Plugins.KeyboardSetup)return;
+for(const name of Object.keys(chatBrainChats)){
+const chat=chatBrainChats[name];
+await cap.Plugins.KeyboardSetup.saveChatBrain({name:name,messages:JSON.stringify(chat.messages||[])});
+}
+}catch(e){}
+}
+
+async function syncChatsFromNative(){
+try{
+const cap=window.Capacitor;
+if(!cap||!cap.Plugins||!cap.Plugins.KeyboardSetup)return;
+const res=await cap.Plugins.KeyboardSetup.getChatBrainList();
+const nativeChats=JSON.parse(res.chats||'[]');
+let changed=false;
+for(const nc of nativeChats){
+if(!chatBrainChats[nc.name]){
+const msgRes=await cap.Plugins.KeyboardSetup.getChatBrainMessages({name:nc.name});
+const msgs=JSON.parse(msgRes.messages||'[]');
+if(msgs.length){
+chatBrainChats[nc.name]={messages:msgs,created:nc.updated,updated:nc.updated,autoSave:true};
+changed=true;
+}
+}else{
+const msgRes=await cap.Plugins.KeyboardSetup.getChatBrainMessages({name:nc.name});
+const nativeMsgs=JSON.parse(msgRes.messages||'[]');
+const localMsgs=chatBrainChats[nc.name].messages||[];
+if(nativeMsgs.length>localMsgs.length){
+chatBrainChats[nc.name].messages=nativeMsgs;
+chatBrainChats[nc.name].updated=Date.now();
+changed=true;
+}
+}
+}
+if(changed)localStorage.setItem('chatBrainChats',JSON.stringify(chatBrainChats));
+}catch(e){}
+}
+
+document.addEventListener('DOMContentLoaded',()=>{setTimeout(syncChatsFromNative,1000);});
+if(document.visibilityState!==undefined){document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')syncChatsFromNative();});}
+
 
 function renderChatBrainUI(body){
 const chatNames=Object.keys(chatBrainChats);
@@ -1459,6 +1507,7 @@ openTool('chatBrain');
 
 function openSavedChat(name){
 chatBrainActive=name;
+syncChatsFromNative().then(()=>{
 const chat=chatBrainChats[name];
 if(!chat)return;
 
@@ -1466,27 +1515,90 @@ document.getElementById('cbActiveChat').style.display='block';
 try{document.querySelector('.cb-upload-section').style.display='none';}catch(e){}
 try{document.getElementById('cbExtractResult').style.display='none';}catch(e){}
 try{document.querySelector('.cb-saved-section').style.display='none';}catch(e){}
+try{document.querySelector('.cb-hero').style.display='none';}catch(e){}
 
 const header=document.getElementById('cbActiveHeader');
-header.innerHTML=`<div class="cb-active-title"><span class="cb-active-icon">🧠</span><span>${escHtml(name)}</span><span class="cb-msg-badge">${chat.messages.length} msgs</span></div>
-<div class="cb-active-actions"><button class="cb-action-sm" onclick="cbAddScreenshots()">📸 Add Screenshots</button><button class="cb-action-sm" onclick="openTool('chatBrain')">← Back</button></div>`;
+const lastUpdated=chat.updated?new Date(chat.updated).toLocaleString():'';
+header.innerHTML=`<div class="cb-active-title">
+<span class="cb-active-icon">🧠</span>
+<div><span style="font-size:.95rem">${escHtml(name)}</span><br><span style="font-size:.65rem;color:var(--text3);font-weight:400">${chat.messages.length} messages${lastUpdated?' • '+lastUpdated:''}</span></div>
+<span class="cb-msg-badge cb-live-badge">LIVE</span>
+</div>
+<div class="cb-active-actions">
+<button class="cb-action-sm" onclick="cbRefreshChat()">🔄 Sync</button>
+<button class="cb-action-sm" onclick="cbAddScreenshots()">📸 Add</button>
+<button class="cb-action-sm" onclick="openTool('chatBrain')">← Back</button>
+</div>`;
 
 renderChatMessages(chat.messages);
 cbAutoAnalyze(chat.messages);
+});
+}
+
+function cbRefreshChat(){
+syncChatsFromNative().then(()=>{
+if(!chatBrainActive)return;
+const chat=chatBrainChats[chatBrainActive];
+if(!chat)return;
+renderChatMessages(chat.messages);
+cbAutoAnalyze(chat.messages);
+showToast('🔄 Synced from keyboard!');
+});
 }
 
 function renderChatMessages(messages){
 const box=document.getElementById('cbMessagesBox');
 let html='';
-const start=Math.max(0,messages.length-30);
-if(start>0)html+=`<div class="cb-msg-more">... ${start} earlier messages</div>`;
-for(let i=start;i<messages.length;i++){
+const total=messages.length;
+const start=Math.max(0,total-50);
+if(start>0)html+=`<div class="cb-msg-more" onclick="cbShowAllMessages()">↑ Show ${start} earlier messages</div>`;
+let lastSender='';
+for(let i=start;i<total;i++){
 const msg=messages[i];
 const isMe=msg.toLowerCase().startsWith('me:')||msg.toLowerCase().startsWith('sent:');
-html+=`<div class="cb-msg ${isMe?'cb-msg-me':'cb-msg-them'}">${escHtml(msg)}</div>`;
+const sender=isMe?'me':'them';
+const cleanMsg=msg.replace(/^(Me|Them|Sent|You):\s*/i,'').trim();
+const showAvatar=sender!==lastSender;
+lastSender=sender;
+html+=`<div class="cb-msg-wrap ${isMe?'cb-wrap-me':'cb-wrap-them'}">`;
+if(showAvatar&&!isMe)html+=`<div class="cb-avatar cb-av-them">${escHtml(chatBrainActive?chatBrainActive.charAt(0).toUpperCase():'T')}</div>`;
+if(showAvatar&&isMe)html+=`<div style="flex:1"></div>`;
+html+=`<div class="cb-msg ${isMe?'cb-msg-me':'cb-msg-them'}">
+<div class="cb-msg-text">${escHtml(cleanMsg)}</div>
+</div>`;
+if(!showAvatar&&!isMe)html+=`<div class="cb-avatar-space"></div>`;
+html+=`</div>`;
+}
+if(total>0){
+const lastMsg=messages[total-1];
+const isLastMe=lastMsg.toLowerCase().startsWith('me:');
+if(isLastMe)html+=`<div class="cb-waiting">⏳ Waiting for their reply...</div>`;
 }
 box.innerHTML=html;
 box.scrollTop=box.scrollHeight;
+}
+
+function cbShowAllMessages(){
+if(!chatBrainActive)return;
+const box=document.getElementById('cbMessagesBox');
+const messages=chatBrainChats[chatBrainActive].messages;
+let html='';
+let lastSender='';
+for(let i=0;i<messages.length;i++){
+const msg=messages[i];
+const isMe=msg.toLowerCase().startsWith('me:')||msg.toLowerCase().startsWith('sent:');
+const sender=isMe?'me':'them';
+const cleanMsg=msg.replace(/^(Me|Them|Sent|You):\s*/i,'').trim();
+const showAvatar=sender!==lastSender;
+lastSender=sender;
+html+=`<div class="cb-msg-wrap ${isMe?'cb-wrap-me':'cb-wrap-them'}">`;
+if(showAvatar&&!isMe)html+=`<div class="cb-avatar cb-av-them">${escHtml(chatBrainActive.charAt(0).toUpperCase())}</div>`;
+if(showAvatar&&isMe)html+=`<div style="flex:1"></div>`;
+html+=`<div class="cb-msg ${isMe?'cb-msg-me':'cb-msg-them'}"><div class="cb-msg-text">${escHtml(cleanMsg)}</div></div>`;
+html+=`</div>`;
+}
+box.innerHTML=html;
+box.scrollTop=0;
 }
 
 function cbAddMessage(){
